@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    @*<link rel="icon" href="favicon.ico">*@
+    @*favicon이 있으면 동적쿼리가 안됨
+        Server : ExecuteSql Error : 저장 프로시저 'dbo.favicon.ico'을(를) 찾을 수 없습니다.*@
+    <title>Portfolio-@ViewBag.Title</title>
+
+    @Html.Partial("_Config")
+
+    @Styles.Render("~/frest/css/basic")
+    @Styles.Render("~/frest/css/theme")
+    @Styles.Render("~/frest/css/core")
+    @Styles.Render("~/frest/css/page")
+    @Styles.Render("~/frest/css/vendor")    
+    @Scripts.Render("~/frest/js/basic") @*js를 쓰기전부터 필요한 기본 적인 js여서 head 부분으로 올림*@
+    @Scripts.Render("~/frest/js/vendor") @*vendor안에 있는 js를 사용할 경우 상위에서 먼저 불러져야되므로 head로 옮김*@
+    @Styles.Render("~/kendo/style")
+
+
+
+</head>
+<body data-menu="vertical-menu-modern" class="vertical-layout vertical-menu-modern content-left-sidebar navbar-sticky footer-static menu-expanded" data-col="content-left-sidebar">
+
+    @Html.Partial("_Header")
+
+    @{Html.RenderAction("Menu", "Menu");}
+
+    @RenderBody()
+
+    @Html.Partial("_Footer")
+
+
+    @Scripts.Render("~/frest/js/fonts")
+    @Scripts.Render("~/frest/js/theme")
+
+    @*@Scripts.Render("~/frest/js/page")*@
+    @Scripts.Render("~/kendo/script")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+
+<script type="text/javascript">  
+
+    //해당 페이지를 나갈때 실행되는 이벤트(세션 히스토리 세팅)
+    $(window).on("beforeunload", function () {
+        HistoryJS.fnHistorySet();
+    }); 
+</script>
+
+@Html.Partial("~/Views/Common/ComJS/ComJs.cshtml") @*공통 js 호출*@
+@Html.Partial("~/Views/Common/GridJS/GridJS.cshtml") @*그리드 관련 js 호출*@
+@Html.Partial("~/Views/Common/HistoryJS/HistoryJS.cshtml") @*히스토리 관련 js 호출*@

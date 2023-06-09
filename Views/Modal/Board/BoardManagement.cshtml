@@ -1,0 +1,565 @@
+﻿<!--picker관련 가져오기-->
+@Styles.Render("~/frest/css/picker")
+@Scripts.Render("~/frest/js/picker")
+<!--dropzone 첨부파일 관련 가져오기-->
+@Styles.Render("~/frest/css/dropzone")
+@Scripts.Render("~/frest/js/dropzone")
+
+@{ 
+    string ID_PAGE = "".Equals(ViewData["ID_PAGE"]) ? "" : ViewData["ID_PAGE"].ToString();
+}
+<div class="modal fade show" id="M_BoardM" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mTitle"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <form id="modalForm" name="modalForm" method="post" onsubmit="return false">
+                                    <input type="hidden" id="readrwNum" name="readrwNum" value="" />
+                                    <input type="hidden" id="param" name="param" />
+                                    <div class="row">
+                                        @if ("boardEmergency".Equals(ID_PAGE))
+                                        {
+                                            <div class="col-md-8">
+                                                <label for="wwTitle" class="form-label">제목</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" id="wwTitle" name="wwTitle" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div style="display:flex;">
+                                                    <div style="padding-top:1.1%">
+                                                        <input type="checkbox" id="chk_yn_Publish" name="chk_yn_Publish" />
+                                                    </div>
+                                                    <div style="padding-left:1.5%">
+                                                        <label for="chk_yn_Publish">게시만료일</label>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group pickadate">
+                                                    <input type="text" class="form-control" placeholder="YYYY-MM-DD" id="tbExpireDate" name="tbExpireDate" />
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="col-md-12">
+                                                <div>
+                                                    <div style="float:left;">
+                                                        <label for="wwTitle" class="form-label">제목</label>
+                                                    </div>
+                                                    <div style="float:right; width:10%; display:flex; justify-content:flex-end">
+                                                        <div style="padding-top:1.1%">
+                                                            <input type="checkbox" id="chk_yn_Publish" name="chk_yn_Publish" />
+                                                        </div>
+                                                        <div style="padding-left:1.5%">
+                                                            <label for="chk_yn_Publish">게시여부</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" id="wwTitle" name="wwTitle" />
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <label for="wwContent" class="form-label">내용</label>
+                                            <textarea id="wwContent" name="wwContent" class="form-control" rows="10" cols="30" style="width:100%; height:400px" aria-label="editor">
+                                        </textarea>
+                                        </div>
+                                    </div>
+                                    @if (!"boardEmergency".Equals(ID_PAGE))
+                                    {
+                                        <div class="row">                                            
+                                            <div class="col-md-12">
+                                                <label for="" class="form-label">첨부파일</label>                                                
+                                                <div class="dropzone needsclick" id="dropzone-basic">
+                                                    <div class="dz-message needsclick">
+                                                        Drop files here or click to upload
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </form>                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" id="btnArea">
+                <button type="button" class="btn btn-primary ml-1" id="BTN_write">
+                    <span class="d-none d-sm-block">글작성</span>
+                </button>
+                <button type="button" class="btn btn-primary ml-1" id="BTN_copy">
+                    <span class="d-none d-sm-block">복사</span>
+                </button>
+                <button type="button" class="btn btn-primary ml-1" id="BTN_modify">
+                    <span class="d-none d-sm-block">수정</span>
+                </button>
+                <button type="button" class="btn btn-primary ml-1" id="BTN_delete">
+                    <span class="d-none d-sm-block">삭제</span>
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+    <div class="loadingBar"></div>
+</div>
+<!-- /.modal -->
+
+<script>
+    //부모 그리드에 이벤트를 건 경우 그리드가 다시 그려질때(그리드가 재조회 될때) 그리드의 이벤트가 다 사라지므로 공통된 명의의 함수로 이름을 지정(fnModalEvent)
+    //살려야되는 이벤트가 있을 시 해당 함수에 넣어야 재조회 시 이벤트가 다시 살아남
+    //commonPage.cshtml에서 해당 함수 실행
+    function fnModalEvent() {
+        fnModalBoardEvent("M_BoardM");
+        $('#tbExpireDate').pickadate({
+            format: 'yyyy-mm-dd',
+        });
+
+        //kendo editor 호출
+        if ($("#wwContent").data("kendoEditor") == null) {
+            $("#wwContent").kendoEditor({
+                tools: [
+                    "fontName",
+                    "fontSize",
+                    "foreColor",
+                    "backColor",
+                    "bold",
+                    "italic",
+                    "underline",
+                    "justifyLeft",
+                    "justifyCenter",
+                    "justifyRight",
+                    "insertUnorderedList",
+                    "createLink",
+                    "unlink",
+                    "insertImage",
+                    "tableWizard",
+                    "createTable",
+                    "addRowAbove",
+                    "addRowBelow",
+                    "addColumnLeft",
+                    "addColumnRight",
+                    "deleteRow",
+                    "deleteColumn",
+                    "mergeCellsHorizontally",
+                    "mergeCellsVertically",
+                    "splitCellHorizontally",
+                    "splitCellVertically",
+                    "viewHtml",
+                ]
+            });
+        }
+    }
+
+
+    //modal event
+    //1.모달 영역 id
+    //2.모달 오픈 버튼 id
+    //3.선택한 값을 돌려줄 컨트롤러의 ID (input ID)
+    function fnModalBoardEvent(ID_MODAL) {
+        var grid = $("#grid");
+        var gridData = grid.data("kendoGrid");
+
+        //글작성 이벤트
+        $("#BTN_write").off("click").on("click", function () {
+            /*progressbar z-index 변경 (맨앞)
+             * 파일 추가 후 파일명이 안보여서 기존 소스 안건드리는 방법으로 작성 시 다시 progress 보이게
+             */
+            $(".dz-progress").css("z-index", 1000);
+            fnBoardWrite(ID_MODAL);
+        });
+
+        //그리드 글쓰기
+        $("#BTN_WriteBoard").off("click").on("click", function () {
+            $("#mTitle").text("글작성");
+            $("#BTN_write").show();
+            $("#btnArea button").not("#BTN_write").hide();
+
+            $("#" + ID_MODAL).modal();
+        });
+
+        //그리드 더블클릭
+        $(gridData.tbody.find("tr td")).off("dblclick").on("dblclick", function (e) {
+
+            $("#mTitle").text("글상세");
+            $("#BTN_write").hide();
+            $("#btnArea button").not("#BTN_write").show();
+            var data = gridData.dataItem($(this).closest("tr")); //선택한 컬럼의 row의 data
+            fnBoardDetailSearch(data.wNum);
+            $("#" + ID_MODAL).modal();
+        });
+
+        //모달이 닫힐때
+        $("#" + ID_MODAL).off("hide.bs.modal").on("hide.bs.modal", function () {
+            //초기화
+            fnUserModalReset(ID_MODAL);
+        });
+
+        //게시글 복사
+        $("#BTN_copy").off("click").on("click", function (e) {
+            fnBoardCopy(ID_MODAL);
+        });
+
+        //게시글 삭제
+        $("#BTN_delete").off("click").on("click", function (e) {
+            fnBoardDelete(ID_MODAL);
+        });
+
+        //게시글 수정
+        $("#BTN_modify").off("click").on("click", function (e) {
+            /*progressbar z-index 변경 (맨앞)
+             * 파일 추가 후 파일명이 안보여서 기존 소스 안건드리는 방법으로 작성 시 다시 progress 보이게
+             */
+            $(".dz-progress").css("z-index", 1000);
+            fnBoardWrite(ID_MODAL);
+        });
+
+        //ID_PAGE에 따라 이벤트 설정
+        let idPage = "@ID_PAGE";
+
+        if (idPage == "boardEmergency")
+        {
+            $("#tbExpireDate").prop("disabled", true);
+            //게시만료일 체크시
+            $("#chk_yn_Publish").off("click").on("click", function() {
+              if ($("#chk_yn_Publish").is (":checked")) {
+              $("#tbExpireDate").prop("disabled", false);
+                  if ($("#tbExpireDate").val() == "") {
+                      $("#tbExpireDate").val(ComJS.fnGetDate("D", 7));
+                  }
+              } else
+              {
+                  $("#tbExpireDate").prop("disabled", true);
+              }
+            });
+        } else {
+            //dropzone 이 이미 만들어 져있으면 삭제 후 재생성
+            if ($(".dz-clickable#dropzone-basic").length > 0) {
+                Dropzone.forElement("#dropzone-basic").destroy();
+            }
+
+            const myDropzone = new Dropzone('#dropzone-basic', {
+                    url: "@Scripts.Url("~/Board/SaveBoard")",
+                    paramName: "files", //전송받는 파일 파라미터명
+                    autoProcessQueue: false,            //자동 업로드
+                    maxFilesize: 50, //업로드 파일 최대 크기 mb
+                    addRemoveLinks: true, // 업로드 취소 및 추가 삭제 미리보기
+                    maxFiles: 5, //최대 파일 업로드 파일수
+                    parallelUploads: 5,  //동시 업로드 파일 개수
+                    uploadMultiple: true, //다중 업로드
+                    headers: { "Accept": "*/*" }, //Accept 를 */* 변경후 406 에러가 안뜸 https://webstone.tistory.com/66
+                    maxfilesexceeded: function (file) {
+                        ComJS.fnSweetAlert("5개의 까지만 파일 업로드 할 수 있습니다.");
+                        this.removeFile(file);
+                    },
+                    init: function () {
+                        this.on('sending', function (file, xhr, formData) {
+                            formData.append('param', $("#param").val());
+                        });
+                        this.on("success", function (file, responseText) {
+                            ComJS.fnSweetAlert(responseText.msg);
+                            if (responseText.successYn) {
+                                fnSearch();
+                                $("#" + ID_MODAL).modal("hide");
+                            } else {
+                                /*게시판 저장시 오류가 있다면 업로드할 파일 삭제
+                                 * 여러 파일 일경우 성공된 파일은 업로드 폴더 경로에 해당 파일존재
+                                 * -->문제 될시 추후 업로드 파일 삭제로직을 따로 추가해야함
+                                 * 화면에서 업로드 파일 삭제, DB에 저장되지않음
+                                 * */
+                                myDropzone.removeAllFiles();
+                            }
+                        });
+                        // 업로드 에러 처리
+                        this.on('error', function (file, errorMessage) {
+                            ComJS.fnSweetAlert(errorMessage);
+                        });
+
+                        this.on('addedfile', function (file, xhr, formData) {
+                            /*progressbar z-index 변경 (맨뒤)
+                             * 파일 추가 후 파일명이 안보여서 기존 소스 안건드리는 방법으로 파일 추가시 progress 안보이게
+                             */
+                            $(".dz-progress").css("z-index", 0);
+                            $(".dropzone.dz-clickable .dz-message").css("display", "none");//한개라도 파일우 추가된다면 해당 영역 display 감추기
+                        });
+                      }
+                });
+        }
+    }
+
+
+    //모달 초기화
+    function fnUserModalReset(ID_MODAL) {
+        $("#" + ID_MODAL + " input, textarea").val("");
+        $("#chk_yn_Publish").prop("checked", false);
+        $("#wwContent").data("kendoEditor").value('');
+
+        let idPage = "@ID_PAGE";
+        if ("boardEmergency" != idPage)
+        {
+            let dropzone = Dropzone.forElement("#dropzone-basic");
+            //첨부파일 삭제
+            dropzone.removeAllFiles();
+        }
+    }
+
+    //글작성
+    function fnBoardWrite(ID_MODAL) {
+
+        //제목
+        if ($("#wwTitle").val() == "") {
+            ComJS.fnSweetAlert("제목을 입력해주세요.");
+            $("#wwTitle").focus();
+            return false;
+        }
+        //내용
+        if ($("#wwContent").val() == "") {
+            ComJS.fnSweetAlert("내용을 입력해주세요.");
+            $("#wwContent").focus();
+            return false;
+        }
+
+
+        let yn_Publish = ""; //게시여부
+        let tbExpireDate = ""; //게시기간
+
+        //게시기간
+        if ($("#chk_yn_Publish").is(":checked")) {
+            yn_Publish = "Y";
+        } else {
+            yn_Publish = "N";
+        }
+
+        let idPage = "@ID_PAGE";
+
+        if (idPage == "boardEmergency") {
+            if (yn_Publish == "Y") {
+                if ($("#tbExpireDate").val() == "") {
+                    ComJS.fnSweetAlert("게시만료일을 입력해주세요.");
+                    return false;
+                } else {
+                    tbExpireDate = $("#tbExpireDate").val();
+                }
+                var result = confirm("작업공지 게시는 1건만 가능합니다. 이전 게시글이 있으면 자동 해제됩니다. 게시하시겠습니까?");
+                if (!result) {
+                    return false;
+                }
+            }
+        }
+
+        let htmlContent = $("#wwContent").data("kendoEditor").value();
+        let escapeHtmlContent = $("#wwContent").val();
+        let plainTextContent = $("<div>").html(htmlContent).text();
+
+        var param = {
+            BoardKey: idPage,
+            wNum: $("#readrwNum").val(),
+            wTitle: $("#wwTitle").val(),
+            yn_Publish: yn_Publish,
+            ExpireDate: tbExpireDate,
+            //wfileName: data.wfileName,
+            wContent: escapeHtmlContent,
+            wPlainContent: plainTextContent,
+        }
+
+        $("#param").val(JSON.stringify(param))
+
+        let actionType = "D"; //페이지 및 첨부파일 여부에 따라 어떤 방식으로 서버에 접글 할지 정하는 변수
+        if (idPage == "boardEmergency") { //긴급공지 페이지 인경우
+            actionType = "A";
+        } else {
+            //첨부파일이 없는경우
+            if (Dropzone.forElement("#dropzone-basic").getAcceptedFiles().length < 1) {
+                actionType = "A";
+            }
+        }
+
+        //actionType A인경우 ajax로 D인경우 dropzone을 이용하여
+        if (actionType =="A") {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Board/SaveBoard")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    ComJS.fnSweetAlert(result.msg);
+                    if (result.successYn) {
+                        fnSearch();
+                        $("#" + ID_MODAL).modal("hide");
+                    }
+                }
+            });
+        } else {
+            Dropzone.forElement("#dropzone-basic").processQueue();
+        }
+    }
+
+    //게시글 상세 조회
+    function fnBoardDetailSearch(wNum) {
+        var param = {
+            BoardKey: "@ID_PAGE",
+            wNum: wNum
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Board/GetBoardDetail")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+
+                let data = result.data[0];
+
+                //게시글 번호
+                $("#readrwNum").val(data.wNum);
+
+                // 게시글
+                $("#wwTitle").val(data.wTitle);
+
+                if (data.yn_Publish == "Y") {
+                    $("#chk_yn_Publish").prop("checked", true);
+                    $("#tbExpireDate").val(data.ExpireDate);
+                }
+                else {
+                    $("#chk_yn_Publish").prop("checked", false);
+                    $("#tbExpireDate").val("");
+                }
+                $("#wwfileName").val(data.wfileName);
+                $("#wwContent").data('kendoEditor').value(data.EscapeHtml_wContent);
+
+                //첨부파일
+                let dropzone = Dropzone.forElement("#dropzone-basic");
+                for (let i = 0; i < result.attachfile.length; i++) {
+                    let attachFile = result.attachfile[i];
+                    let file ={
+                          name: attachFile.wfileName
+                        , size: attachFile.wfileSize
+                        , path: attachFile.wfilePath
+                        , wNum: attachFile.wNum
+                        , wFileNum: attachFile.wFileNum                        
+                    };
+
+                    //첨부파일 추가 (해당 게시물의 첨부파일 추가 -- 보이기용 파일 추가)
+                    dropzone.options.addedfile.call(dropzone, file);
+                    dropzone.files.push(file);
+
+                    //추가 된 파일에 다운로드 기능 추가
+                    $('.dz-details').last().on("click", function () {
+                        let msg = attachFile.wfileName + " 파일을 다운로드 하시겠습니까?";
+                        ComJS.fnSweetConfirm3(msg, fnFileDownload,file );
+                    });
+
+                    //파일제거 삭제
+                    $('.dz-remove').last().remove();
+                    $(".dz-file-preview.dz-preview").last().append('<a class="dz-remove" href="javascript:undefined;" data-dz-remove="">Remove file</a>')                    
+
+                    $('.dz-remove').last().on("click", function () {
+                        let msg = attachFile.wfileName + " 파일을 삭제 하시겠습니까?";
+                        file.clickElement = $(this).parent(); //파일 삭제시 삭제할 요소 data에 추가
+                        ComJS.fnSweetConfirm3(msg, fnFileDelete, file);
+                    });
+                }
+
+                /*progressbar z-index 변경 (맨뒤)
+                * 파일 추가 후 파일명이 안보여서 기존 소스 안건드리는 방법으로 파일 추가시 progress 안보이게
+                */
+                $(".dz-progress").css("z-index", 0);
+            }
+        });
+    }
+
+    //게시글 복사
+    function fnBoardCopy(ID_MODAL) {
+
+        var readrwNum = $("#readrwNum").val();
+
+        var param = {
+            BoardKey: "@ID_PAGE",
+            wNum: readrwNum,
+        }
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Board/CopyBoard")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                ComJS.fnSweetAlert(result.msg);
+                if (result.successYn) {
+                    fnSearch();
+                    $("#" + ID_MODAL).modal("hide");
+                }
+            }
+        });
+    }
+
+    //게시글 삭제
+    function fnBoardDelete(ID_MODAL) {
+
+        var readrwNum = $("#readrwNum").val();
+
+        var param = {
+            BoardKey: "@ID_PAGE",
+            wNum: readrwNum,
+        }
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Board/DeleteBoard")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                ComJS.fnSweetAlert(result.msg);
+                if (result.successYn) {
+                    fnSearch();
+                    $("#" + ID_MODAL).modal("hide");
+                }
+            }
+        });
+    }
+
+    /**
+     * 첨부파일 다운로드
+     * param fileData
+     */
+    function fnFileDownload(fileData) {
+        location.href = "@Scripts.Url("~/Files/FileDownload")?param=" + JSON.stringify(fileData);
+    }
+
+    /**
+     * 첨부파일 삭제
+     * param fileData
+     */
+    function fnFileDelete(fileData) {        
+         $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Files/FileRemove")",
+             data: { param: JSON.stringify(fileData) },
+            dataType: 'json',
+            async: true,
+             success: function (result) {
+                 let clickElement = fileData.clickElement;                
+                 clickElement.remove(); //서버에서 제거 성공시 화면에서 해당 파일 제거
+                //파일이 하나도 안남아있다면
+                if ($(".dz-file-preview.dz-preview").length < 1) {
+                    $(".dropzone.dz-clickable .dz-message").css("display", "block");
+                }
+            }
+        });       
+    }
+</script>

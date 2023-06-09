@@ -1,0 +1,283 @@
+﻿@Styles.Render("~/frest/css/commonPage")
+@Scripts.Render("~/frest/js/commonPage")
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header row">
+            <div class="content-header-left col-12 mb-2 mt-1">
+                <div class="breadcrumbs-top">
+                    <h5 class="content-header-title float-left pr-1 mb-0">알림예제</h5>
+                </div>
+            </div>
+        </section>
+        <!-- Main content -->
+        <section class="content-body">
+            <!--검색조건 영역 시작-->
+            <section class="row" id="conditionRow">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header" data-action="collapse">
+                            <div style="display:flex;">
+                                <div><h4 class="card-title">예제 데이터 입력</h4></div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <form id="dataForm" method="post" onsubmit="return false">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <fieldset class="form-group">
+                                                    <label>아이디</label>
+                                                    <input type="text" class="form-control" id="userId" name="userId" value="" style="width:100%;" required="required">
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <fieldset class="form-group">
+                                                    <label>메세지</label>
+                                                    <input type="text" class="form-control" id="message" name="message" value="" style="width:100%;" required="required">
+                                                </fieldset>
+                                            </div>                                            
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <div style="float: right;">
+                                            <button class="btn btn-outline-dark float-right" type="button" id="btn_Test">테스트실행</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+        <!-- /.content -->
+    </div>
+</div>
+
+<div aria-live="polite" aria-atomic="true" style="position: relative">
+    <!-- Position it -->
+    <div style="position: fixed; top: 1rem; right: 1rem; margin-left: 1rem; z-index: 1030">
+        <div class="toast toast-basic hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000" style="top: 1rem; right: 1rem">
+            <div class="toast-header">
+                <i class="bx bx-bulb"></i>
+                <span class="mr-auto toast-title">Bootstrap</span>
+                <small>11 mins ago</small>
+                <button type="button" class="close" data-dismiss="toast" aria-label="Close">
+                    <i class="bx bx-x"></i>
+                </button>
+            </div>
+            <div class="toast-body">
+                <label id="rsUser">test</label>
+                <label id="rsMessage">test</label>                
+            </div>
+        </div>
+        <!-- Basic Toast ends -->       
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="@Url.Content("~/Scripts/jquery-2.1.4.js")"></script>
+    <script>
+        var $jSR = jQuery.noConflict();
+    </script>
+    <script src="@Url.Content("~/Scripts/jquery.signalR-2.4.2.js")"></script>        
+
+    <script type="text/javascript">
+
+    $(document).ready(function () {
+        fnInit();
+        fnEvent();
+    });
+
+    //페이지 로드 후 실행
+    $(window).ready(function () {
+        fnLast();
+    });
+
+    function fnInit() {
+
+        $(function () {
+            var connection = $jSR.hubConnection(virtualDirectory == "" ? "" : '/' + virtualDirectory + '/signalr', { useDefaultPath: false });
+            var proxy = connection.createHubProxy("TestHub");
+
+            var userId = $jSR("#userId").val();
+            var message = $jSR("#message").val();
+            proxy.on('GetUser', function (listTable) {
+                console.log(listTable);
+                fnDrawAlarm(listTable);
+                //getUserMessages(userId)
+            });
+
+            // Start the connection.
+            connection.start()
+                .done(function () {
+                    console.log('Now connected, connection ID=' + connection.id);
+                    getAllMessages();
+                    $("#btn_Test").on("click", function () {
+                        //$('.toast-basic').toast('show');
+
+                        var userId = $jSR("#userId").val();
+                        var message = $jSR("#message").val();
+
+                        proxy.invoke('TestMessage', userId, message).done(function () {
+                            console.log('Invocation of TestMessage succeeded');
+                        }).fail(function (error) {
+                            console.log('Invocation of TestMessage failed. Error: ' + error);
+                        });
+                    });
+                })
+                .fail(function () { console.log('Could not connect'); });
+        });
+
+        function getAllMessages() {
+
+            try {
+                var tbl = $('#dSignalR_Alarm');
+                $jSR.ajax({
+                    url: "@Scripts.Url("~/Common/_GetTestMessages")",
+                    cache: false,
+                    contentType: 'application/html ; charset:utf-8',
+                    type: 'GET',
+                    dataType: 'html'
+                }).success(function (result) {
+                    tbl.empty().append(result);
+                    //console.log("successfully run ajax request..." + result);
+                }).done(function () {
+                    //console.log("I am from done function");
+                }).fail(function () {
+                    //console.log("I am from fail function.");
+                }).always(function () {
+                    //console.log("I am from always function");
+                });
+            } catch (err) {
+                //console.log('xError') // will always get executed
+                console.log(err) // will log the error with the error stack
+            } finally {
+                //console.log('xFinally') // will always get executed
+            }
+        }
+    }
+
+    //이벤트 모음
+    function fnEvent() {
+        //$("#btn_Test").on("click", function () {
+        //    //$('.toast-basic').toast('show');
+
+        //    var userId = $jSR("#userId").val();
+        //    var message = $jSR("#message").val();
+
+        //    proxy.invoke('TestMessage', userId, message).done(function () {
+        //        console.log('Invocation of NewContosoChatMessage succeeded');
+        //    }).fail(function (error) {
+        //        console.log('Invocation of NewContosoChatMessage failed. Error: ' + error);
+        //    });
+        //});
+
+        $("#btn_MessageDataDelete").on("click", function () {
+            var rs = $('#dataForm').valid();
+            if (rs) {
+                fnMessageDataInsert();
+            }
+        });
+
+        $('.toast-basic-toggler').on('click', function () {
+            $('.toast-basic').toast('show');
+        });
+    };
+
+    //마지막 세팅
+    function fnLast() {
+
+    }
+
+      //메뉴 정보 추가
+    function fnMessageDataInsert() {
+        var param = $('#dataForm').serializeObject();   //폼 입력값을 객체로 변경
+         $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Example/MessageDataInsert")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: false,
+             success: function (result) {
+                 ComJS.fnSweetAlert(result.msg);
+            }
+        });
+     }
+
+    function getUserMessages(userId) {
+
+        try {
+            var tbl = $('#dSignalR_Alarm');
+            $jSR.ajax({
+                url: "@Scripts.Url("~/Common/_GetTestUserMessages")",
+                data: { userId: userId },
+                cache: false,
+                contentType: 'application/html ; charset:utf-8',
+                type: 'GET',
+                dataType: 'html'
+            }).success(function (result) {
+                tbl.empty().append(result);
+                //console.log("successfully run ajax request..." + result);
+            }).done(function () {
+                //console.log("I am from done function");
+            }).fail(function () {
+                //console.log("I am from fail function.");
+            }).always(function () {
+                //console.log("I am from always function");
+            });
+        } catch (err) {
+            //console.log('xError') // will always get executed
+            console.log(err) // will log the error with the error stack
+        } finally {
+            //console.log('xFinally') // will always get executed
+        }
+        }
+
+        function fnDrawAlarm(listTable) {            
+
+            var html = ""
+                html += '<a class="nav-link nav-link-label" href="javascript:void(0);" data-toggle="dropdown">';
+
+            if (listTable.length > 0)
+                {
+                    html += '<i class="ficon bx bx-bell bx-tada bx-flip-horizontal"></i>';
+                    html += '<span class="badge badge-pill badge-danger badge-up">' + listTable.length + '</span>';
+                }
+                else
+                {
+                    html += '<i class="ficon bx bx-bell bx-flip-horizontal"></i>';
+                }
+            html += '</a>';
+            html += '<ul class="dropdown-menu dropdown-menu-media dropdown-menu-right">';
+                html += '<li class="dropdown-menu-header">';
+                    html += '<div class="dropdown-header px-1 py-75 d-flex justify-content-between"><span class="notification-title">7 new Notification</span><span class="text-bold-400 cursor-pointer">Mark all as read</span></div>';
+                html += '</li>'
+                html += '<li class="scrollable-container media-list ps">';
+                    for(var item in listTable)
+                    {
+                        html += '<a class="d-flex justify-content-between cursor-pointer" href="javascript:void(0);">';
+                            html += '<div class="media d-flex align-items-center border-0">';
+                                html += '<div class="media-left pr-0">';
+                                    html += '<div class="avatar mr-1 m-0"><img src="../../../app-assets/images/portrait/small/avatar-s-16.jpg" alt="avatar" height="39" width="39"></div>';
+                                html += '</div>';
+                                html += '<div class="media-body">';
+                                    html += '<h6 class="media-heading"><span class="text-bold-500">' + item.no_Message + '</span>' + item.ds_Category; item.ds_Title; item.ds_Content; item.Is_Read+' </h6><small class="notification-text">'+item.dtm_Create+'</small>';
+                                html += '</div>';
+                            html += '</div>';
+                        html += '</a>';
+                    }
+                html += '<div class="ps__rail-x" style="left: 0px; bottom: 0px;"><div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div></div><div class="ps__rail-y" style="top: 0px; right: 0px;"><div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 0px;"></div></div>';
+                html += '</li>';
+                html += '<li class="dropdown-menu-footer"><a class="dropdown-item p-50 text-primary justify-content-center" href="javascript:void(0)">Read all notifications</a></li>';
+            html += '</ul>'
+            $("#dSignalR_Alarm").empty();
+            $("#dSignalR_Alarm").append(html);
+        }
+    </script>
+}

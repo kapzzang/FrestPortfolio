@@ -1,0 +1,1349 @@
+﻿@*그리드 추가 버튼 이벤트 작성하는곳 프로젝트마다 사용되는 버튼과 이벤트가 다르므로 여기서 작성해준다.*@
+@* 메서드 작성시 주석 작성방법
+    /*
+    *이벤트 설명: 테스트 이벤트입니다.
+    *사용cshtml : test.cshtml
+    *사용sp명 : uspn_test
+    */
+*@
+<script type="text/javascript">
+    $("#BTN_T1").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        var rowIndex = [];
+        $(grid.tbody[0].rows).find("input").each(function (index, item) {
+            if ($(this).is(":checked")) {
+                rowIndex[index] = $(this).closest("tr")[0].rowIndex;
+            }
+        });
+        alert(rowIndex);
+    });
+
+    // OLD BTN_T2
+    $("#BTN_SMS").off("click").on("click", function () {
+
+        var grid = $("#grid").data("kendoGrid");
+        var serverIdArr = [];
+
+        var SenderNum = "1544-2233";
+        var ReceiverNum = $("#S_TEST1").val();
+        var SMSSubject = $("#S_TEST4").val();
+        var SMSMsg = $("#S_TEST5").val();
+
+         $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/SMS/SendMessage")",
+            data: {
+                SenderNum: SenderNum,
+                ReceiverNum: ReceiverNum,
+                SMSSubject: SMSSubject,
+                SMSMsg: SMSMsg
+            },
+            dataType: 'json',
+            async: true,
+            error: function (request, status, error) {
+                 alert("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+             },
+             success: function (result) {
+                 alert("OK");
+            }
+        });
+
+    });
+
+    $("#BTN_SMSMail").off("click").on("click", function () {
+
+        var grid = $("#grid").data("kendoGrid");
+
+        var param = {};
+        param.NotiType = $("#S_TEST1").val();
+        param.Keys = $("#S_TEST4").val();
+
+         $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/SMS/SendMailSMS")",
+             data: {
+                 param: JSON.stringify(param)
+            },
+            dataType: 'json',
+            async: true,
+            error: function (request, status, error) {
+                alert("ERROR : code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+             },
+             success: function (result) {
+                 if (result.success) {
+                     alert("OK :" + result.msg);
+                 } else {
+                     alert("FAIL:" + result.msg);
+                 }
+            }
+        });
+
+    });
+
+    @* 사이트 추가 *@
+    $("#BTN_ADDSITE").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        var rowIndex = [];
+        $(grid.tbody[0].rows).find("input").each(function (index, item) {
+            if ($(this).is(":checked")) {
+                rowIndex[index] = $(this).closest("tr")[0].rowIndex;
+            }
+        });
+
+        alert(rowIndex);
+        alert("사이트 추가");
+    });
+
+    @* 사이트 수정*@
+    $("#BTN_EDITSITE").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        var rowIndex = [];
+        $(grid.tbody[0].rows).find("input").each(function (index, item) {
+            if ($(this).is(":checked")) {
+                rowIndex[index] = $(this).closest("tr")[0].rowIndex;
+            }
+        });
+
+        alert(rowIndex);
+        alert("사이트 수정");
+    });
+
+    @* 사이트 삭제 *@
+    $("#BTN_DELSITE").off("click").on("click", function () {
+//        alert("추가버튼2");
+    });
+
+    $("#BTN_ADD").off("click").on("click", function () {
+//        alert("툴바 추가");
+    });
+
+    $("#BTN_DEL").off("click").on("click", function () {
+//        alert("툴바 삭제");
+    });
+
+    $("#BTN_MOD").off("click").on("click", function () {
+//        alert("툴바 수정");
+    });
+
+    /*VM서버관리 시작*/
+        /*
+        *이벤트 설명: VM서버관리 사용버튼
+        *사용cshtml : CommonPage.cshtml
+        *사용sp명 : usp_UpdateVMServer
+        */
+    $("#BTN_SERVER_USE").off("click").on("click", function () {
+        fnVmServerManagementUseYn("1");
+    });
+
+
+        /*
+         *이벤트 설명: VM서버관리 미사용버튼
+         *사용cshtml : CommonPage.cshtml
+         *사용sp명 : usp_UpdateVMServer
+        */
+    $("#BTN_SERVER_STOP").off("click").on("click", function () {
+        fnVmServerManagementUseYn("3");
+    });
+
+        /*
+        *이벤트 설명: VM서버 삭제
+        *사용cshtml : CommonPage.cshtml
+        *사용sp명 : usp_DeleteServer
+        */
+    $("#BTN_SERVER_DEL").off("click").on("click", function () {
+        fnVmServerDel();
+    });
+    /*VM서버관리 끝*/
+
+    /*템플릿 관리 시작*/
+    $("#BTN_TEMPLATE_DEL").off("click").on("click", function () {
+        fnTemplateManagementDelete();
+    });
+
+    /*템플릿 관리 끝*/
+
+    /*HW등급 관리 시작*/
+    $("#BTN_HWCLASS_DEL").off("click").on("click", function () {
+        fnHWClassManagementDelete();
+    });
+    /*HW등급 관리 끝*/
+
+    /*IP 사용현황 시작*/
+    $("#BTN_IP_USE").off("click").on("click", function () {
+        fnIPUseYn("1");
+    });
+
+    $("#BTN_IP_STOP").off("click").on("click", function () {
+        fnIPUseYn("0");
+    });
+    /*IP 사용현황  끝*/
+
+    /*사이트 관리 시작*/
+    $("#BTN_SITE_DEL").off("click").on("click", function () {
+        fnSiteManagementDelete();
+    });
+    /*사이트 관리  끝*/
+
+    /*VM 처리 상세 시작*/
+
+    /*
+    *이벤트 설명: '실패로처리'버튼 클릭
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : X
+    */
+    $("#BTN_AS_FAIL").off("click").on("click", function () {
+        fnVMAsFail();
+    });
+
+    /*
+    *이벤트 설명: 행 클릭(VM 생성, 재생성, 삭제, 처리 상세 페이지 공통)
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : X
+    */
+    $("#BTN_GRID_CLICK").off("click").on("click", function () {
+        //해당 버튼이 있을때만 작동하도록
+        if ($("#BTN_AS_FAIL").length > 0) {
+            fnBtnVisibleCheck();
+        }
+    });
+
+    $("#BTN_VIEW_DETAIL").off("click").on("click", function () {
+    });
+    /*vm 처리 상세  끝*/
+
+    /*VM 공통 시작*/
+    $("#BTN_HOLD_PROC").off("click").on("click", function () {
+        fnHoldProcess();
+    });
+
+    $("#BTN_VM_DEL").off("click").on("click", function () {
+        fnVMDelete();
+    });
+    /*VM 삭제   끝*/
+
+    /*
+    *이벤트 설명: 관리자 수정
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : uspn_AdminUpdate
+    */
+    $("#BTN_SAVE_GROUPMEM").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        fnAdminManagementModify(grid);
+    });
+
+    $("#BTN_ADMIN_DEL").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        fnAdminManagementDelete(grid);
+    });
+
+    $("#BTN_MEMBER_DEL").off("click").on("click", function () {
+        fnMemberManagementDelete();
+    });
+    /*
+   *이벤트 설명: 생성VM 처리보류
+   *사용cshtml : CommonPage.cshtml
+   *사용sp명 : usp_SetAdminExcept
+   */
+    $("#BTN_Processing").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        fnProcessing(grid);
+    });
+
+	/*
+    *이벤트 설명: 생성VM 대상자삭제
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : usp_SetAdminDelete
+    */
+    $("#BTN_ADD_WORK_DELETE").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        var result = confirm("삭제 하시겠습니까?");
+        if (result) {
+            fnAddWorkDelete(grid, "main");
+        }
+    });
+
+	/*
+    *이벤트 설명: 생성요청VM 대상자삭제
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : usp_SetAdminDelete
+    */
+    $("#BTN_ADD_REQUESTWORK_DELETE").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        var result = confirm("삭제 하시겠습니까?");
+        if (result) {
+            fnAddWorkDelete(grid,"request");
+        }
+    });
+
+    /*
+      *이벤트 설명: 재생성VM 처리보류
+      *사용cshtml : CommonPage.cshtml
+      *사용sp명 : usp_SetAdminExcept
+    */
+    $("#BTN_HOLD_PROC_MODIFY").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        fnReProcessing(grid); //재생성 처리보류
+    });
+
+    /*
+      *이벤트 설명: VM 수정
+      *사용cshtml : CommonPage.cshtml
+      *사용sp명 : usp_AddModifyVM
+    */
+    $("#BTN_RE_VM").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        fnReVM(grid); //재생성 처리보류
+    });
+
+    /*
+    *이벤트 설명: 재생성VM 대상자삭제
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : usp_SetAdminDelete
+    */
+        $("#BTN_VMMODIFY_DEL").off("click").on("click", function () {
+            var grid = $("#grid").data("kendoGrid");
+            var result = confirm("삭제 하시겠습니까?");
+            if (result) {
+                fnModifyWorkDelete(grid);
+                fnDelWorkDelete(grid, "main");
+            }
+        });
+
+    /*
+    *이벤트 설명: 재생성 요청 VM 대상자삭제
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : usp_SetAdminDelete
+    */
+    $("#BTN_REQUEST_VMMODIFY_DEL").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        var result = confirm("삭제 하시겠습니까?");
+        if (result) {
+            fnModifyWorkDelete(grid);
+            fnDelWorkDelete(grid, "request");
+        }
+    });
+
+    /*
+     *이벤트 설명: 삭제VM 처리보류
+     *사용cshtml : CommonPage.cshtml
+     *사용sp명 : usp_SetAdminExcept
+   */
+    $("#BTN_HOLD_PROC_DEL").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        fnDelProcessing(grid); //삭제 처리보류
+    });
+
+
+    /*
+    *이벤트 설명: 삭제VM 대상자삭제
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : usp_SetAdminDeleteVmDelete
+    */
+    $("#BTN_VM_WORK_DEL").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        var result = confirm("삭제 하시겠습니까?");
+        if (result) {
+            fnDelWorkDelete(grid, "main");
+        }
+    });
+
+    /*
+    *이벤트 설명: 삭제요청VM 대상자삭제
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : usp_SetAdminDeleteVmDelete
+    */
+    $("#BTN_VM_REQUESTWORK_DEL").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        var result = confirm("삭제 하시겠습니까?");
+        if (result) {
+            fnDelWorkDelete(grid, "request");
+        }
+    });
+
+    /*
+    *이벤트 설명: OTP2차인증 예외자 삭제
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : uspn_DelOTPAuth
+    */
+    $("#BTN_USER_DEL").off("click").on("click", function () {
+        var grid = $("#grid").data("kendoGrid");
+        var result = confirm("삭제 하시겠습니까?");
+        if (result) {
+            fnOTPAuthManagementDelete(grid);
+        }
+    });
+
+    /*
+    *이벤트 설명: VM 과금예외
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : uspn_UpdateVMPayExcept
+    */
+    $("#BTN_PAY_EXCEPT").off("click").on("click", function () {
+        var result = confirm("과금예외 대상에 추가 하시겠습니까?");
+        if (result) {
+            fnVMPayExceptYn(0);
+        }
+    });
+
+    /*
+    *이벤트 설명: VM 과금대상
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : uspn_UpdateVMPayExcept
+    */
+    $("#BTN_PAY_NEXCEPT").off("click").on("click", function () {
+        var result = confirm("과금 대상에 추가 하시겠습니까?");
+        if (result) {
+            fnVMPayExceptYn(1);
+        }
+    });
+
+    /*
+    *이벤트 설명: VM 과금대상
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : uspn_UpdateVMPayExcept
+    */
+    $("#BTN_AGREEMENT_DEL").off("click").on("click", function () {
+        fnAgreementManagementDelete();
+    });
+
+    /*VM현황 시작*/
+
+    /*
+    *이벤트 설명: '사용기한 수정'버튼 클릭
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : X
+    */
+    $("#BTN_AS_EDITEXPIREDATE").off("click").on("click", function () {
+        fnBtnEditExpireDate();
+    });
+
+    /*
+    *이벤트 설명: 행 클릭(VM 생성, 재생성, 삭제, 처리 상세 페이지 공통)
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : X
+    */
+    $("#BTN_AS_EDITEXPIREDATE_GRID_CLICK").off("click").on("click", function () {
+        //해당 버튼이 있을때만 작동하도록
+        if ($("#BTN_AS_EDITEXPIREDATE").length > 0) {
+            fnBtnEditExpireDate();
+        }
+    });
+
+    /*vm현황  끝*/
+
+
+    /*
+    *이벤트 설명: AD 수동 동기화
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : uspn_UpdateVMPayExcept
+    */
+    $("#BTN_SYNCACTION").off("click").on("click", function () {
+        if (confirm("확인을 누르시면 수동동기화가 시작됩니다.")) {
+            fnSyncAction();
+        }
+    });
+
+    /*
+    *이벤트 설명: 임시사용자 삭제
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : uqv_TempUserManagement_Main_001
+    */
+    $("#BTN_TEMPUSER_DEL").off("click").on("click", function () {
+        fnTempUserManagementDelete();
+    });
+
+    /*
+    *이벤트 설명: 라이센스 템플릿 삭제
+    *사용cshtml : CommonPage.cshtml
+    *사용sp명 : uqv_AzureLicenseTemplate_Main_001
+    */
+    $("#BTN_LICENSE_DEL").off("click").on("click", function () {
+        fnAzureLicenseDelete();
+    });
+    /**********************************함수 시작*******************************************/
+    /**************************************************************************************/
+
+    //VM서버관리 사용/미사용 함수
+    function fnVmServerManagementUseYn(useYn) {
+        var grid = $("#grid").data("kendoGrid");
+        var gridChkArr = [];
+
+        var dataCheck = false;
+
+        //vm서버관리에서 체크한 serverid 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                gridChkArr.push(this.cells[1].innerText);
+                dataCheck = true;
+            }
+        });
+
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/ServerManagement/ServerUseYn")",
+                data: { useYn: useYn, gridChkArr: gridChkArr },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("VM서버를 선택해주세요.")
+        }
+    }
+
+    //VM서버관리 삭제
+    function fnVmServerDel() {
+        var grid = $("#grid").data("kendoGrid");
+        var serverIdArr = [];
+
+        var dataCheck = false;
+
+        //vm서버관리에서 체크한 serverid 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                serverIdArr.push(this.cells[1].innerText);
+                dataCheck = true;
+            }
+        });
+
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/ServerManagement/ServerDelete")",
+                data: { serverIdArr: serverIdArr },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("삭제할 VM서버를 선택해주세요.");
+        }
+    }
+
+
+     //템플릿 관리
+    function fnTemplateManagementDelete() {
+        var grid = $("#grid").data("kendoGrid");
+        var gridChkArr = [];
+
+        var dataCheck = false;
+
+        //템플릿관리에서 체크한 tmpid 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                gridChkArr.push(this.cells[1].innerText);
+                dataCheck = true;
+            }
+        });
+
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/TemplateManagement/DeleteTemplate")",
+                data: { gridChkArr: gridChkArr },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("삭제할 템플릿을 선택해주세요.");
+        }
+    }
+
+    //HW등급 관리
+    function fnHWClassManagementDelete() {
+        var grid = $("#grid").data("kendoGrid");
+        var gridChkArr = [];
+
+        var dataCheck = false;
+
+        //HW등급 관리에서 체크한 class 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                gridChkArr.push(this.cells[1].innerText);
+                dataCheck = true;
+            }
+        });
+
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/HWClassManagement/DeleteHWClass")",
+                data: { gridChkArr: gridChkArr },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("삭제할 HW등급을 선택해주세요.");
+        }
+    }
+
+
+    //IP 사용 현황
+    function fnIPUseYn(useYn) {
+        var grid = $("#grid").data("kendoGrid");
+        var gridChkArr = [];
+
+        var dataCheck = false;
+
+        //IP 사용현황에서 체크한 ip 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                gridChkArr.push(this.cells[2].innerText);
+                dataCheck = true;
+            }
+        });
+
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/IPStatus/IPUseYn")",
+                data: { useYn: useYn, gridChkArr: gridChkArr },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("IP를 선택해주세요.");
+        }
+    }
+
+    //사이트 관리
+    function fnSiteManagementDelete() {
+        var grid = $("#grid").data("kendoGrid");
+        var gridChkArr = [];
+
+        var dataCheck = false;
+
+        //사이트관리에서 체크한 site 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                gridChkArr.push(this.cells[1].innerText);
+                dataCheck = true;
+            }
+        });
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/SiteManagement/DeleteSite")",
+                data: { gridChkArr: gridChkArr },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("삭제할 사이트를 선택해주세요.");
+        }
+    }
+
+    //VM 처리 상세
+    function fnVMAsFail() {
+        var grid = $("#grid").data("kendoGrid");
+
+        //선택된 행 데이터 추출
+        var dataitem = grid.dataItem(grid.select());
+
+        var seq_num = dataitem["seq_num"]
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/StatusDetailProcByDay/VMAsFail")",
+            data: { seq_num: seq_num },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                alert(result.msg);
+                if (result.success) {
+                    fnSearch(); //재조회
+                }
+            }
+        });
+    }
+
+    function fnBtnVisibleCheck() {
+        var grid = $("#grid").data("kendoGrid");
+
+        //선택된 행 데이터 추출
+        var dataitem = grid.dataItem(grid.select());
+
+        //컬럼 검사
+        if (dataitem["proc_gb"] == "생성" &&
+            dataitem["proc_status_gb"] == "생성중") {
+            $("#BTN_AS_FAIL").attr('disabled', false);
+        }
+        else {
+            $("#BTN_AS_FAIL").attr('disabled', true);
+        }
+    }
+
+    //VM 삭제
+    function fnVMDelete() {
+        var grid = $("#grid").data("kendoGrid");
+        var gridChkArr = [];
+        var gridChkArr2 = [];
+
+        var dataCheck = false;
+
+        //vm서버관리에서 체크한 serverid 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                gridChkArr.push(this.cells[1].innerText);
+                gridChkArr2.push(this.cells[10].innerText);
+                dataCheck = true;
+            }
+        });
+
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/VMDelete/DeleteVM")",
+                data: { gridChkArr: gridChkArr, gridChkArr2: gridChkArr2 },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("삭제할 VM을 선택해주세요.");
+        }
+    }
+
+    //@@VM 공통
+    //처리보류
+    function fnHoldProcess() {
+        var grid = $("#grid").data("kendoGrid");
+        var gridChkArr = [];
+        var gridChkArr2 = [];
+
+        var dataCheck = false;
+
+        //체크항목 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                gridChkArr.push(this.cells[1].innerText);
+                gridChkArr2.push(this.cells[15].innerText);
+                dataCheck = true;
+            }
+        });
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/VMCommon/HoldProcess")",
+                data: { gridChkArr: gridChkArr, gridChkArr2: gridChkArr2 },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("처리보류할 VM을 선택해주세요.");
+        }
+    }
+
+    // -------------------------------------------------------- 관리자 그룹 --------------------------------------------------------
+    $("#BTN_ADMINGROUP_DEL").off("click").on("click", function () {
+        fnAdminGroupManagementDelete();
+    });
+
+    //관리자 그룹 삭제
+    function fnAdminGroupManagementDelete() {
+        var grid = $("#grid").data("kendoGrid");
+        var gridChkArr = [];
+
+        //그리드에서 체크한 내역 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                gridChkArr.push(this.cells[1].innerText);
+            }
+        });
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/AdminManagement/DeleteAdminGroup")",
+            data: { gridChkArr: gridChkArr },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                // 완료 or 에러 메시지
+                alert(result.msg);
+                if (result.success) {
+                    fnSearch(); //재조회
+                }
+            }
+        });
+    }
+    // -------------------------------------------------------- 관리자 관리 --------------------------------------------------------
+
+    //관리자 삭제
+    function fnAdminManagementDelete() {
+        var grid = $("#grid").data("kendoGrid");
+        var param = {};
+        param.adminId = "";
+        //그리드에서 체크한 내역 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                param.adminId += this.cells[1].innerText + ",";
+            }
+        });
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/AdminManagement/AdminDel")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                // 완료 or 에러 메시지
+                alert(result.msg);
+                if (result.success) {
+                    fnSearch(); //재조회
+                }
+            }
+        });
+    }
+    // -------------------------------------------------------- 관리자 그룹원 관리 --------------------------------------------------------
+    //관리자 그룹원 삭제
+    function fnMemberManagementDelete() {
+        var grid = $("#grid").data("kendoGrid");
+        var param = {};
+        param.AdminID = "";
+        param.GroupNo = $("#S_admin_group").val();
+        param.Type = "0";
+        //그리드에서 체크한 내역 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                param.AdminID += this.cells[1].innerText + ",";
+            }
+        });
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/AdminManagement/MemberUpdate")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                // 완료 or 에러 메시지
+                alert(result.msg);
+                if (result.success) {
+                    fnSearch(); //재조회
+                }
+            }
+        });
+    }
+    //VM생성 처리보류
+    function fnProcessing(grid) {
+        var seq_num = [];
+        var cnt = 0;
+        $(grid.tbody[0].rows).each(function (index, item) {
+            if ($(this.cells[0]).find("input").is(":checked")) {
+                seq_num.push(this.cells[1].innerText);
+                cnt++;
+            }
+        });
+
+        if (cnt < 1) {
+            alert("선택 후 처리보류 버튼을 눌러주세요.");
+            return false;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/VMCreate/VMProcessing")",
+            data: { seq_num: seq_num},
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                fnSearch(); //재조회
+            }
+        });
+    }
+	//VM생성 대상자 삭제
+    function fnAddWorkDelete(grid, IsGubun) {
+        var seq_num = [];
+        var cnt = 0;
+        $(grid.tbody[0].rows).each(function (index, item) {
+            if ($(this.cells[0]).find("input").is(":checked")) {
+                seq_num.push(this.cells[1].innerText);
+                cnt++;
+            }
+        });
+
+        if (cnt < 1) {
+            alert("선택 후 삭제 버튼을 눌러주세요.");
+            return false;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/VMCreate/VMAddWorkDelete")",
+            data: {
+                seq_num: seq_num,
+                IsGubun: IsGubun
+            },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                fnSearch(); //재조회
+            }
+        });
+    }
+
+    //VM재생성 처리보류
+    function fnReProcessing(grid) {
+        var seq_num = [];
+        var cnt = 0;
+        $(grid.tbody[0].rows).each(function (index, item) {
+            if ($(this.cells[0]).find("input").is(":checked")) {
+                seq_num.push(this.cells[1].innerText);
+                cnt++;
+            }
+        });
+
+        if (cnt < 1) {
+            alert("선택 후 처리보류 버튼을 눌러주세요.");
+            return false;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/VMModify/VMReProcessing")",
+            data: { seq_num: seq_num},
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                fnSearch(); //재조회
+            }
+        });
+    }
+
+    //VM수정(재생성)
+    function fnReVM(grid) {
+        var seq_num = [];
+        var cnt = 0;
+        $(grid.tbody[0].rows).each(function (index, item) {
+            if ($(this.cells[0]).find("input").is(":checked")) {
+                seq_num.push(this.cells[1].innerText);
+                cnt++;
+            }
+        });
+
+        if (cnt < 1) {
+            alert("선택 후 수정 버튼을 눌러주세요.");
+            return false;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/VMModify/VMReVM")",
+            data: { seq_num: seq_num},
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                // 완료 or 에러 메시지
+                alert(result.msg);
+                if (result.success) {
+                    fnSearch(); //재조회
+                }
+            }
+        });
+    }
+
+    //VM재생성 대상자 삭제
+        function fnModifyWorkDelete(grid) {
+        var seq_num = [];
+        var cnt = 0;
+        $(grid.tbody[0].rows).each(function (index, item) {
+            if ($(this.cells[0]).find("input").is(":checked")) {
+                seq_num.push(this.cells[1].innerText);
+                cnt++;
+            }
+        });
+
+        if (cnt < 1) {
+            alert("선택 후 삭제 버튼을 눌러주세요.");
+            return false;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/VMModify/VMModifyWorkDelete")",
+            data: { seq_num: seq_num},
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                fnSearch(); //재조회
+            }
+        });
+    }
+
+    //VM삭제 처리보류
+    function fnDelProcessing(grid) {
+        var seq_num = [];
+        var cnt = 0;
+        $(grid.tbody[0].rows).each(function (index, item) {
+            if ($(this.cells[0]).find("input").is(":checked")) {
+                seq_num.push(this.cells[1].innerText);
+                cnt++;
+            }
+        });
+
+        if (cnt < 1) {
+            alert("선택 후 처리보류 버튼을 눌러주세요.");
+            return false;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/VMDelete/VMDelProcessing")",
+            data: { seq_num: seq_num},
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                fnSearch(); //재조회
+            }
+        });
+    }
+
+    //VM삭제 대상자 삭제
+    function fnDelWorkDelete(grid, IsGubun) {
+        var seq_num = [];
+        var cnt = 0;
+        $(grid.tbody[0].rows).each(function (index, item) {
+            if ($(this.cells[0]).find("input").is(":checked")) {
+                seq_num.push(this.cells[1].innerText);
+                cnt++;
+            }
+        });
+
+        if (cnt < 1) {
+            alert("선택 후 삭제 버튼을 눌러주세요.");
+            return false;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/VMDelete/VMDelWorkDelete")",
+            data: {
+                seq_num: seq_num,
+                IsGubun: IsGubun
+            },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                fnSearch(); //재조회
+            }
+        });
+    }
+        //OTP2차인증 예외자 삭제
+        //관리자 삭제
+    function fnOTPAuthManagementDelete() {
+        var grid = $("#grid").data("kendoGrid");
+        var param = {};
+        param.AdminID = "";
+        //그리드에서 체크한 내역 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                param.AdminID += this.cells[2].innerText + ",";
+            }
+        });
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Management/OTPAuthDel")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                // 완료 or 에러 메시지
+                alert(result.msg);
+                if (result.success) {
+                    fnSearch(); //재조회
+                }
+            }
+        });
+    }
+
+    //VM 과금설정
+    function fnVMPayExceptYn(exceptYn) {
+        var grid = $("#grid").data("kendoGrid");
+        var param = {};
+        var dataCheck = false;
+
+        param.seq_num = "";
+        param.exceptYn = exceptYn
+        param.isCurrent = $("#S_PAYYYMM").val();
+        //그리드에서 체크한 내역 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                param.seq_num += this.cells[1].innerText + ",";
+                dataCheck = true;
+            }
+        });
+
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Management/UpdateVMPayExcept")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("VM를 선택해주세요.");
+        }
+    }
+
+    //약정 삭제
+    function fnAgreementManagementDelete() {
+        var grid = $("#grid").data("kendoGrid");
+        //선택된 행 데이터 추출
+        var dataitem = grid.dataItem(grid.select());
+
+        var param = {};
+        var dataCheck = false;
+
+        param.Seq_Num = "";
+        param.UserID = "";
+        param.AgreementPeriod = "";
+        param.isCurrent = $("#S_PAYYYMM").val();
+
+        //그리드에서 체크한 내역 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                param.Seq_Num += dataitem["seq_num"] + ",";
+                param.UserID += dataitem["emp_no"] + ",";
+                param.AgreementPeriod += dataitem["Agreement_Period"] + ",";
+                dataCheck = true;
+            }
+        });
+
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/AgreementManagement/DeleteAgreement")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("VM를 선택해주세요.");
+        }
+    }
+
+    //VM현황 - 사용기간 수정 -----------------------------------------------------------------
+
+    function fnBtnEditExpireDate() {
+        var grid = $("#grid").data("kendoGrid");
+
+        //선택된 행 데이터 추출
+        var dataitem = grid.dataItem(grid.select());
+
+        ////컬럼 검사
+        //if (dataitem["proc_gb"] == "생성" ||
+        //    dataitem["proc_gb"] == "생성중") {
+        //    $("#BTN_AS_FAIL").attr('disabled', false);
+        //}
+        //else {
+        //    $("#BTN_AS_FAIL").attr('disabled', true);
+        //}
+    }
+
+    //VM현황 - 사용기간 수정
+    function fnEditExpireDate() {
+        var grid = $("#grid").data("kendoGrid");
+
+        //선택된 행 데이터 추출
+        var dataitem = grid.dataItem(grid.select());
+
+        var seq_num = dataitem["seq_num"]
+
+        @*$.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/StatusDetailProcByDay/VMAsFail")",
+            data: { seq_num: seq_num },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                alert(result.msg);
+                if (result.success) {
+                    fnSearch(); //재조회
+                }
+            }
+        });*@
+     }
+
+    function testbind() {
+        var dropdownlist = $("#S_PAYYYMM").data("kendoDropDownList");
+        dropdownlist.bind("change", testproc);
+    }
+    function testproc() {
+        $("#BTN_PAY_EXCEPT").hide();
+    }
+
+    param = {};
+
+    function fnSyncAction() {
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/ADManagement/SyncAction")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                alert(result.msg);
+            }
+        });
+    }
+    function fnTempUserManagementDelete() {
+        var grid = $("#grid").data("kendoGrid");
+
+        var dataCheck = false;
+
+        ADPaths = [];
+        tempUsers = [];
+        employeeIDs = [];
+        //그리드에서 체크한 내역 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                ADPaths.push(grid.dataItem($(this)).distinguishedName);
+                tempUsers.push(grid.dataItem($(this)).sAMAccountName);
+                employeeIDs.push(grid.dataItem($(this)).EmployeeID);
+                dataCheck = true;
+            }
+        });
+
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/TempUserManagement/TempUserDelete")",
+                data: {
+                    ADPaths: ADPaths,
+                    tempUsers: tempUsers,
+                    employeeIDs: employeeIDs
+                },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("사용자를 선택해주세요.");
+        }
+    }
+
+    function fnAzureLicenseDelete() {
+        var grid = $("#grid").data("kendoGrid");
+        //선택된 행 데이터 추출
+
+        var param = {};
+        var dataCheck = false;
+
+        param.SkuIDs = "";
+        //그리드에서 체크한 내역 배열에 담기
+        $(grid.tbody[0].rows).each(function (index) {
+            var check = $(this.cells[0]).find("input").is(":checked");
+            if (check) {
+                param.SkuIDs += grid.dataItem($(this)).SkuID + ","
+                dataCheck = true;
+            }
+        });
+
+        if (dataCheck) {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Management/DelAzureLicense")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                async: true,
+                success: function (result) {
+                    alert(result.msg);
+                    if (result.success) {
+                        fnSearch(); //재조회
+                    }
+                }
+            });
+        }
+        else {
+            alert("라이센스를 선택해주세요.");
+        }
+    }
+</script>

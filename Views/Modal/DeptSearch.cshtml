@@ -1,0 +1,236 @@
+﻿<div class="modal fade show" id="M_DeptSearch" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">부서 검색</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="searchArea">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <div class="row">
+                                            <div class="col-md-11">
+                                                <label>부서명</label>
+                                                <div class="input-group" style="width:100%;">
+                                                    <input type="text" class="form-control" id="deptNm">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <div style="float: right;">
+                                            <div class="livicon-evo livicon-evo-holder mt-2" data-options="name:search; style:lines; size:35px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;" onclick="fnDeptSearch('M_DeptSearch')"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="deptGrid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary ml-1" data-dismiss="modal" id="selectBtn">
+                    <span class="d-none d-sm-block">선택</span>
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->        
+    <div class="M_LoadingBar"></div>
+</div>
+<!-- /.modal -->
+
+<script>    
+
+    $(document).ready(function () {                     
+        fnModalDeptEvent("M_DeptSearch", "BTN_DEPT");                
+    });
+
+    //그리드 그리기
+    function fnDeptGridDraw(result) {
+
+        var expanded = false;
+
+        if ($("#deptNm").val() != "") {
+            expanded = true;
+        }
+
+        $("#deptGrid").empty(); //그리드 초기화를 안해주면 해당 그리드에 계속 추가되어 페이징에서 스크립트 오류가 뜸
+        $("#deptGrid").kendoTreeList({
+            dataSource: {
+                data: result != null ? result.data : result
+                , schema: {
+                    model: {
+                        id: "ORG_CD",
+                        parentId: "UPPER_ORG_CD", //부모 id
+                        fields: {
+                            UPPER_ORG_CD: { field: "UPPER_ORG_CD"},
+                            ORG_CD: { field: "ORG_CD" }
+                        },
+                        expanded: expanded //treelist 펼치기 (변경 x)
+                    }
+                }
+            },                    
+            height: 400,
+            autoWidth: true,
+            sortable: true,
+            selectable: "one", // multiple 다중 row선택, multiple cell 다중cell선택
+            dataBound: function (e) {
+                //부서 검색 후 검색한 부서 select해주기
+                var treeList = this;
+                this.element.find("tbody>tr").each(function (index, item) {
+                    if (this.cells[1].innerText == $("#deptNm").val()) {
+                        treeList.select(treeList.element.find("tbody>tr:nth("+index+")"))
+                    }
+                });
+            },
+            columns: [
+                { field: "ORG_CD", title: "부서코드", hidden: true }, /*부서 ID*/
+                { field: "ORG_NM", title: "부서명", width: "200px" }, /*부서*/
+            ],
+        });
+        setTimeout(function (e) {
+            $("#deptGrid").data("kendoTreeList").resize();
+        }, 250)
+    }
+
+    //modal event
+    //1.모달 영역 id
+    //2.모달 오픈 버튼 id
+    //3.선택한 값을 돌려줄 컨트롤러의 ID (input ID)
+    function fnModalDeptEvent(ID_MODAL, ID_BTN) {        
+
+        $("#" + ID_BTN).off("click").on("click", function () {            
+            //$("#" + ID_MODAL).find(".modal-dialog").prop("class", "modal-dialog modal-lg");
+            //$("#" + ID_MODAL).modal({ backdrop: 'static', keyboard: false });
+            
+            $("#" + ID_MODAL).modal();            
+        })        
+
+        $("#" + ID_MODAL).off('show.bs.modal').on('show.bs.modal', function () {
+            fnDeptSearch(ID_MODAL);
+        })
+
+        //모달이 닫힐때
+        $("#" + ID_MODAL).off("hide.bs.modal").on("hide.bs.modal", function () {
+            //초기화
+            fnDeptModalReset(ID_MODAL);
+        });
+
+        //그리드 row 더블 클릭시
+        $("#" + ID_MODAL + " #deptGrid").off("dblclick").on("dblclick", "tbody tr", function () {
+            var ID_RT_MODAL = $("#ID_RT_MODAL").val(); //부서값을 리턴받을 모달창 ID
+            var treeList = $("#" + ID_MODAL + " #deptGrid").data("kendoTreeList"); //그리드 정보 담기
+            var selectedData = treeList.dataItem(treeList.select()); //선택한 값 담기
+            $("#" + ID_RT_MODAL + " #DEPT_CD").val(selectedData.ORG_CD); //input box에 세팅
+            $("#" + ID_RT_MODAL + " #DEPT_NM").val(selectedData.ORG_NM); // hidden에 세팅
+            $("#" + ID_MODAL).modal("hide");  
+        });      
+       
+
+        //선택 버튼 클릭
+        $("#" + ID_MODAL + " #selectBtn").off("click").on("click", function () {
+            var ID_RT_MODAL = $("#ID_RT_MODAL").val(); //부서값을 리턴받을 모달창 ID
+            var treeList = $("#" + ID_MODAL + " #deptGrid").data("kendoTreeList"); //그리드 정보 담기
+            var selectedData = treeList.dataItem(treeList.select()); //선택한 값 담기
+            $("#" + ID_RT_MODAL + " #DEPT_CD").val(selectedData.ORG_CD); //input box에 세팅
+            $("#" + ID_RT_MODAL + " #DEPT_NM").val(selectedData.ORG_NM); // hidden에 세팅
+            $("#" + ID_MODAL).modal("hide");  
+        });        
+
+        $("#M_VMUserSearch #DEPT_NM").keydown(function (key) {//검색 영역에 focus가 있을 시에만 엔터키 이벤트 실행
+            if (key.keyCode == 13) {//키가 13이면 실행 (엔터는 13)                
+                $("#" + ID_MODAL + " #deptNm").val($("#M_VMUserSearch #DEPT_NM").val());
+                fnDeptSearch(ID_MODAL,"input");
+            }
+
+            //백스페이스 입력 시 사용자 id 초기화
+            if (key.keyCode == 8) {//키가 13이면 실행 (엔터는 13)
+                $("#M_VMUserSearch #DEPT_CD").val("");
+            }
+        });
+
+        //부모 검색조건 input 더블 클릭시 초기화
+        $("#M_VMUserSearch #DEPT_NM").off("dblclick").on("dblclick", function () {
+            $("#M_VMUserSearch #DEPT_NM").val("");
+            $("#M_VMUserSearch #DEPT_CD").val("");
+            fnVMUserModalSearch();
+        });
+    }
+
+    function fnDeptSearch(ID_MODAL,type) {
+
+        let param = {}
+        let ID_RT_MODAL = $("#ID_RT_MODAL").val(); //부서값을 리턴받을 모달창 ID
+        if (type == "input") {
+            let ID_RT_MODAL = $("#ID_RT_MODAL").val(); //부서값을 리턴받을 모달창 ID
+            param.deptNm = $("#" + ID_RT_MODAL + " #DEPT_NM").val();
+        } else {
+            param.deptNm = $("#" + ID_MODAL + " #deptNm").val();
+        }
+        
+
+         $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Common/SearchDept")",
+             data: { param: JSON.stringify(param) },
+             beforeSend: function () { // 조회 전
+                 kendo.ui.progress($(".M_LoadingBar"), true);
+             },
+             complete: function () {//조회 후
+                 kendo.ui.progress($(".M_LoadingBar"), false);
+             },
+            dataType: 'json',
+            async: false,
+             success: function (result) {
+                 //사용자 검색시 필요                
+                 var data = result != null ? result.data : result;
+
+                 //부모 검색조건에서 입력 시
+                 if ("input" == type) {
+                     //조회 개수가 1개이하이면
+                     if (data.length < 2) {
+                         //부모 검색조건에 결과값 리턴
+                         $("#M_VMUserSearch #DEPT_NM").val(data[0].ORG_NM);
+                         $("#M_VMUserSearch #DEPT_CD").val(data[0].ORG_CD);                         
+                     } else { //조회 개수가 2개 이상이면                 
+                         //모달 창 열어서 입력한 데이터로 사용자 검색
+                         $("#" + ID_MODAL + " #deptNm").val($("#M_VMUserSearch #DEPT_NM").val());
+                         $("#" + ID_MODAL).modal();
+
+                         //해당 소스를 안넣으면 일정확률로 그리드의 페이징의 클래스가 k-pager-lg 가 아닌 
+                         //k-pager-sm이 되어 페이지 사이즈 토탈 카운트가 안보이는 경우가 있어 추가함
+                         function us() {
+                             fnDeptGridDraw(result);
+                         }
+                         setTimeout(us, 300);
+                     }
+                 } else {                                          
+                     fnDeptGridDraw(result)
+                 }             
+            }
+        });        
+    }
+
+    //모달 초기화
+    function fnDeptModalReset(ID_MODAL) {
+        $("#" + ID_MODAL + " input").val("");
+        fnDeptGridDraw();
+    }
+</script>

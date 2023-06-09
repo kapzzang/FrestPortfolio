@@ -1,0 +1,32 @@
+/*================================================================================
+	Item Name: Frest HTML Admin Template
+	Version: 1.0
+	Author: PIXINVENT
+	Author URL: http://www.themeforest.net/user/pixinvent
+================================================================================
+
+NOTE:
+------
+PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
+WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
+
+@font-face {
+	font-family: NanumGothic;
+	src: url('../../../../../Resources/fonts/NanumGothic.ttf') format('truetype');
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2:not(.brand-text), h3, h4, h5, h6, span:not(.k-icon):not(.icon), div, small, li {
+	font-family: NanumGothic !important; /*폰트 나눔고딕 적용*/
+}
+
+.modal-content {
+	background: #fcfcfc !important;
+}
+
+/*sweetAlert
+* 입력값이 많을시 글자가 창을 넘어가는 현상 수정
+*/
+.swal2-popup {
+	width: 30% !important;
+	word-break: break-all;
+}

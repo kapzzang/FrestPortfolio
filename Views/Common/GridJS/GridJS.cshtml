@@ -1,0 +1,598 @@
+﻿<script>
+    var GridJS = {}
+
+    @*/**
+     *메뉴권한에 따른 jumpCell 설정
+     * @param {any} pageId
+     */*@
+    function fnMenuRoleJumpCell(pageId) {
+        var className = "";
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Common/UserMenuRoleCheck")",
+                data: { pageId: pageId },
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (result) {
+                        className = "jumpCell";
+                    }
+                }
+            });
+        return className;
+    }
+
+    @*/**
+     * 페이지,정렬,필터 정보를 가져오는 메서드(*추가로 넘기는 데이터보다 앞에 사용해야함)
+     * @param {any} grid
+     */*@
+    GridJS.gridDataSet = function gridDataSet(grid) {
+        var param = {};
+        var serverPaging = grid.options.serverPaging;
+        var serverSorting = grid.options.serverSorting;
+        var serverFiltering = grid.options.serverFiltering;
+
+        if (serverPaging) {
+            param.PAGE = grid.page();
+            param.PAGESIZE = grid.pageSize();
+        }
+
+        if (serverSorting) {
+            if (grid.sort().length > 0) {
+
+                var dataField = grid.sort()[0].field;
+                $(grid.options.fields).each(function (index, item) {
+                    if (this.field == dataField + "_Sort") {
+                        dataField = this.field;
+                    }
+                });
+
+                param.SORTFIELD = dataField;
+                param.SORTDIR = grid.sort()[0].dir;
+            }
+        }
+
+        if (serverFiltering) {
+            if (grid.filter() != null) {
+                param.FILTER = grid.filter();
+            }
+        }
+        return param;
+    }
+
+
+
+    @*/**
+     * 그리드 컬럼 세팅
+     * @param {any} colData
+     */*@
+    GridJS.fnGridColumsSet = function fnGridColumsSet(colData, gridColSetType) {
+        if (colData != null) {
+
+            //그리드 컬럼 세팅 타입에 따라 사용자별 저장 그리드 컬럼인지 프로시저에 기본값으로 저장된 그리드 컬럼인지 구분하여 알맞게 데이터를 세팅한다.
+            if (gridColSetType != "default") {
+
+                //사용자가 변경한 (그리드 컬럼 순서) 데이터는 gridColums에 기존에 불러왔던 컬럼 데이터는 gridOptionColumns 있음
+                //필요한 정보는 gridOptionColumns 데이터 이기 때문에 순서가 바뀌지 않는 gridOptionColumns을 gridColums 순서에 알맞게 배열을 재배치해야함
+                var columns = []; //최종 컬럼 정보를 담는 변수
+                var colJson = {}; //컬럼 정보를 json 으로 담는 변수
+                var cnt = 0;
+
+                //DB에서 받은 컬럼 정보 수만큼 반복
+                for (var i = 0; i < colData.length; i++) {
+                    //맨 처음 데이터가 아니거나 컬럼데이터 중 전 필드 데이터가 현재 필드데이터가 같은 경우
+                    if (i > 0 && colData[i].Field == colData[i - 1].Field) {
+                        //문자열로 boolean값이 string으로 들어간 경우 boolean값으로 다시 넣어준다.
+                        if (colData[i].AttributeValue == "True") {
+                            colData[i].AttributeValue = true;
+                        }
+                        if (colData[i].AttributeValue == "False") {
+                            colData[i].AttributeValue = false;
+                        }
+
+                        //JSON으로 변경 되는 데이터 일 경우
+                        try {
+                            colJson[colData[i].Attribute] = JSON.parse(colData[i].AttributeValue);
+                        } catch (e) {
+                            colJson[colData[i].Attribute] = colData[i].AttributeValue;
+                        }
+
+                        columns[cnt - 1] = colJson; //데이터가 row로 쌓이기 때문에 같은 field의 데이터인경우 똑같은 컬럼 순서에 넣어줘야 되므로 -1
+                    }
+                    //맨 처음 데이터 이거나 컬럼데이터 중 전 필드 데이터가 현재 필드데이터가 다른 경우
+                    else {
+                        colJson = {}; // colJson에 넣어둔 데이터를 초기화
+                        colJson["field"] = colData[i].Field; //필드 부터 넣어준다.
+                        //JSON으로 변경 되는 데이터 일 경우
+                        try {
+                            colJson[colData[i].Attribute] = JSON.parse(colData[i].AttributeValue);
+                        } catch (e) {
+                            colJson[colData[i].Attribute] = colData[i].AttributeValue;
+                        }
+                        columns[cnt] = colJson; //새로운 field로 시작 되기때문에 새로운 컬럼 순서에 넣어줌
+                        cnt++; //새로운 field 일경우 cnt를 올려줘야 같은 필드 값들이 알맞은 컬럼 순서에 들어감
+                    }
+                }
+                return columns;
+
+            } else { //기본 컬럼세팅
+
+                var value;
+                for (var i = 0; i < colData.length; i++) {
+                    for (var key in colData[i]) {
+                        try {
+                            value = JSON.parse(colData[i][key]);
+                            colData[i][key] = value;
+                        } catch (e) {
+                            value = colData[i][key];
+                            colData[i][key] = value;
+                        }
+                        //title은 문자열로 명시적 형변환 Jira ITBRML-14
+                        if (key == "title") {
+                            colData[i][key] = String(value);
+                        }
+                        //attributes 중 class 가 존재하는 값중 fnMenuRoleJumpCell이라는 텍스트가 있을시 fnMenuRoleJumpCell() 함수를 실행 --그리드 속도 이슈가 생긴다면 이부분을 서버단으로 옴길 수도 있음 지금은 관리가 더 용이한 쪽으로 선택
+                        if (key == "attributes") {
+                            if (colData[i][key].class != null) {
+                                if (colData[i][key].class.indexOf("fnMenuRoleJumpCell") != -1) { //해당 택스트가 있는경우
+                                    colData[i][key].class = (new Function('return ' + colData[i][key].class))()
+                                } else {
+                                    colData[i][key].class = (new Function('return null'))()
+                                }
+                            }
+                        }
+                    }
+                }
+                return colData;
+
+            }
+
+        } else {
+            ComJS.fnSweetAlert("컬럼 정보가 없습니다. 프로시저를 확인 해주세요.")
+        }
+    }
+
+    @*/**
+     * 그리드 컬럼 세팅
+     * @param {any} colData
+     */*@
+    /*GridJS.fnGridColumsSet = function fnGridColumsSet(colData, gridColSetType) {
+        if (colData != null) {
+
+            //그리드 컬럼 세팅 타입에 따라 사용자별 저장 그리드 컬럼인지 프로시저에 기본값으로 저장된 그리드 컬럼인지 구분하여 알맞게 데이터를 세팅한다.
+            if (gridColSetType != "default") {
+
+                //사용자가 변경한 (그리드 컬럼 순서) 데이터는 gridColums에 기존에 불러왔던 컬럼 데이터는 gridOptionColumns 있음
+                //필요한 정보는 gridOptionColumns 데이터 이기 때문에 순서가 바뀌지 않는 gridOptionColumns을 gridColums 순서에 알맞게 배열을 재배치해야함
+                var columns = []; //최종 컬럼 정보를 담는 변수
+                var colJson = {}; //컬럼 정보를 json 으로 담는 변수
+                var cnt = 0;
+
+                //DB에서 받은 컬럼 정보 수만큼 반복
+                for (var i = 0; i < colData.length; i++) {
+                    //맨 처음 데이터가 아니거나 컬럼데이터 중 전 필드 데이터가 현재 필드데이터가 같은 경우
+                    if (i > 0 && colData[i].Field == colData[i - 1].Field) {
+                        //컬렘 데이터중 속성정보가 template인 경우
+                        if (colData[i].Attribute == "template") {
+                            //함수를 실행 할 수 있는 정보로 변경하여 값을 넣어준다.
+                            if (colData[i].AttributeValue != null && colData[i].AttributeValue != "") {
+                                //template 속성은 실행 되면서 해당 실행 함수명이 사라짐 사라진 함수명을 templateFnNm 담아둠
+                                colJson["templateFnNm"] = colData[i].AttributeValue;
+                                colJson[colData[i].Attribute] = (new Function('return ' + colData[i].AttributeValue))();
+                            } else {
+                                colJson[colData[i].Attribute] = (new Function('return null'))()
+                            }
+                        } else {
+
+                            //문자열로 boolean값이 string으로 들어간 경우 boolean값으로 다시 넣어준다.
+                            if (colData[i].AttributeValue == "True") {
+                                colData[i].AttributeValue = true;
+                            }
+                            if (colData[i].AttributeValue == "False") {
+                                colData[i].AttributeValue = false;
+                            }
+
+                            //JSON으로 변경 되는 데이터 일 경우
+                            try {
+                                colJson[colData[i].Attribute] = JSON.parse(colData[i].AttributeValue);
+                            } catch (e) {
+                                colJson[colData[i].Attribute] = colData[i].AttributeValue;
+                            }
+                        }
+                        columns[cnt - 1] = colJson; //데이터가 row로 쌓이기 때문에 같은 field의 데이터인경우 똑같은 컬럼 순서에 넣어줘야 되므로 -1
+                    }
+                    //맨 처음 데이터 이거나 컬럼데이터 중 전 필드 데이터가 현재 필드데이터가 다른 경우
+                    else {
+                        colJson = {}; // colJson에 넣어둔 데이터를 초기화
+                        colJson["field"] = colData[i].Field; //필드 부터 넣어준다.
+                        //JSON으로 변경 되는 데이터 일 경우
+                        try {
+                            colJson[colData[i].Attribute] = JSON.parse(colData[i].AttributeValue);
+                        } catch (e) {
+                            colJson[colData[i].Attribute] = colData[i].AttributeValue;
+                        }
+                        columns[cnt] = colJson; //새로운 field로 시작 되기때문에 새로운 컬럼 순서에 넣어줌
+                        cnt++; //새로운 field 일경우 cnt를 올려줘야 같은 필드 값들이 알맞은 컬럼 순서에 들어감
+                    }
+                }
+                return columns;
+
+            } else {
+
+                var value;
+                for (var i = 0; i < colData.length; i++) {
+                    for (var key in colData[i]) {
+                        try {
+                            value = JSON.parse(colData[i][key]);
+                            colData[i][key] = value;
+                        } catch (e) {
+                            value = colData[i][key];
+                            colData[i][key] = value;
+                        }
+	                    //title은 문자열로 명시적 형변환 Jira ITBRML-14
+	                    if (key == "title") {
+	                        colData[i][key] = String(value);
+	                    }
+                        //attributes 중 class 가 존재하는 값중 fnMenuRoleJumpCell이라는 텍스트가 있을시 fnMenuRoleJumpCell() 함수를 실행
+                        if (key == "attributes") {
+                            if (colData[i][key].class != null) {
+                                if (colData[i][key].class != "jumpCell") { //class가 jumpcell이 아닌경우
+                                    if (colData[i][key].class == 'dialogCell') {
+                                        colData[i][key].class = 'dialogCell';
+                                    } else {
+                                        if (colData[i][key].class.indexOf("fnMenuRoleJumpCell") != -1) { //해당 택스트가 있는경우
+                                            colData[i][key].class = (new Function('return ' + colData[i][key].class))()
+                                        } else {
+                                            colData[i][key].class = (new Function('return null'))()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (key == "template") {
+                            //colData[i][key] = eval(colData[i][key]);
+                            if (colData[i][key] != null && colData[i][key] != "") {
+                                //template 속성은 실행 되면서 해당 실행 함수명이 사라짐 사라진 함수명을 templateFnNm 담아둠
+                                colData[i]["templateFnNm"] = colData[i][key];
+                                colData[i][key] = (new Function('return ' + colData[i][key]))()
+                            } else {
+                                colData[i][key] = (new Function('return null'))()
+                            }
+                        }
+                    }
+                }
+                return colData;
+
+            }
+
+        } else {
+            alert("컬럼 정보가 없습니다. 프로시저를 확인 해주세요.")
+        }
+    }*/
+
+
+    @*/**
+     * 사용자 그리드 컬럼 정보 저장
+     * @param {any} grid
+     */*@
+    GridJS.fnColumnSave = function fnColumnSave(grid) {
+
+        //사용자가 변경한 (그리드 컬럼 순서) 데이터는 gridColums에 기존에 불러왔던 컬럼 데이터는 gridOptionColumns 있음
+        //필요한 정보는 gridOptionColumns 데이터 이기 때문에 순서가 바뀌지 않는 gridOptionColumns을 gridColums 순서에 알맞게 배열을 재배치해야함
+        var gridColums = grid.columns;
+        var gridOptionColumns = grid.options.columns;
+
+        //그리드에 첫번째 컬럼이 체크박스인경우 컬럼 정보에서 빼주기
+        if (gridOptionColumns[0].field == null){
+            gridColums.splice(0, 1);
+            gridOptionColumns.splice(0, 1);
+        }
+
+        var columns = [];
+
+        //순서를 재배치 하는 로직
+        for (var i = 0; i < gridColums.length; i++) {
+            for (var j = 0; i < gridOptionColumns.length; j++) {
+                //바뀐 컬럼 기준으로 기존 컬럼데이터를 새로운 배열에 쌓음
+                if (gridColums[i].field == gridOptionColumns[j].field) {
+                    //template 속성은 실행 되면서 해당 실행 함수명이 사라짐 사라진 함수명을 templateFnNm 담아둠
+                    //담아둔 templateFnNm을 다시 template 속성으로 넣어 db에 저장 되게함
+                    if (gridOptionColumns[j].templateFnNm != null && gridOptionColumns[j].templateFnNm != "") {
+                        gridOptionColumns[j].template = gridOptionColumns[j].templateFnNm;
+                        delete gridOptionColumns[j].templateFnNm;
+                    }
+
+                    //저장시 변경된 width값으로 저장한다
+                    gridOptionColumns[j].width = gridColums[i].width;
+                    //저장시 변경된 hidden값으로 저장한다.
+                    gridOptionColumns[j].hidden = gridColums[i].hidden;
+
+                    columns[i] = gridOptionColumns[j];
+
+                    //템플릿 값이 있을경우 해당 값을 string 값으로(소스 그대로 넣어준다)
+                    if (columns[i].template != null && columns[i].template != "") {
+                        columns[i].template = gridOptionColumns[j].template.toString();
+                    }
+                    break;
+                }
+            }
+        }
+
+        var param = [];
+
+        //컬럼 정보를 param 배열에 넣어준다
+        for (var i = 0; i < columns.length; i++) {
+            param.push(JSON.stringify(columns[i]));
+        }
+
+        $.ajax({
+            type: "POST",
+            url:  "@Scripts.Url("~/Common/GridColumnSave")",
+            data: { param: param },
+            beforeSend: function () { // 조회 전
+                kendo.ui.progress($(".loadingBar"), true);
+            },
+            complete: function () {//조회 후
+                kendo.ui.progress($(".loadingBar"), false);
+            },
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                if (result != 0) {
+                    @*alert("@proTns.Resources.GetString("dlg00056")");*@
+                    ComJS.fnSweetAlert("컬럼 정보가 저장되었습니다.");                    
+                } else {
+                    @*alert("@proTns.Resources.GetString("dlg00057")");*@
+                    ComJS.fnSweetAlert("컬럼 정보 저장을 실패했습니다.");
+                }
+            }
+        });
+    }
+
+    @*/**
+     * 그리드 컬럼 초기화
+     * @param {any}
+     */*@
+    GridJS.fnColumnReset = function fnColumnReset() {
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Common/GridColumnReset")",
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                if (result != 0) {
+                    @*alert("@proTns.Resources.GetString("dlg00058")");*@
+                    ComJS.fnSweetAlert("초기화 되었습니다.");
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000);                    
+                } else {
+                    @*alert("@proTns.Resources.GetString("dlg00059")");*@
+                    ComJS.fnSweetAlert("초기화에 실패했습니다.");
+                }
+            }
+        });
+    }
+
+    @* 그리드 컬럼 조회 (따로 조회시 사용) *@
+    GridJS.fnColumnSearch = function fnColumnSearch() {
+        let gridColData;
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Common/GridColumnSearch")",
+            dataType: 'json',
+            async: false,
+            success: function (result) {
+                if (result != null) {
+                    gridColData = result.data;
+                }
+                
+            }
+        });
+        return gridColData;
+    }
+
+    //엑셀 전체다운로드
+    GridJS.fnExcelAllDownload = function fnExcelAllDownload(result, grid) {
+
+        var data = result != null ? result.data : result; //데이터
+
+        if (data == null) {
+            @*alert("@proTns.Resources.GetString("dlg00060")");*@
+            ComJS.fnSweetAlert("데이터가 없습니다.");
+            return;
+        }
+
+        var columns = grid.columns; //그리드 컬럼정보
+
+        var columnNm = []; //컬럼명 배열
+        var colTitle = []; //타이틀 배열
+        //그리드 컬럼 정보 만큼 반복
+        for (var i = 0; i < columns.length; i++) {
+            //그리드 컬럼정보 중 히든이 없거나 히든이 false인경우 컬럼명 배열에 넣는다.
+            if (grid.columns[i].hidden == null || grid.columns[i].hidden == "") {
+                if (!grid.columns[i].hidden) {
+                    columnNm.push(columns[i].field);
+                    colTitle.push(columns[i].title);
+                }
+            }
+        }
+
+        //엑셀 head부분 (첫 줄 - 컬럼명)
+        var cells = [];
+        for (var i = 0; i < columnNm.length; i++) {
+            //컬럼명 배열에 있는 만큼 cell배열에 넣어준다.
+            cells.push({
+                value: colTitle[i]
+                , color: "#ffffff"
+                , background: "#7a7a7a"
+                //bold: true,
+                //vAlign: "center",
+                //hAlign: "center"
+            })
+        }
+
+        //엑셀 head부분 (첫 row에 cells배열 값을 넣는다)
+        var rows = [{
+            cells: cells
+        }];
+
+        //데이터 만큼 반복
+        for (var i = 0; i < data.length; i++) {
+            //cells 배열 초기화
+            var cells = [];
+            //컬럼명 만큼 반복
+            for (var j = 0; j < columnNm.length; j++) {
+                var value = null;
+                value = data[i][columnNm[j]] //cell 값
+
+                //ajax로 datetime 값을 받아올때 long 형태로 넘어옴 ex) "/Date(1574144514000)/" 해당 값을 date로 바꾼 후 string으로 값 변환
+                if (typeof value == "string" && value.indexOf("/Date(") != -1) {
+                    var start = value.indexOf("(");
+                    var end = value.lastIndexOf(")");
+                    value = value.substring(start + 1, end);
+                    value = parseInt(value); //숫자로 형변환
+                    var date = new Date(value);//날짜로 형변환
+                    value = date.format("yyyy-MM-dd HH:mm:ss");//날짜 string형 날짜 포멧으로 변환
+                }
+
+                //cells 배열에 값을 넣어줌
+                cells.push(
+                    { value: value }
+                )
+            }
+            //rows 배열에 값 넣어줌
+            rows.push({
+                cells: cells
+            })
+        }
+
+        //컬럼 자동넓이 컬럼 개수만큼 세팅
+        var autoWidth = [];
+        for (var i = 0; i < columnNm.length; i++) {
+            autoWidth.push({
+                autoWidth: true
+            })
+        }
+
+        var workbook = new kendo.ooxml.Workbook({
+            sheets: [
+                {
+                    // Column settings (width).
+                    columns: autoWidth,
+                    // The title of the sheet.
+                    title: "AllData",
+                    // The rows of the sheet.
+                    rows: rows,
+                    filter: { from: 0, to: columnNm.length-1 } //컬럼수 만큼 필터 기능 추가
+                }
+            ]
+        });
+        // Save the file as an Excel file with the xlsx extension.
+        kendo.saveAs({ dataURI: workbook.toDataURL(), fileName: "All_"+grid.options.excel.fileName });
+    }
+
+    /**
+     * 그리드 병합
+     * param grid
+     * param type
+     * param rows
+     * param useColArr
+     */
+    GridJS.fnAbsorption = function fnAbsorption(grid, type, rows, useColArr) {
+
+        if (type == "col") {
+            //COL
+            for (var i = 0; i < rows.length; i++) {
+                var cells = rows[i].cells;
+                var colCnt = 1;//colspan 숫자
+                var sCell = ""; //기준cell
+                for (var j = 0; j < cells.length; j++) {
+                    var cell = cells[j].innerText;
+                    var nextCell;
+                    if (j + 1 < cells.length) {
+                        nextCell = cells[j + 1].innerText;
+                    } else {
+                        nextCell = "";
+                    }
+
+                    if (cell == nextCell) {
+                        if (sCell == "") {
+                            sCell = $(cells[j]);
+                        }
+                        colCnt++;
+                        $(cells[j + 1]).css("display", "none");
+                    } else {
+                        if (sCell != "") {
+                            sCell.attr("colspan", colCnt);
+                            sCell = "";
+                        }
+                        colCnt = 1;
+                    }
+                }
+            }
+        } else if (type == "row") {
+            //ROW
+            var cellCnt = 0;
+            if (rows.length > 0) {
+                cellCnt = rows[0].cells.length;
+            }
+
+            var stop = true; //병합 할 필드 비교 중지 변수
+            var stopCnt = 0; //병합 할 필드 비교 증가값
+
+            for (var t = 0; t < cellCnt; t++) {
+                var rowCnt = 1;//rowspan 숫자
+                var sCell = ""; //기준cell
+                var abStop = false; //병합 중지 변수
+                if (stop) {
+                    for (var useColCnt = 0; useColCnt < useColArr.length; useColCnt++) {
+                        if (stopCnt == useColArr.length) { //병합을 사용 하는 마지막 컬럼이 왔을 경우 해당 for문을 stop (자원절약..)
+                            stop = false;
+                            break;
+                        }
+                        if (grid.columns[t].field == useColArr[useColCnt]) {
+                            abStop = true;
+                            stopCnt++;
+                            break;
+                        }
+                    }
+                }
+                if (abStop) {
+                    for (var k = 0; k < rows.length; k++) {
+                        var cell = rows[k].cells[t].innerText;
+                        var nextCell;
+                        if (k + 1 < rows.length) {
+                            nextCell = rows[k + 1].cells[t].innerText;
+                        } else {
+                            nextCell = "";
+                        }
+
+                        if (cell == nextCell) {
+                            if (sCell == "") {
+                                sCell = $(rows[k].cells[t]);
+                            }
+                            rowCnt++;
+                            $(rows[k + 1].cells[t]).css("display", "none");
+                        } else {
+                            if (sCell != "") {
+                                sCell.attr("rowspan", rowCnt);
+                                sCell = "";
+                            }
+                            rowCnt = 1;
+                        }
+                    }
+                }
+            }
+        } else if (type == "rowDiv") {//row 분할
+            for (var i = 0; i < rows.length; i++) {
+                var cell;
+                for (var j = 0; j < useColArr.length; j++) {
+                    var cellIndex = $(grid.thead[0].rows[0]).find("th[data-field='" + useColArr[j] + "']").index(); //분할 된 cell index
+                    $(rows[i].cells[cellIndex]).css("display", "");
+                    $(rows[i].cells[cellIndex]).attr("rowspan", 1);
+                }
+            }
+        }
+    }
+</script>

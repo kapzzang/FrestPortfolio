@@ -1,0 +1,215 @@
+﻿@{
+    ViewBag.Title = "Login";
+    Layout = "";
+}
+<!DOCTYPE html>
+<html class="loading" data-textdirection="ltr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="icon" href="favicon.ico">
+    <title>Portfolio</title>
+    @Styles.Render("~/frest/css/basic")
+    @Styles.Render("~/frest/css/vendor")
+</head>
+<body class="horizontal-layout horizontal-menu navbar-static 1-column   footer-static bg-full-screen-image  blank-page" data-open="hover" data-menu="horizontal-menu" data-col="1-column">
+    <!-- BEGIN: Content-->
+    <div class="app-content content">
+        <div class="content-overlay"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
+            <div class="content-body">
+                <!-- login page start -->
+                <section id="auth-login" class="row flexbox-container">
+                    <div class="mb-5">
+                        <div class="card bg-authentication mb-0">
+                            <div class="row m-0">
+                                <!-- left section-login -->
+                                <div class="col-md-6 col-12 px-0">
+                                    <div class="card disable-rounded-right mb-0 p-2 h-100 d-flex justify-content-center">
+                                        <div class="card-header pb-1">
+                                            <div class="card-title">
+                                                <h3 class="text-center mb-2">로그인 페이지</h3>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <form>
+                                                <div class="form-group mb-50">
+                                                    <label class="text-bold-600" for="userid">ID</label>
+                                                    <input type="text" class="form-control" id="userid" placeholder="사용하고 싶은 ID를 넣으세요.">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="text-bold-600" for="passwd">Password</label>
+                                                    <input type="password" class="form-control" id="passwd" placeholder="암호를 비교하지 않습니다. 아무값이나 넣어주세요.">
+                                                </div>
+                                                <div class="form-group d-flex flex-md-row flex-column justify-content-between align-items-center">
+                                                    <div class="text-left">
+                                                        <div class="checkbox checkbox-sm">
+                                                            <input type="checkbox" class="form-check-input" id="idSaveCheck">
+                                                            <label class="checkboxsmall" for="idSaveCheck">
+                                                                <small>
+                                                                    Keep me logged
+                                                                    in
+                                                                </small>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    @*<div class="text-right"><a href="auth-forgot-password.html" class="card-link"><small>Forgot Password?</small></a></div>*@
+                                                </div>
+                                                <button type="button" class="btn btn-primary glow w-100 position-relative" id="loginBtn">Login<i id="icon-arrow" class="bx bx-right-arrow-alt"></i></button>
+                                            </form>
+                                            <br>
+
+                                            <div class="text-center" id="loginMsgtip" data-toggle="tooltip" data-placement="top" title="">
+                                                <span class="text-center" id="loginMsg" style="display:none; color:firebrick"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- right section image -->
+                                <div class="col-md-6 d-md-block d-none text-center align-self-center p-3">
+                                    @*<img class="img-fluid" src="../Resoucre/app-assets/images/pages/login.png" alt="branding logo">*@
+                                    <img class="img-fluid" src="@Scripts.Url("~/Resources/frest/app-assets/images/pages/login.png")" alt="branding logo">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- login page ends -->
+            </div>
+        </div>
+    </div>
+
+    <!--로딩-->
+    <div class="modal fade show" id="loadingbar" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <button class="btn btn-primary" type="button" style="height:100px;"> 
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    보여주기용 모달 준비되면 로그인.....
+                </button>  
+            </div>
+        </div>
+    </div>
+
+    <!--스크립트영역-->
+    @Scripts.Render("~/frest/js/basic")
+    @Scripts.Render("~/frest/js/vendor") 
+</body>   
+</html>
+<script type="text/javascript">
+
+    @* 저장된 쿠키값을 가져와서 ID 칸에 넣어준다.없으면 공백으로 들어감.*@
+    var userInputId = getCookie("userInputId");
+    $("#userid").val(userInputId);
+    $("#userid").focus();
+    if (userInputId != "") {
+        $("#idSaveCheck").prop("checked", true);
+    }
+
+    @* ID 저장하기를 체크한 상태에서 ID를 입력하는 경우, 이럴 때도 쿠키 저장.*@
+    $("#userid").keyup(function () { 
+        if ($("#idSaveCheck").is(":checked")) { 
+            var userInputId = $("#userid").val();
+            setCookie("userInputId", userInputId, 1); @* 1일 동안 쿠키 보관 *@
+        }
+    });
+
+    @* ID 저장 체크박스에 변화가 있다면*@
+    $("#idSaveCheck").change(function () {
+        if ($("#idSaveCheck").is(":checked")) {
+            var userInputId = $("#userid").val();
+            setCookie("userInputId", userInputId, 1); 
+        } else { 
+            deleteCookie("userInputId");
+        }
+    });    
+
+    $(".card-body").keydown(function (key) {
+        if (key.keyCode == 13) {//키가 13이면 실행 (엔터는 13)
+            $("#loginBtn").click();
+        }
+    });
+
+    @* 로그인 *@
+    $("#loginBtn").on("click",function (e) {
+		var userid = $.trim($("#userid").val());
+		var passwd = $.trim($("#passwd").val());
+
+        if (userid == "") {
+            $("#userid").attr("placeholder","Please enter your ID.");
+            $("#userid").focus();
+			return false;
+        } else if (passwd == "") {
+            $("#passwd").attr("placeholder", "Please enter a password.");
+            $("#passwd").focus();
+			return false;
+		}
+
+        // Get Brower Timezone Offset
+        var today = new Date();
+        var timezoneMM = today.getTimezoneOffset();
+
+		var params = {
+			userid: userid,
+			passwd: passwd,
+            timezoneMM: timezoneMM
+		};
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Login/SignOn")",
+            data: { param: JSON.stringify(params) },
+            dataType: 'json',
+            async: false,     
+            success: function (data) {
+                if (data.result) {
+                    @* ID 저장하기를 체크한 상태에서 ID를 입력하는 경우, 이럴 때도 쿠키 저장*@
+                    $("#userid").keyup(function () {
+                        if ($("#idSaveCheck").is(":checked")) {
+                            var userInputId = $("#userid").val();
+                            setCookie("userInputId", userInputId, 1);
+                        }
+                    });
+                    $("#loadingbar").modal();
+                    setTimeout(function () {                        
+                        window.location.href = data.resulturl;
+                    }, 1000);                    
+                }else {
+                    $('#loginMsgtip').attr("data-original-title", data.resultmsgtip);
+                    $("#loginMsg").html(data.resultmsg);
+                    $("#loginMsg").show();
+                }
+            }
+        });
+    });
+    
+    function setCookie(cookieName, value, exdays) {
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + exdays);
+        var cookieValue = escape(value) + ((exdays == null) ? "" : "; expires=" + exdate.toGMTString());
+        document.cookie = cookieName + "=" + cookieValue;
+    }
+
+    function deleteCookie(cookieName) {
+        var expireDate = new Date();
+        expireDate.setDate(expireDate.getDate() - 1);
+        document.cookie = cookieName + "= " + "; expires=" + expireDate.toGMTString();
+    }
+
+    function getCookie(cookieName) {
+        cookieName = cookieName + '=';
+        var cookieData = document.cookie;
+        var start = cookieData.indexOf(cookieName);
+        var cookieValue = '';
+        if (start != -1) {
+            start += cookieName.length;
+            var end = cookieData.indexOf(';', start);
+            if (end == -1) end = cookieData.length;
+            cookieValue = cookieData.substring(start, end);
+        }
+        return unescape(cookieValue);
+    }
+</script>

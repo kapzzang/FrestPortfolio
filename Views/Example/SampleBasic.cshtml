@@ -1,0 +1,759 @@
+﻿@Styles.Render("~/frest/css/commonPage")
+@Scripts.Render("~/frest/js/commonPage")
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header row">
+            <div class="content-header-left col-12 mb-2 mt-1">
+                <div class="breadcrumbs-top">
+                    <h5 class="content-header-title float-left pr-1 mb-0">기본페이지</h5>
+                </div>
+            </div>
+        </section>
+        <!-- Main content -->
+        <section class="content-body">
+            <!--검색조건 영역 시작-->
+            <section class="row" id="conditionRow">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header" data-action="collapse">
+                            <div style="display:flex;">
+                                <div><h4 class="card-title">검색조건</h4></div>
+                                <div>
+                                    <div class="livicon-evo livicon-evo-holder" data-options="name:trash; style:lines; size:25px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:5px;" onclick="fnSearchReset()"></div>
+                                </div>
+                            </div>
+                            <div class="heading-elements">
+                                <ul class="list-inline mb-0">
+                                    <li><a data-action="collapse" class="rotate"><i class="bx bx-chevron-down"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-content collapse show" aria-expanded="true">
+                            <div class="card-body">
+                                <form id="searchForm" method="post" onsubmit="return false">
+                                    <!-- /.box-header -->
+                                    <div class="row">
+                                        <div class="col-md-11">
+                                            <div class="row">
+                                                <!--기본-->
+                                                <div class="col-md-3">
+                                                    <fieldset class="form-group">
+                                                        <label>기본</label>
+                                                        <input type="text" class="form-control" id="basic" name="basic" value="" style="width:100%;">
+                                                    </fieldset>
+                                                </div>
+
+                                                <!--기간 datepiker인 경우-->
+                                                <div class="col-md-3">
+                                                    <fieldset class="form-group">
+                                                        <label>기간</label>
+                                                        <input type="text" class="form-control Y-DT" id="dt" name="dt" style="">
+                                                    </fieldset>
+                                                </div>
+                                                <!-- select2 (dropdown) 인경우  -->
+                                                <div class="col-md-3">
+                                                    <fieldset class="form-group">
+                                                        <label>드롭다운</label>
+                                                        <select id="dd" class="form-control" name="dd" data-placeholder="Select..." style="height:34px; overflow:auto; width:100%;">
+                                                        </select>
+                                                    </fieldset>
+                                                </div>
+                                                <!--검색조건 검색 & 모달 방식-->
+                                                <div class="col-md-3">
+                                                    <fieldset class="form-group">
+                                                        <label>사용자검색</label>
+                                                        <div style="display:flex;">
+                                                            <input type="text" class="form-control input-SM" id="UserName" name="UserName" style="width:45%;"> <!-- 클래스에 input-SM 넣은 이유 : 검색조건 영역에서 엔터시 해당 input만 검색 안되게-->
+                                                            <input type="text" class="form-control" id="UserID" name="UserID" style="width:40%;" readonly="readonly">
+                                                            <div class="livicon-evo livicon-evo-holder" id="BTN_USER" data-options="name:search; style:lines; size:40px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;"></div>
+                                                        </div>
+                                                    </fieldset>
+                                                </div>
+
+                                                <!--//multiselect 인경우-->
+                                                <div class="col-md-6">
+                                                    <fieldset class="form-group">
+                                                        <label>멀티셀렉트</label>
+                                                        <select id="ms" class="form-control" name="ms" multiple="multiple" data-placeholder="Select..." style="height:34px; overflow:auto; width:100%;">
+                                                        </select>
+                                                    </fieldset>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div style="float: right;">
+                                                <div class="livicon-evo livicon-evo-holder mt-2" data-options="name:search; style:lines; size:40px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;" onclick="fnSearch()"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /.row -->
+                                    <!--검색조건 영역 끝-->
+                                    <!-- 검색 -->
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+            </section>
+            <!-- /.box -->
+            <!--그리드 추가 버튼영역-->
+            <section class="row" id="buttonRow" style="margin-top:-1%; margin-bottom: -1%;">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-content collapse show" aria-expanded="true">
+                            <div class="card-body">
+                                <button class="btn btn-outline-dark" type="button" id="testBtn">테스트버튼1</button>
+                                <button class="btn btn-outline-dark" type="button" id="testBtn2">테스트버튼2</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!--/그리드 추가 버튼영역 끝-->
+            <section class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- /.box -->
+                            <div id="grid" style="min-height:300px"></div>
+                            <!-- /.box -->
+                            <div class="loadingBar"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.col (left) -->
+            </section>
+            <!-- /.row -->
+        </section>
+        <!-- /.content -->
+    </div>
+</div>
+@section Scripts
+{
+    <script type="text/javascript">
+    $(document).ready(function () {
+        fnInit();
+        fnEvent();
+    });
+
+    //페이지 로드 후 실행
+    $(window).ready(function () {
+        fnLast();
+    });
+
+    function fnInit() {
+
+        //datepicker 설정
+        fnDatePickerSet();
+
+        //드롭다운
+        var param = {}
+            param.TY_PRE = "N";
+            param.param = "DD_MS_Example";
+
+             $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Common/ComDDMTSearch")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                 async: false,
+                 success: function (result) {
+                    var data = [{ NM_DD: "전체", VAL_DD: "all" }]; //데이터를 직접 입력 시 ajax 코드 빼고 해당 data에 json 형태로 추가하여 사용하면 됨
+                    data = $.merge(data, result.data); //json형 string값을 json으로 변경
+
+                    ComJS.fnDataKeyRedefine("DD", data);
+
+                    $("#dd").select2({
+                        data: data
+                    });
+
+                     $("#dd").on('select2:select', function (e) {
+                         fnSearch();
+                    });
+                }
+             });
+
+       //multiselect
+        var param = {}
+        param.TY_PRE = "N";
+        param.param = "DD_MS_Example";
+        $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Common/ComDDMTSearch")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                 async: false,
+                 success: function (result) {
+                    var data = [{ NM_MS: "전체", VAL_MS: "all" }]; //데이터를 직접 입력 시 ajax 코드 빼고 해당 data에 json 형태로 추가하여 사용하면 됨
+                    data = $.merge(data, result.data); //json형 string값을 json으로 변경
+
+                    ComJS.fnDataKeyRedefine("MS", data);
+
+                    $("#ms").select2({
+                        data: data
+                    });
+
+                     $("#ms").val(data[0].VAL_MS).trigger('change.select2'); //전체 값을 기본 선택으로 하기 위해
+
+                     $("#ms").on('select2:select', function (e) {
+                         fnSearch();
+                     });
+
+                     //MultiSelect 아이템 선택에 따른 수정
+                     $("#ms").on('select2:select', function (e) {
+                         //선택한 옵션 id
+                         var val = e.params.data.id;
+
+                         //선택되어있는 옵션 id
+                         var val_old = $("#" + e.target.name).val();
+
+                         //'전체' 아이템 선택 시
+                         if (val == "all") {
+                             $("#" + e.target.name).val(null).trigger("change");
+                             $("#" + e.target.name).val("all");
+                             $("#" + e.target.name).trigger('change.select2');
+                         }
+
+                         //COM HS 그 외 아이템 선택 시
+                         else {
+                             for (var i = 0; i < val_old.length; i++) {
+                                 if (val_old[i] == "all") {
+                                     val_old.splice(i, 1);
+                                     $("#" + e.target.name).val(val_old);
+                                     $("#" + e.target.name).trigger('change.select2');
+                                 }
+                             }
+                         }
+                         fnSearch();
+                     });
+
+                     //'전체' 아이템 선택 해제 불가하게 변경
+                     $("#ms").on('select2:unselect', function (e) {
+                         //선택한 옵션 id
+                         var val = e.params.data.id;
+
+                         //'전체' 아이템 선택 시
+                         if (val == "all") {
+                             $("#" + e.target.name).val("all");
+                             $("#" + e.target.name).trigger('change.select2');
+                             $("#" + e.target.name).select2('close');
+                         }
+
+                         if ($(this).val() == "") {
+                             $("#" + e.target.name).val("all");
+                             $("#" + e.target.name).trigger('change.select2');
+                             $("#" + e.target.name).select2('close');
+                             fnSearch();
+                         }
+                     });
+                }
+             });
+    }
+
+    //이벤트 모음
+    function fnEvent() {
+        //검색 영역에 focus가 있을 시에만 엔터키 이벤트 실행
+        //input 중 class에 .input-SM 있을 경우 제외
+        $("#searchForm").find("input").not(".input-SM").keydown(function (key) {
+            if (key.keyCode == 13) {//키가 13이면 실행 (엔터는 13)
+                fnSearch();
+            }
+        });
+
+        $(window).off("resize"); //재설정을 위해 resize 이벤트를 off
+
+        $(window).resize(function () {
+            fnGridSize("grid");
+        });
+
+        // 2021-04-27 ADD HS 검색조건 열리고 닫힐때 그리드 리사이즈
+        $('.card-content').on('shown.bs.collapse', function () {
+            fnGridSize("grid");
+        });
+        $('.card-content').on('hidden.bs.collapse', function () {
+            fnGridSize("grid");
+        });
+        $("#testBtn2").on("click", function () {
+            ComJS.fnSweetAlert("테스트입니다 오류가\n 생겼습니다.");
+        });
+    };
+
+    //마지막 세팅
+    function fnLast() {
+        //히스토리 데이터 세팅 레이아웃에서 fnLast로 변경 레이아웃에 있으면 조회 후 데이터가 세팅됨
+        HistoryJS.fnHistoryGet();
+
+        fnGridDraw();
+        fnSearch();
+
+        //리사이즈
+        fnGridSize("grid");
+    }
+
+    //그리드
+    function fnGridDraw(result) {
+
+        //그리드 정보 데이터 세팅
+        var data = result != null ? result.data : result;
+        var total = result != null ? result.total != null ? result.total[0].TOTAL : result : result;
+        var pageSize = result != null ? result.pageSize : 20;
+        var pageNo = result != null ? result.pageNo : 1;
+        var sortField = result != null ? result.sortField : result;
+        var sortDir = result != null ? result.sortDir : result;
+        var filter = result != null ? result.filter : result;
+
+        //그리드 체크박스 넣기
+        var columns = [];
+        var checkBox = {
+            headerAttributes: { style: "text-align:center;" },
+            attributes: { style: "text-align:center;" },
+            headerTemplate: "<input type='checkbox' id='CB_ALL' style='width:20px; height:20px;'>",
+            template: function () {
+                return "<input type='checkbox' id='CB' style='width:20px; height:20px;'>";
+            },
+            width: 30
+        }
+
+        //체크 박스 사용여부에 따라..
+        var YN_CB_GRID = "Y"; // 값을 N 으로 할 때 위에 소스와 해당 소스 삭제 해두됨, 위 소스를 밑에 컬럼 정보에 넣어도 됨
+        if ("Y" == YN_CB_GRID) {
+            columns.push(checkBox);
+        }
+
+        var col = [
+            { field: "TEST1", title: "TEST1", hidden: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } },
+            { field: "TEST2", title: "TEST2", hidden: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { class: "jumpCell", style: "text-align: center; white-space : nowrap;" } },
+            { field: "TEST3", title: "TEST3", hidden: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } },
+            { field: "TEST4", title: "TEST4", hidden: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, format: "{0: yyyy-MM-dd HH:mm:ss}", type: "date" },
+            { field: "TEST5", title: "TEST5", hidden: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, format: "{0:###,###,###,##0}", type: "number" }
+        ];
+
+        columns = $.merge(columns, col); //체크박스 있을 시 포함 예제 이므로 더 간단히 소스를 변경하려면 columns 변수에 컬럼정보만 들어 갈 수 있는 형태면 됨
+
+        var nonReordableColumn; //체크박스 영역 담는 변수
+
+        //그리드를 empty하면 기존 관련 이벤트들이 모두 사라짐
+        //toolbar 버튼은 다른 cshtml에서 이벤트를 걸기 때문에 페이지 실행시 1회만 적용됨
+        //이런 부분을 보완하기위해 그리드가 empty되기전에 detach라는 기능을 사용하여 기존toolbar 이벤트를 담아두고
+        //그리드를 새로 다시 그린 후 추가 하는 방식
+        //detach는 기존 이벤트 정보까지 모두 가진상태로 삭제함 2021.07.07. 강승호
+        var toolbarDetach;
+        if ($("#grid").data("kendoGrid") != null) { //데이터 없이 그려질 경우 toolbarDetach에 넣지 않아도됨
+            toolbarDetach = $("#grid").children(".k-toolbar").detach();
+        }
+
+        $("#grid").empty(); //그리드 초기화를 안해주면 해당 그리드에 계속 추가되어 페이징에서 스크립트 오류가 뜸
+        var grid = $("#grid").kendoGrid({
+            toolbar: [
+                { name: "add", iconClass: "k-icon", text: "" }   //그리드 데이터 추가 기능 (추가버튼영역 한개와 연결)
+                , { name: "delete", iconClass: "k-icon", text: "" }   //그리드 row 삭제기능
+                , { template: '<a role="button" class="k-button k-button-icontext k-grid-colDisplay" href="\\#"></a>' }
+                , { name: "excel", iconClass: "k-icon", text: "" }   //excel기능 버튼 사용시 toolbar:["excel"] 만해도 됨
+                , { name: "allExcel", iconClass: "k-icon", text: "" }   //전체 엑셀 다운로드excelType
+                , { name: "columnSave", iconClass: "k-icon", text: "" } //그리드 컬럼 저장
+                , { name: "columnReset", iconClass: "k-icon", text: "" } //그리드 컬럼 초기화
+            ],
+            excelExport: function (e) { //엑셀다운로드시 날짜형 데이터 포멧 변환해주기 (날짜형은 typeof 시 object임)
+                var sheet = e.workbook.sheets[0];
+                for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                    var row = sheet.rows[rowIndex];
+                    for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex++) {
+                        if (typeof row.cells[cellIndex].value == "object") {
+                            row.cells[cellIndex].format = "yyyy-MM-dd HH:mm:ss"
+                        }
+                    }
+                }
+            },
+            excel: {
+                allPages: true
+                , fileName: "SampleBasic"
+                , filterable: true
+                , collapsible: true
+            },
+            dataSource: {
+                data: data,
+                pageSize: pageSize,
+                serverPaging: true,
+                serverSorting: true,
+                serverFiltering: true,
+                sort: { field: sortField, dir: sortDir },
+                filter: filter
+            },
+            pageable: {
+                pageSizes: [5, 10, 20, 30],
+                buttonCount: 5,
+                change: function (e) {
+                    fnSearch();
+                }
+            },
+            noRecords: {
+                template: "조회된 데이터가 없습니다."
+            },
+            filterable: {
+                mode: "row" //menu,row
+                , operators: {
+                    string: {
+                        contains: "Contains"
+                    }
+                    , date: {
+                        gte: "After or equal to" //해당날짜 이후
+                    }
+                }
+            },
+            autoWidth: true,
+            sortable: true,
+            resizable: true,
+            reorderable: true,
+            dataBound: function (e) {
+                this.element.find(".k-filtercell .k-dropdown-wrap").remove(); // 필터 이미지 및 영역 삭제
+                this.element.find(".k-filtercell > span").css("width", "100%"); // input 영역 100%
+
+                var rows = this.tbody[0].rows; //그리드 row 값 사용 시 필요한 변수
+
+                // 2020-12-08 ADD HS tab입력하여 다음필터로 바로 넘어갈 수 있게 수정
+                this.element.find(".k-widget.k-dropdown.k-dropdown-operator").removeAttr("tabindex");
+
+                // 2020-12-10 ADD HS tab입력하여 다음필터로 바로 넘어갈 수 있게 수정(필터 동작 수정 버튼 제거)
+                this.element.find(".k-button.k-button-icon").remove();
+
+
+                //toolbar 툴팁 설정
+                this.element.find(".k-grid-add").attr("title", "Grid Data Add");
+                this.element.find(".k-grid-delete").attr("title", "Grid Data Delete");
+                $(this.element.find(".k-grid-colDisplay")).find(".k-header-column-menu").attr("title", "ColumView.");
+                this.element.find(".k-grid-excel").attr("title", "One Page Excel Download.");
+                this.element.find(".k-grid-allExcel").attr("title", "All Page Excel Download.");
+                this.element.find(".k-grid-columnSave").attr("title", "Grid Column Save.");
+                this.element.find(".k-grid-columnReset").attr("title", "Grid Column Save Reset.");
+
+                //체크박스 사용안할 시 툴바 삭제 감추기
+                if ("N" == YN_CB_GRID) {
+                    $(this.element.find(".k-grid-toolbar .k-grid-delete")).hide();
+                }
+
+                //그리드 컬럼 초기화 버튼
+                this.element.find(".k-grid-columnReset").off("click").on("click", function () {
+                    var result = confirm('컬럼 정보를 초기화 하시겠습니까?');
+                    if (result) {
+                        GridJS.fnColumnReset();
+                    } else {
+                        return false;
+                    }
+                });
+
+                //그리드 컬럼 저장 버튼
+                this.element.find(".k-grid-columnSave").off("click").on("click", function () {
+                    GridJS.fnColumnSave(grid);
+                });
+
+                //엑셀 전체다운로드 저장 버튼
+                this.element.find(".k-grid-allExcel").off("click").on("click", function () {
+                    var sOption = {}
+                    sOption.excelType = 'all';
+                    fnSearch(sOption)
+                });
+
+                //total 세팅
+                this.dataSource._total = total;
+
+                //페이지 사이즈 변경시
+                $(this.pager.element.find(".k-dropdown")).off("change").on("change", function (e) {
+                    grid.dataSource._skip = 0; //페이지사이즈 변환시 페이지가 1로 변하는데 skip이 0으로 안되어 있어서 1페이지 부터 데이터가 안나오게 보여 0으로 초기화
+                    fnSearch();
+                });
+
+                //타이틀 클릭 시 정렬 이벤트
+                $(this.thead.find("tr")[0]).find("th").off("click").on("click", function (e) {
+
+                    var dsSort = {}; //그리드 데이터중 정렬 부분에 들어갈 json 형태 변수
+                    dsSort.field = $(this).attr("data-field"); //선택한 필드명
+                    $(grid.thead.find("tr")[0]).find("th").find("span").remove(); //헤더에 있는 정렬 표시를 초기화
+
+                    //정렬 이벤트
+                    if ($(this).is("[aria-sort]")) { //정렬이 있으면
+                        if ($(this).attr("data-dir") == "desc") { //내림차순이면 오름차순으로
+                            $(this).attr("aria-sort", "ascending");
+                            $(this).attr("data-dir", "asc");
+                            $(this).find("a").append("<span class='k-icon k-i-sort-asc-sm'></span>")
+
+                            dsSort.dir = $(this).attr("data-dir");
+                        } else if ($(this).attr("data-dir") == "asc") { //오름차순이면 정렬 사라지게
+                            $(this).removeAttr("aria-sort");
+                            $(this).removeAttr("data-dir");
+                        }
+                    } else {//정렬이 없으면 내림차순부터
+                        $(this).attr("aria-sort", "descending");
+                        $(this).attr("data-dir", "desc");
+                        $(this).find("a").append("<span class='k-icon k-i-sort-desc-sm'></span>")
+
+                        dsSort.dir = $(this).attr("data-dir");
+                    }
+
+                    grid.dataSource.sort()[0] = dsSort;    //최종 정렬 값을 그리드데이터 중 정렬쪽에 넣음
+
+                    //전체선택 체크 박스 컬럼 제외
+                    if ($(this).find("input").length > 0) {
+                        //전체선택 체크박스가 있으면
+                        if ($(this).find("input")[0].id == "CB_ALL") {
+                            fnGridAllCheck(this);
+                        } else {
+                            fnSearch();
+                        }
+                    } else {
+                        fnSearch();
+                    }
+                });
+
+                //필터 input 더블 클릭 시 초기화
+                $(this.element.find(".k-filtercell .k-input")).off("change").on("change", function (e) {
+                    setTimeout(function (e) {
+                        fnSearch();
+                    }, 1)
+                });
+
+                 //jump이벤트
+                $("#" + this.element[0].id + " .jumpCell").off("dblclick").on("dblclick", function (e) {
+                    var field = grid.columns[this.cellIndex].field; //필드명
+                    var data = grid.dataItem($(this).closest("tr")); //선택한 컬럼의 row의 data
+                    var key =["TEST2"]; //필드명 key
+                    var urlArr = ["/Example/PageCommon/FormWizard"];
+                    for (var i = 0; i < key.length; i++){
+                        if (field == key[i]) {
+                            url = "../../../../" + virtualDirectory + urlArr[i];  //상위로 가는게 많아도 상관없음
+                            break;
+                        }
+                    }
+
+                    ComJS.fnSubmit(url, data); // form에 담긴 데이터 서버로 보내기
+                });
+
+                //체크박스 영역 담기
+                if ("Y" == YN_CB_GRID) {
+                    nonReordableColumn = e.sender.columns[0];
+                }
+            },
+            columns: columns,
+            columnReorder: function (e) {
+                setTimeout(function (e) {
+                    grid.reorderColumn(0, nonReordableColumn); //체크 박스 영역을 움직일 시 다시 되돌리기
+                }, 1)
+            }
+        }).data("kendoGrid");
+        //page 세팅
+        var pageNo = pageNo;
+        grid.dataSource.page(pageNo);
+
+        //fillter 중 datepicker 타입의 format을 정의해줌
+        $("#" + grid.element[0].id + " [data-role=datepicker]").kendoDatePicker({
+            format: "yyyy-MM-dd"
+        });
+
+        //그리드 td 툴팁
+        grid.table.kendoTooltip({
+            filter: "td",
+            content: function (e) {
+                var target = e.target; // element for which the tooltip is shown
+                return $(target).text();
+            }
+        });
+
+        //데이터없이 그려진 이후 부터 그리드를 다시 그릴 시 툴바를 다시 넣어준다
+        if (toolbarDetach != null) {
+            $("#" + grid.element[0].id + " .k-grid-toolbar").remove();
+            $("#" + grid.element[0].id + " .k-grid-header").before(toolbarDetach);
+
+            //병합 시 필요한 데이터
+            var rows = grid.tbody[0].rows; //그리드 row 값 사용 시 필요한 변수
+            var abType = "row"; //col, row
+            var abUseCol = "TEST1"; //병합을 사용할 컬럼 필드
+
+            //컬럼 show/hide 기능
+            //해당 소스를 databound에서 toolbar 다시 추가 된 후 넣는걸로 변경
+            //kendoColumnMenu 만들때 datasource와 columns 데이터가 detach로 지우기때문에 남아있어서 해당 기능이 안되서 소스 위치를 변경 2021.07.16.강승호
+            grid.element.find(".k-grid-colDisplay").kendoColumnMenu({
+                filterable: false,
+                sortable: false,
+                dataSource: grid.dataSource,
+                columns: grid.columns,
+                owner: grid
+            });
+
+            //컬럼 show/hide 기본 아이콘 변경
+            $(grid.element.find(".k-grid-colDisplay")).find(".k-i-more-vertical").attr("class", "k-icon");
+            //컬럼show/hide 선택 할때마다 table 넓이 100% 변경
+            $(grid.element.find(".k-grid-colDisplay")).find(".k-header-column-menu").on("click", function () {
+                if ($(".k-column-menu").length > 0) {
+                    $($(".k-column-menu")[0]).find("[role='menuitemcheckbox'] span").off("click").on("click", function () {
+                        var tableWidth = setInterval(function () {
+                            if ($("#" + grid.element[0].id + " table").css("width") != '100%') {
+                                clearInterval(tableWidth)
+                            }
+                            $("#" + grid.element[0].id + " table").css("width", "100%");
+                        }, 50);
+                        GridJS.fnAbsorption(grid, "rowDiv", rows, useColArr); // show/hide 컬럼 선택 시 다시 분할
+                        setTimeout(function (e) {
+                            GridJS.fnAbsorption(grid, abType, rows, useColArr); //약간의 딜레이를 줘서 분할이 다된 후 다시 병합 해야되는 컬럼 병합
+                        },50)
+                    });
+                }
+            });
+
+            //초기 그리드 병합
+            var useColArr = abUseCol.split(',');
+            if (abUseCol != "") {
+                GridJS.fnAbsorption(grid, abType, rows, useColArr);
+            }
+        }
+    }
+
+    //그리드 검색
+    function fnSearch(sOption) {
+
+        var grid = $("#grid").data("kendoGrid");
+
+        //pageSize 선택한 값 세팅(변경 되는 pageSize를 _take에 넣어야되며 pageSize 값 변경 후에는 .k-input의 변경된 값-innerText값을 가져와 세팅한다)
+        grid.dataSource._take = grid.pager.element.find(".k-dropdown .k-input")[0].innerText;
+
+        var param = {}
+        param = GridJS.gridDataSet(grid.dataSource); //페이지,정렬,필터 정보를 가져오는 메서드(*추가로 넘기는 데이터보다 앞에 사용해야함)
+
+        var excelType = null;
+        if (sOption != null) {
+            excelType = sOption.excelType;
+            param.excelType = excelType;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Example/ExampleListSearch")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: false,
+            beforeSend: function () { // 조회 전
+                kendo.ui.progress($(".loadingBar"), true);
+            },
+            complete: function () {//조회 후
+                kendo.ui.progress($(".loadingBar"), false);
+                fnGridSize("grid");
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                //location.reload();
+            },
+            success: function (result) {
+                if (excelType == 'all') {
+                    GridJS.fnExcelAllDownload(result, grid);
+                } else {
+                    //그리드 정보 결과값에 세팅 (page정보, sort정보, fillter정보)
+                    result.pageNo = param.PAGE;
+                    result.pageSize = param.PAGESIZE;
+
+                var sortField = param.SORTFIELD;
+                    //따로 정렬 컬럼을 지정했을때 _Sort 붙은 컬럼일 경우 필드명을 다시 넣어줌 (ip 정렬 시 사용중)
+                    if (sortField != null) {
+                        var index = sortField.lastIndexOf("_Sort");
+                        if (index > 0) {
+                            sortField = sortField.substring(0, index);
+                        }
+                    }
+
+                    result.sortField = sortField;
+                    result.sortDir = param.SORTDIR;
+                    result.filter = param.FILTER;
+                    fnGridDraw(result);
+                }
+            }
+        });
+    }
+
+    //그리드 사이즈 설정
+    function fnGridSize(gridId) {
+
+        //2021-04-20 COM HS 브라우저 컨텐츠 영역 높이
+        var html = window.innerHeight;
+
+        //2021-04-20 COM HS *outHeight(true) 해당 컴포넌트의 padding까지 더한 높이반환
+        //2021-04-20 COM HS 상단 네비게이션 바 높이
+        var naviHeight = $(".navbar-wrapper").outerHeight(true);
+
+        //2021-04-20 COM HS 페이지 제목 영역 높이
+        var contentHeader = $(".content-header.row").outerHeight(true);
+
+        //2021-04-20 COM HS 검색조건 영역 높이
+        var conditionRow = 0;
+            conditionRow = $("#conditionRow").outerHeight(true);
+
+
+        //2021-05-04 COM HS 버튼 검색조건 분기 추가
+        var buttonRow = 0;
+            buttonRow = $("#buttonRow").outerHeight(true);
+
+        //2021-04-20 COM HS footer 높이
+        var footer = $(".footer.footer-static.footer-light").outerHeight(true);
+
+        //2021-04-20 COM HS content-wrapper 영역 padding 높이
+        var contentWrapperMargin = $(".content-wrapper").outerHeight(true) - $(".content-wrapper").innerHeight();
+
+        //2021-04-20 COM HS grid page 설정 영역 높이
+        var gridpager = $(".k-pager-wrap.k-grid-pager.k-widget.k-floatwrap").outerHeight(true);
+
+        //2021-04-20 COM HS 그리드 높이 계산
+        $("#" + gridId).height(html - naviHeight - contentHeader - conditionRow - buttonRow - contentWrapperMargin - gridpager - footer - 10);
+        $("#" + gridId).data("kendoGrid").resize();
+    }
+
+    //그리드 전체체크박스 함수
+    function fnGridAllCheck(cbData) {
+        var grid = $("#grid").data("kendoGrid");
+
+        if ($(cbData).find("input").is(":checked")) {
+            $(grid.tbody[0].rows).find("input").prop("checked", true); // 전체선택
+        } else {
+            $(grid.tbody[0].rows).find("input").prop("checked", false); //전체 선택해제
+        }
+    }
+
+    /*
+     * 검색조건 모두 삭제
+     */
+    function fnSearchReset() {
+        if (confirm("검색조건을 모두 초기화 또는 삭제 하시겠습니까?")) {
+            $("#searchForm")[0].reset();
+            $("#searchForm select").each(function () {
+                $(this).find("option:first").prop("selected", true).trigger("change");
+            });
+        }
+    }
+
+    /**
+     * datepicker 세팅
+     * param : input ID
+     */
+    function fnDatePickerSet() {
+
+        $("#dt").daterangepicker({
+            locale: { format: 'YYYY-MM-DD', separator: " ~ " },
+            ranges: {
+                '금일': [moment(), moment()],
+                '전일': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                '지난7일': [moment().subtract(6, 'days'), moment()],
+                '지난30일': [moment().subtract(29, 'days'), moment()],
+                '금월': [moment().startOf('month'), moment().endOf('month')],
+                '전월': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        });
+
+        //초기 value 값 지정시 필요
+        //$("#dd").data('daterangepicker').setStartDate("2021-07-01");
+        //$("#dd").data('daterangepicker').setEndDate("2021-07-30");
+
+    }
+    </script>
+    <!--모달 불러오기-->
+    @Html.Partial("~/Views/Modal/Common/UserSearch.cshtml")
+    @Html.Partial("~/Views/Example/ExampleModal.cshtml")
+}

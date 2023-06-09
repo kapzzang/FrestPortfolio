@@ -1,0 +1,112 @@
+﻿@Styles.Render("~/frest/css/commonPage")
+@Scripts.Render("~/frest/js/commonPage")
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header row">
+            <div class="content-header-left col-12 mb-2 mt-1">
+                <div class="breadcrumbs-top">
+                    <h5 class="content-header-title float-left pr-1 mb-0">알림예제</h5>
+                </div>
+            </div>
+        </section>
+        <!-- Main content -->
+        <section class="content-body">
+            <!--검색조건 영역 시작-->
+            <section class="row" id="conditionRow">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header" data-action="collapse">
+                            <div style="display:flex;">
+                                <div><h4 class="card-title">예제 데이터 입력</h4></div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div>
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Id</th>
+                                                    <th>Name</th>
+                                                    <th>Salary</th>
+                                                    <th>Department</th>
+                                                    <th>Designation</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="messagesTable"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+        <!-- /.content -->
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="~/Resources/Scripts/jquery.signalR-2.4.3.min.js"></script>
+    <script type="text/javascript" src="/signalr/hubs"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            // Declare a proxy to reference the hub.  
+            var notifications = $.connection.myHub;
+            //debugger;  
+            // Create a function that the hub can call to broadcast messages.  
+            notifications.client.updateMessages = function () {
+                getAllMessages();
+            };
+            // Start the connection.  
+            $.connection.hub.start().done(function (e) {
+                console.log("connection started");                
+                setUser(e.id);
+                getAllMessages();
+            }).fail(function (e) {
+                alert(e);
+            });
+        });
+
+        function getAllMessages() {
+            var tbl = $('#messagesTable');
+            $.ajax({
+                url: '/Example/GetMessages',
+                contentType: 'application/html ; charset:utf-8',
+                type: 'GET',
+                dataType: 'html',
+                success: function (result) {
+                    console.log(result);
+                    var a2 = JSON.parse(result);
+                    tbl.empty();
+                    var i = 1;
+                    $.each(a2, function (key, value) {
+                        tbl.append('<tr>' + '<td>' + i + '</td>' + '<td>' + value.empName + '</td>' + '<td>' + value.Salary + '</td>' + '<td>' + value.DeptName + '</td>' + '<td>' + value.Designation + '</td>' + '</tr>');
+                        i = i + 1;
+                    });
+                }
+            });
+        }
+
+        function setUser(connectionId) {
+            let param = {};
+            param.connectionId = connectionId;
+            $.ajax({
+                url: '/Example/SetUser',                
+                type: 'POST',
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                success: function (result) {
+                   
+                }
+            });
+        }
+    </script>
+}

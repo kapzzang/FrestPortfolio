@@ -1,0 +1,238 @@
+﻿/*공통*/
+h1{
+    font-size:20px;
+    margin-bottom:10px;
+}
+.k-icon-25 {
+    font-size: 25px; /* Sets icon size to 20px */
+    cursor: pointer;
+}
+
+.k-icon-32 {
+    font-size: 32px; /* Sets icon size to 32px */
+    cursor: pointer;
+}
+
+.k-icon-36 {
+    font-size: 36px; /* Sets icon size to 36px */
+    cursor: pointer;
+}
+
+.k-icon-48 {
+    font-size: 48px; /* Sets icon size to 48px */
+    cursor: pointer;
+}
+
+.k-icon-64 {
+    font-size: 64px; /* Sets icon size to 64px */
+    cursor: pointer;
+}
+
+.k-grid-toolbar {
+    text-align: right;
+    padding :2px;
+}
+
+.k-grid-toolbar .k-button {    
+    padding: 2px;
+}
+
+.searchLayout {
+    height: auto;
+    overflow: hidden;
+    margin-bottom: 10px;    
+    background:white;
+    padding:10px;
+    min-width:1400px; /*해상도 또는 컬럼 나열에따라 변경 필요할 수도*/
+}
+
+.searchLayout .searchBtn {
+    float: right;
+    padding-right:10px;
+    padding-top:5px;
+}
+
+.searchLayout .searchDataArea {
+    float: left;
+    width: 95%;
+}
+
+.gridLayout {
+    overflow: auto;
+    /*height: calc(100% - 140px);*/
+    background: white;
+    padding: 10px;
+    min-width: 1400px; /*해상도 또는 컬럼 나열에따라 변경 필요할 수도*/
+}
+
+.dialogLayout {
+    padding: 10px;
+    background: whitesmoke;
+}
+
+/*사업장 모달 css*/
+.DsearchLayout .DsearchBtn {
+    float: right;
+    padding-right: 10px;
+    padding-top: 5px;
+}
+
+.DsearchLayout .DsearchDataArea {
+    float: left;
+    width: 90%;
+}
+
+.DgridLayout {
+    overflow: auto;    
+    background: white;
+    padding: 10px;
+}
+
+.Dheader {
+    height: 50px;
+}
+
+.Dheader .Dtitle {
+    float: left
+}
+
+.Dheader .Dbutton {
+    float: right
+}
+
+.DsearchLayout {
+    height: auto;
+    overflow: hidden;
+    margin-bottom: 10px;
+    background: white;
+    padding: 10px;    
+}
+
+#grid {
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    height: 100%; /* DO NOT USE !important for setting the Grid height! */
+}
+/*Grid의 Jump Cell*/
+.jumpCell {
+    background-color: #9ddff7;
+    font-weight: bold;
+    background: linear-gradient(45deg, #9ddff7, #cbecf8);
+    cursor: pointer;
+}
+
+/*Grid의 Board Cell*/
+.BoardCell {
+    font-weight: bold;
+}
+
+.GridBoardCell {
+    font-weight: bold;
+}
+
+/*탭영역*/
+.tabLayout {
+    height: 100%;
+}
+
+.tabLayout .k-content {
+    height: 91% !important; /*important 값을 주면 무조건 제일 마지막으로 해당 요소 적용*/
+}
+
+.tabContTable {
+    width: 100%;
+    height: 96%;
+    border: 1px solid #444444;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.tabContTable th, .tabContTable td {
+    border: 1px solid #444444;
+    padding: 5px;
+    font-size: 15px;
+}
+
+.tabContTable th {
+    background: #D8D8D8
+}
+
+.tabContTable td {
+    background: #F2F2F2
+}
+
+.world-map-legend{
+    position:absolute;
+    z-index:2;
+    background:white;
+}
+
+.world-map-legend table {
+    border: solid 2px #BDBDBD;
+    border-collapse: collapse;
+    width: 160px;
+    height: 100px;
+}
+
+.world-map-legend table th, .world-map-legend table td {
+    border: solid 2px #BDBDBD;
+    padding: 5px;
+    font-size: 12px;
+    font-weight:bold;
+    text-align:center;
+}
+
+/*툴바 텍스트 제거 하면서 아이콘 가운데 정렬시 필요*/
+.k-grid-toolbar .k-icon {
+    margin:0;
+}
+
+/*툴바 그리드컬럼 show/hide*/
+.k-grid-colDisplay span {
+    font-size: 32px;
+    cursor: pointer;
+    background-image: url(../../../Resources/Images/ToolBar/columnShowHide.png)
+}
+
+/*툴바 excel*/
+.k-grid-excel span {
+    font-size: 32px;
+    cursor: pointer;
+    background-image: url(../../../Resources/Images/ToolBar/excel.png)
+}
+
+/*툴바 전체 excel*/
+.k-grid-allExcel span {
+    font-size: 32px;
+    cursor: pointer;
+    background-image: url(../../../Resources/Images/ToolBar/excelAll.png)
+}
+
+/*툴바 그리드저장*/
+.k-grid-columnSave span {
+    font-size: 32px;
+    cursor: pointer;
+    background-image: url(../../../Resources/Images/ToolBar/columnSave.png)
+}
+
+/*툴바 그리드 새로고침*/
+.k-grid-columnReset span {
+    font-size: 32px;
+    cursor: pointer;
+    background-image: url(../../../Resources/Images/ToolBar/columnRefresh.png)
+}
+
+/*툴바 그리드 추가*/
+.k-grid-add span {
+    font-size: 32px;
+    cursor: pointer;
+    background-image: url(../../../Resources/Images/ToolBar/add.png)
+}
+
+/*툴바 그리드 삭제*/
+.k-grid-delete span {
+    font-size: 32px;
+    cursor: pointer;
+    background-image: url(../../../Resources/Images/ToolBar/delete.png)
+}

@@ -1,0 +1,299 @@
+﻿<div class="modal fade show" id="M_UserSearch" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">사용자 검색</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row" id="searchArea">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-11">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <label>사용자명</label>
+                                                    <div class="input-group" style="width:100%;">
+                                                        <input type="text" class="form-control" id="userName">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>부서명</label>
+                                                    <div class="input-group" style="width:100%;">
+                                                        <input type="text" class="form-control" id="deptName">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div style="float: right;">
+                                                <div class="livicon-evo livicon-evo-holder mt-2" data-options="name:search; style:lines; size:35px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;" onclick="fnUserSearch()"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">                                    
+                                    <div id="userGrid"></div>
+                                </div>
+                            </div>
+                        </div>                         
+                    </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-primary ml-1" data-dismiss="modal" id="selectBtn">
+                      <span class="d-none d-sm-block">선택</span>
+                  </button>
+              </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+    <div class="loadingBar"></div>
+</div>
+<!-- /.modal -->
+
+<script>    
+
+    $(document).ready(function () {
+        fnModalUserEvent("M_UserSearch", "BTN_USER");
+        fnUserGridDraw();        
+    });
+
+    //그리드 그리기
+    function fnUserGridDraw(result) {
+
+        //그리드 정보 데이터 세팅
+        var data = result != null ? result.data : result;
+        var total = result != null ? result.total != null ? result.total[0].TOTAL : result : result;
+        var pageSize = result != null ? result.pageSize : 5;
+        var pageNo = result != null ? result.pageNo : 1;
+        var sortField = result != null ? result.sortField : result;
+        var sortDir = result != null ? result.sortDir : result;
+        var filter = result != null ? result.filter : result;
+
+        $("#userGrid").empty(); //그리드 초기화를 안해주면 해당 그리드에 계속 추가되어 페이징에서 스크립트 오류가 뜸
+        var grid = $("#userGrid").kendoGrid({
+            dataSource: {
+                data: data,
+                pageSize: pageSize,
+                serverPaging: true,
+                serverSorting: true,
+                serverFiltering: true,
+                sort: { field: sortField, dir: sortDir },
+                filter: filter
+            },
+            pageable: {
+                pageSizes: [5, 10, 20, 30],
+                buttonCount: 2,
+                change: function (e) {
+                    fnUserSearch();
+                }
+            },
+            noRecords: {
+                template: "Please search."
+            },            
+            autoWidth: true,
+            sortable: true,
+            resizable: true,
+            reorderable: true,
+            selectable: "one", // multiple 다중 row선택, multiple cell 다중cell선택
+            dataBound: function (e) {                
+
+                //total 세팅
+                this.dataSource._total = total;
+
+                //페이지 사이즈 변경시
+                $(this.pager.element.find(".k-dropdown")).off("change").on("change", function (e) {
+                    fnUserSearch();
+                });
+
+                //타이틀 클릭 시 정렬 이벤트
+                $(this.thead.find("tr")[0]).off("click").on("click", function (e) {
+                    fnUserSearch();
+                });                
+            },
+            columns: [
+                { field: "UserID", hidden:true} //사용자 id
+                , { field: "UserName", title: "사용자명", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "150px" } //사용자명
+                , { field: "DeptCode", hidden: true} //부서코드
+                , { field: "DeptName", title: "부서명", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "200px" } //부서명                
+            ]
+        }).data("kendoGrid");
+
+        //page 세팅
+        var pageNo = pageNo;
+        grid.dataSource.page(pageNo);
+
+        //fillter 중 datepicker 타입의 format을 정의해줌
+        $("#" + grid.element[0].id + " [data-role=datepicker]").kendoDatePicker({
+            format: "yyyy-MM-dd"
+        });
+
+        //그리드 td 툴팁
+        grid.table.kendoTooltip({
+            filter: "td",
+            content: function (e) {
+                var target = e.target; // element for which the tooltip is shown
+                return $(target).text();
+            }
+        });
+    }
+
+    //modal event
+    //1.모달 영역 id
+    //2.모달 오픈 버튼 id
+    //3.선택한 값을 돌려줄 컨트롤러의 ID (input ID)
+    function fnModalUserEvent(ID_MODAL, ID_BTN) {        
+        $("#UserName").keydown(function (key) {//검색 영역에 focus가 있을 시에만 엔터키 이벤트 실행
+            if (key.keyCode == 13) {//키가 13이면 실행 (엔터는 13)                
+                $("#" + ID_MODAL + " #userName").val($("#UserName").val());
+                fnUserSearch("input");                                
+            }
+
+            //백스페이스 입력 시 사용자 id 초기화
+            if (key.keyCode == 8) {//키가 13이면 실행 (엔터는 13)
+                $("#UserID").val("");
+            }
+        });
+
+        //부모 검색조건 input 더블 클릭시 초기화
+        $("#UserName").off("dblclick").on("dblclick", function () {
+            $("#UserName").val("");
+            $("#UserID").val("");
+            fnSearch();
+        });
+
+        $("#" + ID_BTN).off("click").on("click", function () {
+            $("#" + ID_MODAL).modal();
+        });
+
+        //부트스트랩에서 모달띄울때 shown.bs.modal을 써야 모달이 열린 후 포커스 이벤트가 발생할 수 있다
+        $("#" + ID_MODAL).off("shown.bs.modal").on("shown.bs.modal", function () {
+            $("#" + ID_MODAL + " #userName").focus();               
+        });        
+
+        //모달이 닫힐때
+        $("#" + ID_MODAL).off("hide.bs.modal").on("hide.bs.modal", function () {
+            //초기화
+            fnUserModalReset(ID_MODAL);           
+            fnSearch(); 
+        });        
+        
+        //row 더블클릭
+        $("#" + ID_MODAL + " #userGrid").off("dblclick").on("dblclick", "tbody tr", function () {            
+            var grid = $("#" + ID_MODAL + " #userGrid").data("kendoGrid"); //그리드 정보 담기
+            var selectedData = grid.dataItem(grid.select()); //선택한 값 담기
+            $("#UserName").val(selectedData.UserName); //input box에 세팅
+            $("#UserID").val(selectedData.UserID); // hidden에 세팅
+            $("#" + ID_MODAL).modal("hide");
+            fnSearch();              
+        });
+
+        //선택 버튼 클릭
+        $("#" + ID_MODAL + " #selectBtn").off("click").on("click", function () {
+            var grid = $("#" + ID_MODAL + " #userGrid").data("kendoGrid"); //그리드 정보 담기
+            var selectedData = grid.dataItem(grid.select()); //선택한 값 담기
+            $("#UserName").val(selectedData.UserName); //input box에 세팅
+            $("#UserID").val(selectedData.UserID); // hidden에 세팅
+            $("#" + ID_MODAL).modal("hide");
+            fnSearch();            
+        });        
+
+        $("#" + ID_MODAL + " #searchArea").keydown(function (key) {//검색 영역에 focus가 있을 시에만 엔터키 이벤트 실행
+            if (key.keyCode == 13) {//키가 13이면 실행 (엔터는 13)
+                fnUserSearch();
+            }
+        });
+    }
+
+    //모달 초기화
+    function fnUserModalReset(ID_MODAL) {
+        $("#" + ID_MODAL + " input").val("");
+        fnUserGridDraw();  
+    }
+
+    function fnUserSearch(type) {
+
+        var grid = $("#userGrid").data("kendoGrid");
+
+        //pageSize 선택한 값 세팅(변경 되는 pageSize를 _take에 넣어야되며 pageSize 값 변경 후에는 .k-input의 변경된 값-innerText값을 가져와 세팅한다)
+        grid.dataSource._take = grid.pager.element.find(".k-dropdown .k-input")[0].innerText;
+
+        var param = {}
+        param = GridJS.gridDataSet(grid.dataSource); //페이지,정렬,필터 정보를 가져오는 메서드(*추가로 넘기는 데이터보다 앞에 사용해야함)        
+
+        param.userName = $("#userName").val();
+        param.deptName = $("#deptName").val();
+
+         $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Common/SearchUser")",
+             data: { param: JSON.stringify(param) },
+             beforeSend: function () { // 조회 전
+                 kendo.ui.progress($(".loadingBar"), true);
+             },
+             complete: function () {//조회 후
+                 kendo.ui.progress($(".loadingBar"), false);
+             },
+            dataType: 'json',
+            async: true,
+             success: function (result) {
+
+                 //사용자 검색시 필요
+                 var total = result != null ? result.total != null ? result.total[0].TOTAL : result : result;
+                 var data = result != null ? result.data : result;
+
+                 //부모 검색조건에서 입력 시
+                 if ("input" == type) {
+                     //조회 개수가 1개면
+                     if (total == 1) {
+                         //부모 검색조건에 결과값 리턴
+                         $("#UserName").val(data[0].UserName);
+                         $("#UserID").val(data[0].UserID);
+
+                         fnSearch();
+                     } else { //조회 개수가 2개 이상이면                 
+                         //모달 창 열어서 입력한 데이터로 사용자 검색
+                         $("#userName").val($("#UserName").val());                         
+                         $("#M_UserSearch").modal();
+
+                         //해당 소스를 안넣으면 일정확률로 그리드의 페이징의 클래스가 k-pager-lg 가 아닌 
+                         //k-pager-sm이 되어 페이지 사이즈 토탈 카운트가 안보이는 경우가 있어 추가함
+                         function us() {
+                             fnUserSearch();
+                         }
+                         setTimeout(us, 100);
+                     }
+                 } else {                      
+                     //그리드 정보 결과값에 세팅 (page정보, sort정보, fillter정보)
+                     result.pageNo = param.PAGE;
+                     result.pageSize = param.PAGESIZE;
+
+                     var sortField = param.SORTFIELD;
+                     //따로 정렬 컬럼을 지정했을때 _Sort 붙은 컬럼일 경우 필드명을 다시 넣어줌 (ip 정렬 시 사용중)
+                     if (sortField != null) {
+                         var index = sortField.lastIndexOf("_Sort");
+                         if (index > 0) {
+                             sortField = sortField.substring(0, index);
+                         }
+                     }
+
+                     result.sortField = sortField;
+                     result.sortDir = param.SORTDIR;
+                     result.filter = param.FILTER;
+                     fnUserGridDraw(result)
+                 }                
+            }
+        });
+    }   
+</script>

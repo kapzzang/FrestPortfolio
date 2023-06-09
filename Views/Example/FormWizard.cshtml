@@ -1,0 +1,825 @@
+﻿@using System.Collections;
+@{
+    ViewBag.Title = "VM CREATE";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@Styles.Render("~/frest/css/commonPage")
+@Styles.Render("~/frest/css/wizard")
+@Scripts.Render("~/frest/js/commonPage")
+@Scripts.Render("~/frest/js/wizard")
+
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header row">
+            <div class="content-header-left col-12 mb-2 mt-1">
+                <div class="breadcrumbs-top">
+                    <h5 class="content-header-title float-left pr-1 mb-0">VM생성</h5>
+                </div>
+            </div>
+        </section>
+        <!-- Main content -->
+        <section class="content-body">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form class="wizard-validation" method="post" onsubmit="return false">
+                            <!-- Step 1 -->
+                            <h6>
+                                <span>AVD 옵션 입력</span>
+                            </h6>
+                            <!-- Step 1 -->
+                            <!-- body content of step 1 -->
+                            <fieldset>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="hostFull">호스트 풀</label><label id="hostFullInfo"></label>
+                                            <select class="custom-select form-control required" id="hostFull" name="hostFull" style="width:100%;">
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="network">네트워크</label><label id="networkInfo"></label>
+                                            <select class="custom-select form-control required" id="network" name="network" style="width:100%;">
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="templet">템플릿</label><label id="templetInfo"></label>
+                                            <select class="custom-select form-control required" id="templet" name="templet" style="width:100%;">
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="resourceGroup">리소스 그룹</label><label id="resourceGroupInfo"></label>
+                                            <select class="custom-select form-control required" id="resourceGroup" name="resourceGroup" style="width:100%;">
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="subnet">서브넷</label>
+                                            <select class="custom-select form-control required" id="subnet" name="subnet" style="width:100%;">
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="eventName3">사유</label>
+                                            <input type="text" class="form-control" id="remark" name="remark" style="width:100%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <!-- body content of step 1 end -->
+                            <!-- Step 2 -->
+                            <h6>
+                                <span>대상자 선택</span>
+                            </h6>
+                            <!-- step 2 -->
+                            <!-- body content of step 2 end -->
+                            <fieldset>
+                                <div class="row">
+                                    <div id="vmUserGrid" style="min-height:300px; margin-bottom:2%; overflow-x:auto;"></div>
+                                </div>
+                            </fieldset>
+                            <!-- body content of step 2 end -->
+                            <!-- Step 3 -->
+                            <h6>
+                                <span>VM가상 생성</span>
+                            </h6>
+                            <!-- step 3 end -->
+                            <!-- step 3 content -->
+                            <fieldset>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="comOU">
+                                                컴퓨터 OU
+                                            </label>
+                                            <div style="display:flex">
+                                                <input type="text" class="form-control" id="comOU" name="comOU" placeholder="Enter comOU" style="width:95%">
+                                                <button type="button" class="btn btn-light-secondary" id="BTN_APPLY" style="margin-left:1%; width:100px;">적용</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div id="VMCreateGrid" style="min-height:300px; margin-bottom:2%; overflow-x:auto;"></div>
+                                </div>
+                            </fieldset>
+                            <!-- step 3 content end-->
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+<div class="loadingBar"></div>
+@section Scripts
+{
+    <script type="text/javascript">
+        var step = 1; // 현재 step;
+        $(document).ready(function () {
+            fnInit();
+            fnEvent();
+        });
+
+        $(window).ready(function () {
+            fnLast();
+        });
+
+        function fnInit() {
+            //wizard 기능
+            fnWizardSetting();
+        }
+
+        //wizard 기능 설정
+        function fnWizardSetting() {
+            var stepsValidation = $(".wizard-validation");
+            var form = stepsValidation.show();
+
+            stepsValidation.steps({
+                headerTag: "h6",
+                bodyTag: "fieldset",
+                transitionEffect: "fade",
+                titleTemplate: '<span class="step"><i class="step-icon"></i></span>#title#',
+                labels: {
+                    finish: 'Submit'
+                },
+                onStepChanging: function (event, currentIndex, newIndex) {
+                    //다음 스텝이 2이면
+                    var gridCheck = false; //그리드 row 선택 유무
+                    if (newIndex == 2) {
+                        var grid = $("#vmUserGrid").data("kendoGrid");
+                        $(grid.tbody[0].rows).each(function () {
+                            var check = $(this.cells[0]).find("input");
+                            if (check.is(":checked")) {
+                                gridCheck = true;
+                            }
+                        });
+
+                        if(gridCheck) {
+                            // Allways allow previous action even if the current form is not valid!
+                            if (currentIndex > newIndex) {
+                                return true;
+                            }
+                            fnVmCreateGridSet(grid);
+                            form.validate().settings.ignore = ":disabled,:hidden";
+                            return form.valid();
+                        }
+                    } else {
+                        // Allways allow previous action even if the current form is not valid!
+                        if (currentIndex > newIndex) {
+                            return true;
+                        }
+                        form.validate().settings.ignore = ":disabled,:hidden";
+                        return form.valid();
+                    }
+                },
+                onFinishing: function (event, currentIndex) {
+                    form.validate().settings.ignore = ":disabled";
+                    return form.valid();
+                },
+                onFinished: function (event, currentIndex) {
+                    var grid = $("#VMCreateGrid").data("kendoGrid");
+                    fnVMCreate(grid);
+                }
+            });
+
+            // Initialize validation
+            stepsValidation.validate({
+                ignore: 'input[type=hidden]', // ignore hidden fields
+                errorClass: 'danger',
+                successClass: 'success',
+                highlight: function (element, errorClass) {
+                    $(element).removeClass(errorClass);
+                },
+                unhighlight: function (element, errorClass) {
+                    $(element).removeClass(errorClass);
+                },
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element);
+                }
+            });
+
+            $(".current").find(".step-icon").addClass("bx bx-time-five");
+            $(".current").find(".fonticon-wrap .livicon-evo").updateLiviconEvo({
+                strokeColor: '#5A8DEE'
+            });
+
+            //steps 때문에 사라진 라이브아이콘을 다시 설정
+            var my_livicon = $('.livicon-evo');
+            my_livicon.updateLiviconEvo({});
+        }
+
+        function fnEvent() {
+            // Icon change on state
+            // if click on next button icon change
+            $(".actions [href='#next']").click(function () {
+
+                var stepIndex = $(".wizard-validation").steps("getCurrentIndex"); //다음 스텝 index
+                var gridCheck = false; //그리드 row 선택 유무
+                //다음 스텝이 2이면
+                if (stepIndex == 2) {
+                    var grid = $("#vmUserGrid").data("kendoGrid");
+                    $(grid.tbody[0].rows).each(function () {
+                        var check = $(this.cells[0]).find("input");
+                        if (check.is(":checked")) {
+                            gridCheck = true;
+                        }
+                    });
+
+                    if (gridCheck) {
+                        $(".done").find(".step-icon").removeClass("bx bx-time-five").addClass("bx bx-check-circle");
+                        $(".current").find(".step-icon").removeClass("bx bx-check-circle").addClass("bx bx-time-five");
+                        // live icon color change on next button's on click
+                        $(".current").find(".fonticon-wrap .livicon-evo").updateLiviconEvo({
+                            strokeColor: '#5A8DEE'
+                        });
+                        $(".current").prev("li").find(".fonticon-wrap .livicon-evo").updateLiviconEvo({
+                            strokeColor: '#39DA8A'
+                        });
+                    }
+                } else {
+                    $(".done").find(".step-icon").removeClass("bx bx-time-five").addClass("bx bx-check-circle");
+                    $(".current").find(".step-icon").removeClass("bx bx-check-circle").addClass("bx bx-time-five");
+                    // live icon color change on next button's on click
+                    $(".current").find(".fonticon-wrap .livicon-evo").updateLiviconEvo({
+                        strokeColor: '#5A8DEE'
+                    });
+                    $(".current").prev("li").find(".fonticon-wrap .livicon-evo").updateLiviconEvo({
+                        strokeColor: '#39DA8A'
+                    });
+                }
+
+
+            });
+            $(".actions [href='#previous']").click(function () {
+                $(".done").find(".step-icon").removeClass("bx bx-check-circle").addClass("bx bx-time-five");
+                $(".current").find(".step-icon").removeClass("bx bx-check-circle").addClass("bx bx-time-five");
+                // live icon color change on next button's on click
+                $(".current").find(".fonticon-wrap .livicon-evo").updateLiviconEvo({
+                    strokeColor: '#5A8DEE'
+                });
+                $(".current").next("li").find(".fonticon-wrap .livicon-evo").updateLiviconEvo({
+                    strokeColor: '#adb5bd'
+                });
+            });
+            // if click on  submit   button icon change
+            $(".actions [href='#finish']").click(function () {
+                $(".done").find(".step-icon").removeClass("bx-time-five").addClass("bx bx-check-circle");
+                $(".last.current.done").find(".fonticon-wrap .livicon-evo").updateLiviconEvo({
+                    strokeColor: '#39DA8A'
+                });
+            });
+            // add primary btn class
+            $('.actions a[role="menuitem"]').addClass("btn btn-primary");
+            $('.icon-tab [role="menuitem"]').addClass("glow ");
+            $('.wizard-vertical [role="menuitem"]').removeClass("btn-primary").addClass("btn-light-primary");
+
+            $("#BTN_APPLY").on("click", function () {
+                var grid = $("#VMCreateGrid").data("kendoGrid");
+                $(grid.tbody[0].rows).each(function () {
+                    var data = grid.dataItem(this);
+                    var check = $(this.cells[0]).find("input");
+                    if (check.is(":checked")) {
+                        $(this.cells).each(function (index, item) {
+                            if (index == $(grid.thead[0]).find("[data-field='comOU']")[0].cellIndex) {
+                                this.innerText = $("#comOU").val();
+                                data.VMID = $("#comOU").val();
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        function fnLast() {
+
+            //드롭다운 세팅
+            fnDDSearch();
+
+            fnVMUserSearch();
+            //fnVMUserGrid();
+            //fnVMCreateGridDraw();
+        }
+
+        function fnDDSearch() {
+            fnDDHostFull();
+            fnDDResourceGroup();
+            fnDDNetwork();
+            fnDDSubNet();
+            fnDDTemplet();
+        }
+
+        //드롭다운 호스트풀
+        function fnDDHostFull() {
+
+            var param = {}
+            param.TY_PRE = "Y";
+            param.param = "GetWVDHostPool";
+
+             $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Common/ComDDMTSearch")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                 async: false,
+                 success: function (result) {
+                    var data = result.data;
+
+                    ComJS.fnDataKeyRedefine("DD", data);
+
+                    $("#hostFull").select2({
+                        data: data
+                    });
+
+                    $("#hostFullInfo").text(" : " +data[0].description);
+
+                    $("#hostFull").on('select2:select', function (e) {
+                        $("#hostFullInfo").text(" : " + e.params.data.description);
+                    });
+                }
+             });
+        }
+
+        //드롭다운 리소스 그룹
+        function fnDDResourceGroup() {
+
+            var param = {}
+            param.TY_PRE = "Y";
+            param.param = "GetWVDResourceGroup";
+
+             $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Common/ComDDMTSearch")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                async: false,
+                 success: function (result) {
+                    var data = result.data;
+
+                    ComJS.fnDataKeyRedefine("DD", data);
+
+                     $("#resourceGroup").select2({
+                        data: data
+                    });
+
+                     $("#resourceGroupInfo").text(" : " + data[0].region);
+
+                     $("#resourceGroup").on('select2:select', function (e) {
+                         $("#resourceGroupInfo").text(" : " + e.params.data.region);
+                         fnDDNetwork();
+                         fnDDSubNet();
+                    });
+                }
+            });
+        }
+
+        //드롭다운 네트워크
+        function fnDDNetwork() {
+
+            var param = {}
+            param.TY_PRE = "Y";
+            param.param = "GetWVDNetwork";
+            param.vName1 = "rgPath";
+            param.vVal1 = $("#resourceGroup").val();
+
+             $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Common/ComDDMTSearch")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                 async: false,
+                 success: function (result) {
+                    var data = result.data;
+
+                     ComJS.fnDataKeyRedefine("DD", data);
+                     $("#network").empty();
+                     $("#network").select2({
+                        data: data
+                    });
+
+                     $("#networkInfo").text(" : " + data[0].region);
+
+                     $("#network").on('select2:select', function (e) {
+                         $("#networkInfo").text(" : " + e.params.data.region);
+                         fnDDSubNet();
+                    });
+                }
+            });
+        }
+
+        //드롭다운 서브넷
+        function fnDDSubNet() {
+
+            var param = {}
+            param.TY_PRE = "Y";
+            param.param = "GetWVDSubnet";
+            param.vName1 = "networkPath";
+            param.vVal1 = $("#network").val();
+
+             $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Common/ComDDMTSearch")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                 async: false,
+                 success: function (result) {
+                    var data = result.data;
+
+                     ComJS.fnDataKeyRedefine("DD", data);
+                     $("#subnet").empty();
+                     $("#subnet").select2({
+                        data: data
+                    });
+                }
+            });
+        }
+
+        //드롭다운 템플릿
+        function fnDDTemplet() {
+
+            var param = {}
+            param.TY_PRE = "Y";
+            param.param = "GetWVDTemplet";
+
+             $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Common/ComDDMTSearch")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                 async: false,
+                 success: function (result) {
+                     var data = result.data;
+
+                     ComJS.fnDataKeyRedefine("DD", data);
+                     $("#templet").empty();
+                     $("#templet").select2({
+                         data: data
+                     });
+
+                     $("#templetInfo").text(" : " + data[0].remark);
+
+                     $("#templet").on('select2:select', function (e) {
+                         $("#templetInfo").text(" : " + e.params.data.remark);
+                     });
+                }
+            });
+        }
+
+        //VM 대상자 그리드
+        //그리드 그리기
+        function fnVMUserGrid(result) {
+
+            //그리드 정보 데이터 세팅
+            var data = result != null ? result.data : result;
+
+            var columns = [];
+            var checkBox = {
+                headerAttributes: { style: "text-align:center;" },
+                attributes: { style: "text-align:center;" },
+                headerTemplate: "<input type='checkbox' id='CB_ALL' style='width:20px; height:20px;'>",
+                template: function () {
+                    return "<input type='checkbox' id='CB' style='width:20px; height:20px;'>";
+                },
+                width: 30
+            }
+
+            columns.push(checkBox);
+
+            var cols = [
+                  { field: "work_date", title: "등록일시", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "150px", format: "{0: yyyy-MM-dd HH:mm:ss}", type: "date" }
+                , { field: "seq_num", title: "일련번호", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "50px" }
+                , { field: "data_source_gb", hidden: true }
+                , { field: "data_source_nm", title: "출처", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "100px" }
+                , { field: "proc_status_gb", hidden: true }
+                , { field: "proc_status_nm", title: "작업상태", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "100px" }
+                , { field: "proc_gb", hidden: true }
+                , { field: "proc_nm", title: "VM작업구분", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "100px" }
+                , { field: "proc_detail", hidden: true }
+                , { field: "proc_detail_nm", title: "작업사유", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "100px" }
+                , { field: "DEPT_NM", title: "부서명", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "100px" }
+                , { field: "LOGINID", title: "사번", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "100px" }
+                , { field: "EMP_NM", title: "성명", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "100px" }
+                , { field: "req_img_templet_nm", hidden: true } //템플릿
+                , { field: "customImgPath", hidden: true } //템플릿값
+                , { field: "hostpool", hidden: true }
+                , { field: "hostPoolPath", hidden: true }
+                , { field: "resourceGroup", hidden: true }
+                , { field: "resourceGroupPath", hidden: true }
+                , { field: "network", hidden: true }
+                , { field: "networkPath", hidden: true }
+                , { field: "networkSubnet", hidden: true }
+                , { field: "networkSubnetPath", hidden: true }
+                , { field: "comOU", hidden: true }
+                , { field: "VMID", hidden: true }
+            ]
+
+            columns = $.merge(columns, cols);
+
+            var nonReordableColumn; //체크박스 영역 담는 변수
+
+            //그리드를 empty하면 기존 관련 이벤트들이 모두 사라짐
+            //toolbar 버튼은 다른 cshtml에서 이벤트를 걸기 때문에 페이지 실행시 1회만 적용됨
+            //이런 부분을 보완하기위해 그리드가 empty되기전에 detach라는 기능을 사용하여 기존toolbar 이벤트를 담아두고
+            //그리드를 새로 다시 그린 후 추가 하는 방식
+            //detach는 기존 이벤트 정보까지 모두 가진상태로 삭제함 2021.07.07. 강승호
+            var toolbarDetach;
+            if ($("#vmUserGrid").data("kendoGrid") != null) { //데이터 없이 그려질 경우 toolbarDetach에 넣지 않아도됨
+                toolbarDetach = $("#vmUserGrid").children(".k-toolbar").detach();
+            }
+
+            $("#vmUserGrid").empty(); //그리드 초기화를 안해주면 해당 그리드에 계속 추가되어 페이징에서 스크립트 오류가 뜸
+            var grid = $("#vmUserGrid").kendoGrid({
+                toolbar: [
+                    { name: "add", iconClass: "k-icon", text: "" }   //그리드 데이터 추가 기능 (추가버튼영역 한개와 연결)
+                    , { name: "delete", iconClass: "k-icon", text: "" }   //그리드 row 삭제기능
+                ],
+                dataSource: {
+                    data: data,
+                    pageSize: 1000
+                },
+                noRecords: {
+                    template: "Please search."
+                },
+                autoWidth: true,
+                sortable: true,
+                resizable: true,
+                reorderable: true,
+                height: 350,
+                dataBound: function (e) {
+
+                    //toolbar 툴팁 설정
+                    this.element.find(".k-grid-add").attr("title", "Grid Data Add");
+                    this.element.find(".k-grid-delete").attr("title", "Grid Data Delete");
+
+                    //타이틀 클릭 시 정렬 이벤트
+                    $(this.thead.find("tr th")).on("click", function (e) {
+                        //전체선택 체크 박스 컬럼 제외
+                        if ($(this).find("input").length > 0) {
+                            //전체선택 체크박스가 있으면
+                            if ($(this).find("input")[0].id == "CB_ALL") {
+                                fnVMUserGridAllCheck(this);
+                            } else {
+                            }
+                        } else {
+
+                        }
+                    });
+
+                    //그리드 삭제기능
+                    this.element.find(".k-grid-delete").off("click").on("click", function () {
+                        fnDelWorkInfo(grid);
+                    });
+
+                    //체크박스 영역 담기
+                    nonReordableColumn = e.sender.columns[0];
+
+                },
+                columns: columns,
+                columnReorder: function (e) {
+                    setTimeout(function (e) {
+                        grid.reorderColumn(0, nonReordableColumn); //체크 박스 영역을 움직일 시 다시 되돌리기
+                    }, 1)
+                }
+            }).data("kendoGrid");
+
+            //fillter 중 datepicker 타입의 format을 정의해줌
+            $("#" + grid.element[0].id + " [data-role=datepicker]").kendoDatePicker({
+                format: "yyyy-MM-dd"
+            });
+
+            //그리드 td 툴팁
+            grid.table.kendoTooltip({
+                filter: "td",
+                content: function (e) {
+                    var target = e.target; // element for which the tooltip is shown
+                    return $(target).text();
+                }
+            });
+
+            //데이터없이 그려진 이후 부터 그리드를 다시 그릴 시 툴바를 다시 넣어준다
+            if (toolbarDetach != null) {
+                $("#" + grid.element[0].id + " .k-grid-toolbar").remove();
+                $("#" + grid.element[0].id + " .k-grid-header").before(toolbarDetach);
+            }
+
+            setTimeout(function (e) {
+                grid.resize();
+            }, 250)
+        }
+
+        function fnVMUserSearch() {
+            $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/VMManagement/VMAddUserSearch")",
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    fnVMUserGrid(result);
+                }
+            });
+        }
+
+        //그리드 전체체크박스 함수
+        function fnVMUserGridAllCheck(cbData) {
+            var grid = $("#vmUserGrid").data("kendoGrid");
+
+            if ($(cbData).find("input").is(":checked")) {
+                $(grid.tbody[0].rows).find("input").prop("checked", true); // 전체선택
+            } else {
+                $(grid.tbody[0].rows).find("input").prop("checked", false); //전체 선택해제
+            }
+        }
+
+        /**
+         * 대상자 삭제
+         * param grid
+         */
+        function fnDelWorkInfo(grid) {
+            var selectData = [];
+            var data = grid._data;
+            $(grid.tbody[0].rows).each(function () {
+                var check = $(this.cells[0]).find("input");
+                if (check.is(":checked")) {
+                    selectData.push(JSON.stringify(data[this.rowIndex])); //선택한 컬럼의 row의 data
+                }
+            });
+
+            if (selectData.length > 0) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Scripts.Url("~/VMManagement/VMDelWorkInfo")",
+                    data: { selectData: selectData },
+                    dataType: 'json',
+                    async: false,
+                    success: function (result) {
+                        ComJS.fnSweetAlert(result.msg);
+                    }
+                });
+            }else{
+                ComJS.fnSweetAlert("삭제 할 대상자를 선택해주세요.");
+            }
+        }
+
+        //VM 생성 그리드
+        //그리드 그리기
+        function fnVMCreateGridDraw(data) {
+
+            var columns = [];
+            var checkBox = {
+                headerAttributes: { style: "text-align:center;" },
+                attributes: { style: "text-align:center;" },
+                headerTemplate: "<input type='checkbox' id='CB_ALL' style='width:20px; height:20px;'>",
+                template: function () {
+                    return "<input type='checkbox' id='CB' style='width:20px; height:20px;'>";
+                },
+                width: 40
+            }
+
+            columns.push(checkBox);
+
+            var cols = [
+                  { field: "data_source_gb", hidden: true }
+                , { field: "data_source_nm", title: "자료출처", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "150px" }
+                , { field: "LOGINID", title: "사번", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "150px" }
+                , { field: "EMP_NM", title: "성명", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "150px" }
+                , { field: "DEPT_NM", title: "부서명", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "200px" }
+                , { field: "work_date", title: "등록일시", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "200px", format: "{0: yyyy-MM-dd HH:mm:ss}", type: "date" }
+                , { field: "seq_num", title: "일련번호", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "100px" }
+                , { field: "VMID", title: "VMID", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "200px" }
+                , { field: "comOU", title: "컴퓨터OU", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "350px" }
+                , { field: "req_img_templet_nm", title: "템플릿", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "300px" }
+                , { field: "customImgPath", hidden: true } //템플릿값
+                , { field: "hostpool", title: "호스트풀", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "350px" }
+                , { field: "hostPoolPath", hidden: true }
+                , { field: "resourceGroup", title: "리소스그룹", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "200px" }
+                , { field: "resourceGroupPath", hidden: true }
+                , { field: "network", title: "네트워크", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "350px" }
+                , { field: "networkPath", hidden: true }
+                , { field: "networkSubnet", title: "서브넷", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "300px" }
+                , { field: "networkSubnetPath", hidden: true }
+                //, { field: "proc_status_gb", hidden: true }
+                //, { field: "proc_status_nm", title: "작업상태", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "120px" }
+                //, { field: "proc_gb", hidden: true }
+                //, { field: "proc_nm", title: "VM작업구분", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "120px" }
+                //, { field: "proc_detail", hidden: true }
+                //, { field: "proc_detail_nm", title: "작업사유", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, width: "120px" }
+            ]
+
+            columns = $.merge(columns, cols);
+
+            var nonReordableColumn; //체크박스 영역 담는 변수
+
+            $("#VMCreateGrid").empty(); //그리드 초기화를 안해주면 해당 그리드에 계속 추가되어 페이징에서 스크립트 오류가 뜸
+            var grid = $("#VMCreateGrid").kendoGrid({
+                dataSource: {
+                    data: data
+                },
+                noRecords: {
+                    template: "Please search."
+                },
+                sortable: true,
+                resizable: true,
+                reorderable: true,
+                height: 350,
+                dataBound: function (e) {
+
+                    //타이틀 클릭 시 정렬 이벤트
+                    $(this.thead.find("tr th")).on("click", function (e) {
+                        //전체선택 체크 박스 컬럼 제외
+                        if ($(this).find("input").length > 0) {
+                            //전체선택 체크박스가 있으면
+                            if ($(this).find("input")[0].id == "CB_ALL") {
+                                fnVMCreateGridAllCheck(this);
+                            } else {
+                            }
+                        } else {
+
+                        }
+                    });
+
+                    //체크박스 영역 담기
+                    nonReordableColumn = e.sender.columns[0];
+
+                },
+                columns: columns,
+                columnReorder: function (e) {
+                    setTimeout(function (e) {
+                        grid.reorderColumn(0, nonReordableColumn); //체크 박스 영역을 움직일 시 다시 되돌리기
+                    }, 1)
+                }
+            }).data("kendoGrid");
+
+            //그리드 td 툴팁
+            grid.table.kendoTooltip({
+                filter: "td",
+                content: function (e) {
+                    var target = e.target; // element for which the tooltip is shown
+                    return $(target).text();
+                }
+            });
+
+            setTimeout(function (e) {
+                grid.resize();
+            }, 250)
+        }
+
+        //그리드 전체체크박스 함수
+        function fnVMCreateGridAllCheck(cbData) {
+            var grid = $("#VMCreateGrid").data("kendoGrid");
+
+            if ($(cbData).find("input").is(":checked")) {
+                $(grid.tbody[0].rows).find("input").prop("checked", true); // 전체선택
+            } else {
+                $(grid.tbody[0].rows).find("input").prop("checked", false); //전체 선택해제
+            }
+        }
+
+        //VM 생성 그리드 데이터 세팅
+        function fnVmCreateGridSet(grid) {
+            var result = [];
+            var data = grid._data;
+            $(grid.tbody[0].rows).each(function () {
+                var check = $(this.cells[0]).find("input");
+                if (check.is(":checked")) {
+                    result.push(data[this.rowIndex]); //선택한 컬럼의 row의 data
+                }
+            });
+
+            fnVMCreateGridDraw(result);
+        }
+
+        //VM생성
+        function fnVMCreate(grid) {
+
+            var selectData = [];
+            var data = grid._data;
+            $(grid.tbody[0].rows).each(function () {
+                var check = $(this.cells[0]).find("input");
+                if (check.is(":checked")) {
+                    selectData.push(JSON.stringify(data[this.rowIndex])); //선택한 컬럼의 row의 data
+                }
+            });
+
+             if (selectData.length > 0) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Scripts.Url("~/VMManagement/VMCreate")",
+                    data: { selectData: selectData },
+                    dataType: 'json',
+                    async: false,
+                    success: function (result) {
+                        ComJS.fnSweetAlert(result.msg);
+                    }
+                });
+            } else {
+                 ComJS.fnSweetAlert("VM생성 할 정보를 선택해주세요.");
+            }
+        }
+    </script>
+    @Html.Partial("~/Views/Modal/VMManagement/VMUserSearch.cshtml")
+    @Html.Partial("~/Views/Modal/DeptSearch.cshtml")
+}

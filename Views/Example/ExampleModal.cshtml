@@ -1,0 +1,189 @@
+﻿<div class="modal fade show" id="M_Example" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">샘플 모달</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row" id="searchArea">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-11">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <label>TEST1</label>
+                                                    <div class="input-group" style="width:100%;">
+                                                        <input type="text" class="form-control" id="TEST1" name="TEST2">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>TEST2</label>
+                                                    <div class="input-group" style="width:100%;">
+                                                        <input type="text" class="form-control" id="TEST1" name="TEST2">
+                                                    </div>
+                                                </div>                                                
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div style="float: right;">
+                                                <div class="livicon-evo livicon-evo-holder mt-2" data-options="name:search; style:lines; size:35px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;" onclick="fnExampleModalSearch()"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">                                    
+                                    <div id="exampleModalGrid"></div>
+                                </div>
+                            </div>
+                        </div>                         
+                    </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-primary ml-1" data-dismiss="modal" id="selectBtn">
+                      <span class="d-none d-sm-block">선택</span>
+                  </button>
+              </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+    <div class="M_loadingBar"></div>
+</div>
+<!-- /.modal -->
+
+<script>
+
+
+    $(document).ready(function () {
+        fnModalExampleEvent("M_Example");
+        fnExampleModalGrid();
+    });
+
+    //그리드 그리기
+    function fnExampleModalGrid(result) {
+
+        //그리드 정보 데이터 세팅
+        var data = result != null ? result.data : result;
+        //var total = result != null ? result.total != null ? result.total[0].TOTAL : result : result;
+
+        $("#exampleModalGrid").empty(); //그리드 초기화를 안해주면 해당 그리드에 계속 추가되어 페이징에서 스크립트 오류가 뜸
+        var grid = $("#exampleModalGrid").kendoGrid({
+            dataSource: {
+                data: data,
+                pageSize: 10,
+                schema: {
+                    model: { id: "TEST1" }
+                }
+            },
+            pageable: {
+                pageSizes: [5, 10, 20, 30],
+                buttonCount: 2
+            },
+            noRecords: {
+                template: "Please search."
+            },
+            autoWidth: true,
+            sortable: true,
+            resizable: true,
+            reorderable: true,
+            height:350,
+            selectable: "multiple, row", // multiple 다중 row선택, multiple cell 다중cell선택
+            persistSelection: true,            
+            columns: [
+                { field: "TEST1", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, title: "TEST1", width: "100px" },
+                { field: "TEST2", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, title: "TEST2", width: "100px" }                
+            ]
+        }).data("kendoGrid");
+
+        //그리드 td 툴팁
+        grid.table.kendoTooltip({
+            filter: "td",
+            content: function (e) {
+                var target = e.target; // element for which the tooltip is shown
+                return $(target).text();
+            }
+        });
+    }
+
+    //modal event
+    //1.모달 영역 id
+    function fnModalExampleEvent(ID_MODAL) {       
+
+        //그리드 추가기능
+        $("#testBtn").off("click").on("click", function () {
+            $("#" + ID_MODAL).modal();
+        });
+
+
+
+        //부트스트랩에서 모달띄울때 shown.bs.modal을 써야 모달이 열린 후 포커스 이벤트가 발생할 수 있다
+        $("#" + ID_MODAL).off("shown.bs.modal").on("shown.bs.modal", function () {
+            $("#" + ID_MODAL + " #TEST1").focus();
+            fnExampleModalSearch();
+        });
+
+        //모달이 닫힐때
+        $("#" + ID_MODAL).off("hide.bs.modal").on("hide.bs.modal", function () {
+            //초기화
+            fnExampleModalReset(ID_MODAL);
+        });
+
+        //선택 버튼 클릭
+        $("#" + ID_MODAL + " #selectBtn").off("click").on("click", function () {
+            var grid = $("#" + ID_MODAL + " #exampleModalGrid").data("kendoGrid"); //그리드 정보 담기
+            var selData = grid.select(); //선택한 값 담기
+            var selectedData = [];
+            for (var i = 0; i < selData.length; i++) {
+                selectedData.push(JSON.stringify(grid.dataItem(selData[i])));
+            }            
+            
+            $("#" + ID_MODAL).modal("hide");       
+        });
+
+        $("#" + ID_MODAL + " #searchArea").not(".input-SM").keydown(function (key) {
+            if (key.keyCode == 13) {//키가 13이면 실행 (엔터는 13)
+                fnExampleModalSearch();
+            }
+        });        
+    }
+
+    //모달 초기화
+    function fnExampleModalReset(ID_MODAL) {
+        $("#" + ID_MODAL + " input").val("");
+        fnExampleModalGrid();
+    }
+
+    function fnExampleModalSearch() {
+        var param = {}
+        param.TEST1 = $("#TEST1").val();
+        param.TEST2 = $("#TEST2").val();                
+
+         $.ajax({
+            type: "POST",
+             url: "@Scripts.Url("~/Example/ExampleListSearch2")",
+             data: { param: JSON.stringify(param) },
+             beforeSend: function () { // 조회 전
+                 kendo.ui.progress($(".M_loadingBar"), true);
+             },
+             complete: function () {//조회 후
+                 kendo.ui.progress($(".M_loadingBar"), false);
+             },
+            dataType: 'json',
+             async: false,
+             success: function (result) {
+                 fnExampleModalGrid(result);
+            }
+        });
+    }   
+</script>

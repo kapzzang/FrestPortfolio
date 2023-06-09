@@ -1,0 +1,34 @@
+﻿@*
+    그리드 관련 버튼을 추가한경우 스크립트는 작성은 GridBtn에서 cshtml을 만들어 따로 관리한다
+    그리드 툴바에서 추가, 삭제, ROW 클릭 이벤트는 따로 동적쿼리에서 ID를 입력하지말고 밑에 예제를 활용하면됨
+*@
+
+<script type="text/javascript"> 
+    $(window).ready(function () {
+        var grid = $("#grid");
+        var gridData = grid.data("kendoGrid");
+
+        //그리드 추가기능
+        gridData.element.find(".k-grid-add").off("click").on("click", function () {
+
+        });
+
+        //그리드 삭제기능
+        gridData.element.find(".k-grid-delete").off("click").on("click", function () {
+
+        });
+
+        //그리드 클릭
+        $(gridData.tbody.find("tr td")).off("click").on("click", function (e) {
+            $(grid.select()).prop("class", "");
+            grid.select($(this).closest("tr")); //row 선택
+        });
+
+        //그리드 더블클릭
+        $(gridData.tbody.find("tr td")).off("dblclick").on("dblclick", function (e) {
+            $(grid.select()).prop("class", "");
+            grid.data("kendoGrid");
+            grid.dataItem($(this).closest("tr"))            
+        });
+    });
+</script>

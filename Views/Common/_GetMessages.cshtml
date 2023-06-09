@@ -1,0 +1,36 @@
+﻿@model IEnumerable<proTnsWeb.Hubs.TestHub.Schema_tbxMessageHub>
+
+<a class="nav-link nav-link-label" href="javascript:void(0);" data-toggle="dropdown">
+    @if (Model.Count() > 0)
+    {
+        <i class="ficon bx bx-bell bx-tada bx-flip-horizontal"></i>
+        <span class="badge badge-pill badge-danger badge-up">@Model.Count()</span>
+    }
+    else
+    {
+        <i class="ficon bx bx-bell bx-flip-horizontal"></i>
+    }
+</a>
+<ul class="dropdown-menu dropdown-menu-media dropdown-menu-right">
+    <li class="dropdown-menu-header">
+        <div class="dropdown-header px-1 py-75 d-flex justify-content-between"><span class="notification-title">7 new Notification</span><span class="text-bold-400 cursor-pointer">Mark all as read</span></div>
+    </li>
+    <li class="scrollable-container media-list ps">
+
+        @foreach (var item in Model)
+        {
+            <a class="d-flex justify-content-between cursor-pointer" href="javascript:void(0);">
+                <div class="media d-flex align-items-center border-0">
+                    <div class="media-left pr-0">
+                        <div class="avatar mr-1 m-0"><img src="../../../app-assets/images/portrait/small/avatar-s-16.jpg" alt="avatar" height="39" width="39"></div>
+                    </div>
+                    <div class="media-body">
+                        <h6 class="media-heading"><span class="text-bold-500">@item.no_Message</span> @item.ds_Category @item.ds_Title @item.ds_Content @item.Is_Read </h6><small class="notification-text">@item.dtm_Create</small>
+                    </div>
+                </div>
+            </a>
+        }
+        <div class="ps__rail-x" style="left: 0px; bottom: 0px;"><div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div></div><div class="ps__rail-y" style="top: 0px; right: 0px;"><div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 0px;"></div></div>
+    </li>
+    <li class="dropdown-menu-footer"><a class="dropdown-item p-50 text-primary justify-content-center" href="javascript:void(0)">Read all notifications</a></li>
+</ul>

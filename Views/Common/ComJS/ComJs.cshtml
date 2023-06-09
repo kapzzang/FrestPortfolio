@@ -1,0 +1,395 @@
+﻿<script>
+    var ComJS = {}
+
+    //resize
+    ComJS.fnReSize = function fnReSize(type,idData) {
+        if (type == 'grid') {
+            var section = $("body section");
+            var searchLayout = $(".searchLayout");
+            var gridLayout = $(".gridLayout");
+            gridLayout.css("height", section.height() - searchLayout.height() - 30 + 'px');
+            var gridElement = $(idData.grid);
+            gridElement.data("kendoGrid").resize();
+        } else if (type == 'tabGrid') {
+            var TabLayout = $(idData.tab + " .k-content");
+            var gridLayout = $(idData.grid);
+            gridLayout.css("height", TabLayout.height() - 5 + 'px');
+            var gridElement = $(idData.grid);
+            if (gridElement.data("kendoGrid") != null) {
+                gridElement.data("kendoGrid").resize();
+            }
+        }
+    }
+
+
+    //윈도우 창 변경시 resize ----- window.resize()는 한번 설정 된 메서드가 계속 실행되므로 메서드내용을 변경 해야되는경우 사용 할 수 있다.
+    ComJS.fnWindowResize = function fnWindowResize(type, idData) {
+        $(window).off("resize"); //재설정을 위해 resize 이벤트를 off
+        if (type != "none") {
+            $(window).resize(function () {
+                ComJS.fnReSize(type, idData);
+            });
+        }
+    }
+
+    @*/**
+     * form에 담긴 데이터 서버로 보내기     
+     * @param {any} url
+     * @param {any} data     
+     */*@
+    ComJS.fnSubmit = function fnSubmit(url, data) {
+        var form = $('<form id="formData" name="formData"></form>');
+        form.attr('method', 'post');
+        form.appendTo('body');
+
+        form.attr('action', url);
+        var formHtml = "";
+        for (var key in data) {
+            if (typeof (data[key]) != "object" && typeof (data[key]) != "function") {
+                formHtml = '<input type="hidden" name="' + key + '" value="' + data[key] + '">';
+                form.append(formHtml);
+            }            
+        }
+        $(form).attr("onsubmit", null); // onsubmit 속성이 return false 인경우 null로 변경 --동적화면 CommonPage에서 form 속성으로 들어가 있음(엔터 시 submit 방지를 위해)
+        form.submit();
+    }
+
+    //IP 정규식
+    ComJS.checkIP = function checkIP(ip) {
+        var check = /^(1|2)?\d?\d([.](1|2)?\d?\d){3}$/;
+        return check.test(ip);
+    }
+
+    //IP 정규식 (port추가)
+    ComJS.checkIPPort = function checkIP(ip) {
+        var check = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]){1}([:][0-9][0-9][0-9][0-9][0-9]?)$/;
+        return check.test(ip);
+    }
+
+    //시간 정규식
+    ComJS.checkTime = function checkTime(time) {
+        if (time != "") {
+            var timeFormat = /^([01][0-9]|2[0-3]):([0-5][0-9])$/; // 시간형식 체크 정규화 hh:mm
+            return timeFormat.test(time);
+        } else {
+            return true;
+        }        
+    }
+
+    //날짜 포멧
+    Date.prototype.format = function (f) {
+
+        if (!this.valueOf()) return " ";
+
+        var weekKorName = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+
+        var weekKorShortName = ["일", "월", "화", "수", "목", "금", "토"];
+
+        var weekEngName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+        var weekEngShortName = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        var d = this;
+
+
+
+        return f.replace(/(yyyy|yy|MM|dd|KS|KL|ES|EL|HH|hh|mm|ss|a\/p)/gi, function ($1) {
+
+            switch ($1) {
+
+                case "yyyy": return d.getFullYear(); // 년 (4자리)
+
+                case "yy": return (d.getFullYear() % 1000).zf(2); // 년 (2자리)
+
+                case "MM": return (d.getMonth() + 1).zf(2); // 월 (2자리)
+
+                case "dd": return d.getDate().zf(2); // 일 (2자리)
+
+                case "KS": return weekKorShortName[d.getDay()]; // 요일 (짧은 한글)
+
+                case "KL": return weekKorName[d.getDay()]; // 요일 (긴 한글)
+
+                case "ES": return weekEngShortName[d.getDay()]; // 요일 (짧은 영어)
+
+                case "EL": return weekEngName[d.getDay()]; // 요일 (긴 영어)
+
+                case "HH": return d.getHours().zf(2); // 시간 (24시간 기준, 2자리)
+
+                case "hh": return ((h = d.getHours() % 12) ? h : 12).zf(2); // 시간 (12시간 기준, 2자리)
+
+                case "mm": return d.getMinutes().zf(2); // 분 (2자리)
+
+                case "ss": return d.getSeconds().zf(2); // 초 (2자리)
+
+                case "a/p": return d.getHours() < 12 ? "오전" : "오후"; // 오전/오후 구분
+
+                default: return $1;
+
+            }
+
+        });
+
+    };
+
+    String.prototype.string = function (len) { var s = '', i = 0; while (i++ < len) { s += this; } return s; };
+
+    String.prototype.zf = function (len) { return "0".string(len - this.length) + this; };
+
+    Number.prototype.zf = function (len) { return this.toString().zf(len); };
+
+
+    //오늘 날짜 기준으로 날짜 구하기
+    //type : Y년, M월, D일
+    //NUM: 플러스 마이너스 시킬 숫자
+    ComJS.fnGetDate = function fnGetDate(type, num) {
+
+        var param = {};
+        param.type = type;
+        param.num = num;
+
+        var rs;
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Common/GetDate")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: false,
+            success: function (result) {
+                rs = result.data[0].DT
+            }
+        });
+
+        return rs;
+    };     
+
+    //드롭다운 및 멀티셀렉트 id 및 text 설정값 재정의하는 메서드(frest 웹템플릿 사용시 필요함)
+    //data 값 json key값을 재정의 공통적으로 드롭다운은 (id = VAL_DD, text = NM_DD) 멀티셀렉트는 (id = VAL_MS, text = NM_MS) 설정되어야함
+    ComJS.fnDataKeyRedefine = function fnDataKeyRedefine(type, data) {
+
+        if (type == "DD") {
+            data = $.map(data, function (obj) {
+                obj.id = obj.VAL_DD; // replace pk with your identifier
+                return obj;
+            });
+
+            data = $.map(data, function (obj) {
+                obj.text = obj.NM_DD; // replace name with the property used for the text
+                return obj;
+            });
+        } else {
+            data = $.map(data, function (obj) {
+                obj.id = obj.VAL_MS; // replace pk with your identifier
+                return obj;
+            });
+
+            data = $.map(data, function (obj) {
+                obj.text = obj.NM_MS; // replace name with the property used for the text
+                return obj;
+            });
+        }
+        return data;
+    }
+
+    //alert --> sweetAlert 변경
+    ComJS.fnSweetAlert = function fnSweetAlert(text) {       
+        Swal.fire({
+            title: text,
+            showClass: {
+                popup: 'animate__animated animate__bounceInDown'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__bounceOutDown'
+            },
+            //text: text,            
+            confirmButtonClass: 'btn btn-primary',
+            buttonsStyling: false,
+        });        
+    };
+
+    //confirm --> sweetAlert변경
+    /**     * 
+     * param text : 메세지
+     * param fnName : 확인 시 실행 될 함수명     
+     */
+    ComJS.fnSweetConfirm = function fnSweetConfirm(text,fnName) {          
+        Swal.fire({
+            title: text,
+            //text: text,            
+            showClass: {
+                popup: 'animate__animated animate__bounceInDown'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__bounceOutDown'
+            },
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+        }).then((result) => {
+            if (result.isConfirmed) {                
+                new Function('return ' + fnName + '()')()
+            }
+        });        
+    };
+
+    //confirm --> sweetAlert변경 -> OK후 함수 실행
+    /**     * 
+     * param text : 메세지
+     * param fnName : 확인 시 실행 될 함수명     
+     */
+    ComJS.fnSweetConfirm2 = function fnSweetConfirm2(text, fnName) {
+        Swal.fire({
+            title: text,
+            //text: text,            
+            showClass: {
+                popup: 'animate__animated animate__bounceInDown'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__bounceOutDown'
+            },
+            showCancelButton: false,
+            confirmButtonColor: '#3085d6',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                new Function('return ' + fnName + '()')()
+            }
+        });
+    };
+
+    //confirm --> sweetAlert변경
+    /**     * 
+     * param text : 메세지
+     * param fnName : 확인 시 실행 될 함수명    
+     * param param : 실행 할 함수에 필요한 파라미터     
+     */
+    ComJS.fnSweetConfirm3 = function fnSweetConfirm3(text, fnName, param) {
+        Swal.fire({
+            title: text,
+            //text: text,            
+            showClass: {
+                popup: 'animate__animated animate__bounceInDown'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__bounceOutDown'
+            },
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fnName(param);                
+            }
+        });
+    };
+
+    //validation 공통 옵션 JS
+    ComJS.fnValidation = function fnValidation(formId) {
+        $('#' + formId).validate({
+            onfocusout: false, 
+            invalidHandler: function (form, validator) { //validation 중 첫번째 포커스 주기 옵션
+                var errors = validator.numberOfInvalids();
+                if (errors) {
+                    validator.errorList[0].element.focus(); //첫번째 포커스
+                }
+            }
+        });
+    }
+
+    //ErroList
+    ComJS.ErroList = function fnErroList(modal, result) {
+        $("#" + modal + " #modalCotentArea").hide();
+        $("#" + modal + " #erroListArea").show();
+        //$("#" + modal + " .modal-footer button").not("button#close").hide();
+
+        //그리드 정보 데이터 세팅
+        let data = result != null ? result : result;
+        let total = result != null ? result.length : result;
+        let pageSize = 10;
+        let pageNo = 1;
+
+        var columns = [
+            { field: "errKey", title: "ErrorKey", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: left; white-space : nowrap;" }, width: "100px" },
+            { field: "errMsg", title: "ErrorMsg", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: left; white-space : nowrap;" }, width: "200px" }
+        ]
+
+        $("#" + modal + " #errorListGrid").empty(); //그리드 초기화를 안해주면 해당 그리드에 계속 추가되어 페이징에서 스크립트 오류가 뜸
+        var grid = $("#" + modal + " #errorListGrid").kendoGrid({
+            dataSource: {
+                data: data,
+                pageSize: pageSize
+            },
+            height: 400,
+            autoWidth: true,
+            sortable: true,
+            resizable: true,
+            dataBound: function (e) {
+
+                //total 세팅
+                this.dataSource._total = total;
+
+            },
+            columns: columns
+        }).data("kendoGrid");
+
+        //page 세팅
+        pageNo = pageNo;
+        grid.dataSource.page(pageNo);
+
+        //그리드 td 툴팁
+        grid.table.kendoTooltip({
+            filter: "td",
+            content: function (e) {
+                var target = e.target; // element for which the tooltip is shown
+                return $(target).text();
+            }
+        });
+    }
+
+    //ErroList 모달 오픈 타입
+    ComJS.ErroListOpen = function fnErroList(modal, result) {        
+        $("#" + modal).modal();        
+
+        //그리드 정보 데이터 세팅
+        let data = result != null ? result : result;
+        let total = result != null ? result.length : result;
+        let pageSize = 10;
+        let pageNo = 1;
+
+        var columns = [
+            { field: "errKey", title: "ErrorKey", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: left; white-space : nowrap;" }, width: "100px" },
+            { field: "errMsg", title: "ErrorMsg", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: left; white-space : nowrap;" }, width: "200px" }
+        ]
+
+        $("#" + modal + " #errorListGrid").empty(); //그리드 초기화를 안해주면 해당 그리드에 계속 추가되어 페이징에서 스크립트 오류가 뜸
+        var grid = $("#" + modal + " #errorListGrid").kendoGrid({
+            dataSource: {
+                data: data,
+                pageSize: pageSize
+            },
+            height: 400,
+            autoWidth: true,
+            sortable: true,
+            resizable: true,
+            dataBound: function (e) {
+
+                //total 세팅
+                this.dataSource._total = total;
+
+            },
+            columns: columns
+        }).data("kendoGrid");
+
+        //page 세팅
+        pageNo = pageNo;
+        grid.dataSource.page(pageNo);
+
+        //그리드 td 툴팁
+        grid.table.kendoTooltip({
+            filter: "td",
+            content: function (e) {
+                var target = e.target; // element for which the tooltip is shown
+                return $(target).text();
+            }
+        });
+    }
+</script>

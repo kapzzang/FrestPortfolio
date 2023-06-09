@@ -1,0 +1,97 @@
+﻿<script>
+    var HistoryJS = {}
+
+    /**
+     * 세션 history 페이지 정보(검색조건) 넣기
+     *
+     */
+    HistoryJS.fnHistorySet = function fnHistorySet() {
+        var form = $("form");
+        var formData = form.serializeObject();
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Common/PageHistorySet")",
+            data: { param: JSON.stringify(formData)},
+            dataType: 'json',
+            async: true
+        });
+    }
+
+    /**
+     * 해당 페이지의 세션값 가져오기(검색조건)
+     * form이 없는 경우 또는 상세페이지 경우 paramData에있는 값을 가져다 파라미터로 사용한다 (ex: 컴퓨터상세는 input의 id값이 2개이상 존재하여 selector시 #paramData를 꼭 넣어 select 한다)
+     */
+    HistoryJS.fnHistoryGet = function fnHistoryGet() {
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Common/PageHistoryGet")",
+            data: {},
+            dataType: 'json',
+            async: false,
+            success: function (result) {
+                var resultJson = JSON.parse($.toJSON(result));
+                for (var key in resultJson) {
+                    //form에 있는 key존재 여부에 따라
+                    if ($("form #" + key)[0] != null) {
+                        if ($("form #" + key)[0].name == key) {
+                            if ($("form #" + key).attr("data-select2-id") == key) {                                                                
+                                $("form #" + key).val(resultJson[key]).trigger('change');                
+                            } else {
+                                $("form #" + key).val(resultJson[key]);
+                            }
+                        }
+                    } else {
+                        var formHtml = '<input type="hidden" id="' + key + '" name="' + key + '" value="' + resultJson[key] + '">';
+                        $("form").append(formHtml);
+                    }   
+                }
+            }
+        });
+    }
+
+    /**
+     * 히스토리 목록 조회
+     * */
+    function fnHistoryList() {
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Common/HistoryList")",
+            data: {},
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                var html = "";
+                for (var i = 0; i < result.length; i++) {
+                    html = "<button type='button' class='historyBtn' onclick='fnHistoryMove(this)'>" + result[i].nm_Menu + "</button>";
+                    $("#historyArea").append(html);
+
+                    //히스토리 버튼이 생겼을때 버튼 class 수정
+                    if ($("#historyArea button").length > 0) {
+                        $("#historyBtn").attr("class", "k-icon k-i-more-horizontal k-icon-32")
+                    } else {
+                        $("#historyBtn").attr("class", "k-icon k-i-more-vertical k-icon-32")
+                    }
+                }
+            }
+        });
+    }
+
+    @*/**
+     * 히스토리 클릭 시 페이지 이동
+     * @param {any} btnData
+     */*@
+    function fnHistoryMove(btnData) {
+        var index = $(btnData).index();
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Common/HistoryMove")",
+            data: {index:index},
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                var url = result[0].url_Menu.replace("~", "../..");
+                location.href = url;
+            }
+        });
+    }
+</script>

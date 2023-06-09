@@ -1,0 +1,315 @@
+﻿@Styles.Render("~/frest/css/commonPage")
+@Scripts.Render("~/frest/js/commonPage")
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header row">
+            <div class="content-header-left col-12 mb-2 mt-1">
+                <div class="breadcrumbs-top">
+                    <h5 class="content-header-title float-left pr-1 mb-0">데이터보내기(Form)</h5>
+                </div>
+            </div>
+        </section>
+        <!-- Main content -->
+        <section class="content-body">
+            <!--검색조건 영역 시작-->
+            <section class="row" id="conditionRow">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header" data-action="collapse">
+                            <div style="display:flex;">
+                                <div><h4 class="card-title">검색조건</h4></div>
+                                <div>
+                                    <div class="livicon-evo livicon-evo-holder" data-options="name:trash; style:lines; size:25px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:5px;" onclick="fnSearchReset()"></div>
+                                </div>
+                            </div>
+                            <div class="heading-elements">
+                                <ul class="list-inline mb-0">
+                                    <li><a data-action="collapse" class="rotate"><i class="bx bx-chevron-down"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-content collapse show" aria-expanded="true">
+                            <div class="card-body">
+                                <form id="searchForm" method="post" onsubmit="return false">
+                                    <!-- /.box-header -->
+                                    <div class="row">
+                                        <div class="col-md-11">
+                                            <div class="row">
+                                                <!--기본-->
+                                                <div class="col-md-3">
+                                                    <fieldset class="form-group">
+                                                        <label>기본</label>
+                                                        <input type="text" class="form-control" id="basic" name="basic" value="" style="width:100%;">
+                                                    </fieldset>
+                                                </div>
+
+                                                <!--기간 datepiker인 경우-->
+                                                <div class="col-md-3">
+                                                    <fieldset class="form-group">
+                                                        <label>기간</label>
+                                                        <input type="text" class="form-control Y-DT" id="dt" name="dt" style="">
+                                                    </fieldset>
+                                                </div>
+                                                <!-- select2 (dropdown) 인경우  -->
+                                                <div class="col-md-3">
+                                                    <fieldset class="form-group">
+                                                        <label>드롭다운</label>
+                                                        <select id="dd" class="form-control" name="dd" data-placeholder="Select..." style="height:34px; overflow:auto; width:100%;">
+                                                        </select>
+                                                    </fieldset>
+                                                </div>
+                                                <!--검색조건 검색 & 모달 방식-->
+                                                <div class="col-md-3">
+                                                    <fieldset class="form-group">
+                                                        <label>사용자검색</label>
+                                                        <div style="display:flex;">
+                                                            <input type="text" class="form-control input-SM" id="UserName" name="UserName" style="width:45%;"> <!-- 클래스에 input-SM 넣은 이유 : 검색조건 영역에서 엔터시 해당 input만 검색 안되게-->
+                                                            <input type="text" class="form-control" id="UserID" name="UserID" style="width:40%;" readonly="readonly">
+                                                            <div class="livicon-evo livicon-evo-holder" id="BTN_USER" data-options="name:search; style:lines; size:40px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;"></div>
+                                                        </div>
+                                                    </fieldset>
+                                                </div>
+
+                                                <!--//multiselect 인경우-->
+                                                <div class="col-md-6">
+                                                    <fieldset class="form-group">
+                                                        <label>멀티셀렉트</label>
+                                                        <select id="ms" class="form-control" name="ms" multiple="multiple" data-placeholder="Select..." style="height:34px; overflow:auto; width:100%;">
+                                                        </select>
+                                                    </fieldset>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div style="float: right;">
+                                                <div class="livicon-evo livicon-evo-holder mt-2" data-options="name:search; style:lines; size:40px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;" onclick="fnSearch()"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /.row -->
+                                    <!--검색조건 영역 끝-->
+                                    <!-- 검색 -->
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+            </section>
+            <!-- /.box -->
+
+            <section class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table">
+                                <tbody id="resultTable">
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </section>
+        <!-- /.content -->
+    </div>
+</div>
+@section Scripts
+{
+    <script type="text/javascript">
+    $(document).ready(function () {
+        fnInit();
+        fnEvent();
+    });
+
+    //페이지 로드 후 실행
+    $(window).ready(function () {
+        fnLast();
+    });
+
+    function fnInit() {
+
+        //datepicker 설정
+        fnDatePickerSet();
+
+        //드롭다운
+        var param = {}
+            param.TY_PRE = "N";
+            param.param = "DD_MS_Example";
+
+             $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Common/ComDDMTSearch")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                 async: false,
+                 success: function (result) {
+                    var data = [{ NM_DD: "전체", VAL_DD: "all" }]; //데이터를 직접 입력 시 ajax 코드 빼고 해당 data에 json 형태로 추가하여 사용하면 됨
+                    data = $.merge(data, result.data); //json형 string값을 json으로 변경
+
+                    ComJS.fnDataKeyRedefine("DD", data);
+
+                    $("#dd").select2({
+                        data: data
+                    });
+
+                     $("#dd").on('select2:select', function (e) {
+                         fnSearch();
+                    });
+                }
+             });
+
+       //multiselect
+        var param = {}
+        param.TY_PRE = "N";
+        param.param = "DD_MS_Example";
+        $.ajax({
+                type: "POST",
+                url: "@Scripts.Url("~/Common/ComDDMTSearch")",
+                data: { param: JSON.stringify(param) },
+                dataType: 'json',
+                 async: false,
+                 success: function (result) {
+                    var data = [{ NM_MS: "전체", VAL_MS: "all" }]; //데이터를 직접 입력 시 ajax 코드 빼고 해당 data에 json 형태로 추가하여 사용하면 됨
+                    data = $.merge(data, result.data); //json형 string값을 json으로 변경
+
+                    ComJS.fnDataKeyRedefine("MS", data);
+
+                    $("#ms").select2({
+                        data: data
+                    });
+
+                     $("#ms").val(data[0].VAL_MS).trigger('change.select2'); //전체 값을 기본 선택으로 하기 위해
+
+                     $("#ms").on('select2:select', function (e) {
+                         fnSearch();
+                     });
+
+                     //MultiSelect 아이템 선택에 따른 수정
+                     $("#ms").on('select2:select', function (e) {
+                         //선택한 옵션 id
+                         var val = e.params.data.id;
+
+                         //선택되어있는 옵션 id
+                         var val_old = $("#" + e.target.name).val();
+
+                         //'전체' 아이템 선택 시
+                         if (val == "all") {
+                             $("#" + e.target.name).val(null).trigger("change");
+                             $("#" + e.target.name).val("all");
+                             $("#" + e.target.name).trigger('change.select2');
+                         }
+
+                         //COM HS 그 외 아이템 선택 시
+                         else {
+                             for (var i = 0; i < val_old.length; i++) {
+                                 if (val_old[i] == "all") {
+                                     val_old.splice(i, 1);
+                                     $("#" + e.target.name).val(val_old);
+                                     $("#" + e.target.name).trigger('change.select2');
+                                 }
+                             }
+                         }
+                         fnSearch();
+                     });
+
+                     //'전체' 아이템 선택 해제 불가하게 변경
+                     $("#ms").on('select2:unselect', function (e) {
+                         //선택한 옵션 id
+                         var val = e.params.data.id;
+
+                         //'전체' 아이템 선택 시
+                         if (val == "all") {
+                             $("#" + e.target.name).val("all");
+                             $("#" + e.target.name).trigger('change.select2');
+                             $("#" + e.target.name).select2('close');
+                         }
+
+                         if ($(this).val() == "") {
+                             $("#" + e.target.name).val("all");
+                             $("#" + e.target.name).trigger('change.select2');
+                             $("#" + e.target.name).select2('close');
+                             fnSearch();
+                         }
+                     });
+                }
+             });
+    }
+
+    //이벤트 모음
+    function fnEvent() {
+        //검색 영역에 focus가 있을 시에만 엔터키 이벤트 실행
+        //input 중 class에 .input-SM 있을 경우 제외
+        $("#searchForm").find("input").not(".input-SM").keydown(function (key) {
+            if (key.keyCode == 13) {//키가 13이면 실행 (엔터는 13)
+                fnSearch();
+            }
+        });
+    };
+
+    //마지막 세팅
+    function fnLast() {
+        //히스토리 데이터 세팅 레이아웃에서 fnLast로 변경 레이아웃에 있으면 조회 후 데이터가 세팅됨
+        HistoryJS.fnHistoryGet();
+    }
+
+    /**
+     * datepicker 세팅
+     * param : input ID
+     */
+    function fnDatePickerSet() {
+
+        $("#dt").daterangepicker({
+            locale: { format: 'YYYY-MM-DD', separator: " ~ " },
+            ranges: {
+                '금일': [moment(), moment()],
+                '전일': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                '지난7일': [moment().subtract(6, 'days'), moment()],
+                '지난30일': [moment().subtract(29, 'days'), moment()],
+                '금월': [moment().startOf('month'), moment().endOf('month')],
+                '전월': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        });
+
+        //초기 value 값 지정시 필요
+        //$("#dd").data('daterangepicker').setStartDate("2021-07-01");
+        //$("#dd").data('daterangepicker').setEndDate("2021-07-30");
+
+        }
+
+    //검색
+    function fnSearch(sOption) {
+        var param = $('#searchForm').serializeObject();   //폼 입력값을 객체로 변경        
+        param.ms = $("#ms").val().toString(); //멀티 셀렉트 처럼 배열로 값이 들어 갈때 문자열로 만들어야되는 경우 사용
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Example/ExampleFormDataSend")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: false,            
+            success: function (result) {   
+                $("#resultTable").empty();
+                for (rs in result) {
+                    var rsHtml = "";
+                    rsHtml += "<tr>"
+                    rsHtml += "<td>" + rs + " : "
+                    rsHtml += "</td>"
+                    rsHtml += "<td>" + result[rs]
+                    rsHtml += "</td>"
+                    rsHtml += "</tr>"
+                    $("#resultTable").append(rsHtml);
+                }
+            }
+        });
+    }
+
+    </script>
+    <!--모달 불러오기-->
+    @Html.Partial("~/Views/Modal/Common/UserSearch.cshtml")    
+}

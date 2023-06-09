@@ -1,0 +1,19 @@
+﻿<footer class="footer footer-static footer-light">
+    <p class="clearfix mb-0">
+        <span class="float-left d-inline-block">            
+            <a href="#" onclick="privacy_popup('@Url.Content("~/privacy/privacy_policy.html")');"><b><font style="color:red;">Privacy</font></b></a> <font> | </font>
+            <strong>Copyright 2023 Portfolio. all right reserved.</strong> <b>ver</b> KAP_1.0.1
+        </span>        
+    </p>
+</footer>
+
+<script>
+    function privacy_popup(url) {
+        var width = 870;
+        var height = 670;
+        var left = (screen.width / 2) - (width / 2);
+        var top = (screen.height / 2) - (height / 2);
+        var style = "width=" + width + ", height=" + height + ", left=" + left + ", top=" + top + ",scrollbars=yes";
+        window.open(url, "_blank", style);
+    }
+</script>

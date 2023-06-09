@@ -1,0 +1,157 @@
+﻿@model IEnumerable<proTnsWeb.Models.Menu>
+@DisplayMenuTree(Model.Where(n => n.key_MenuParent == "0").ToList())
+@helper DisplayMenuTree(IEnumerable<proTnsWeb.Models.Menu> menu)
+{    
+    var selMenuKey = Session["selMenuKey"];
+
+    <div data-menu="vertical-menu-modern" class="main-menu menu-fixed menu-light menu-accordion menu-shadow expanded">
+        <!--메뉴 헤더 시작-->
+        <div class="navbar-header expanded">
+            <ul class="nav navbar-nav flex-row">
+                <li class="nav-item mr-auto">
+                    <a class="navbar-brand" href="@Url.Content("~/")">
+                        <div class="brand-logo">
+                            <img src="~/Resources/Images/brand_logo.png" style="max-height:100%; width:100%; display:block;">
+                        </div>
+                        <h2 class="brand-text mb-0">Portfolio</h2>
+                    </a>
+                </li>
+                <li class="nav-item nav-toggle"><a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse"><i class="bx bx-x d-block d-xl-none font-medium-4 primary"></i><i class="toggle-icon bx-disc font-medium-4 d-none d-xl-block primary bx" data-ticon="bx-disc"></i></a></li>
+            </ul>
+        </div>
+        <!--메뉴 헤더 끝-->
+        <!--메뉴 본문 시작-->
+        <div class="main-menu-content ps ps--active-y">
+            <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation" data-icon-style="lines">
+            @foreach (var m in menu)
+            {
+                // 하위 메뉴 가져오기
+                var submenu = Model.Where(n => n.key_MenuParent == m.key_Menu).ToList();                    
+
+                //하위메뉴 유무에 따른 분기
+                //하위 메뉴 있을 시 url 링크 대신 하위메뉴 펼치기
+                if (submenu != null && submenu.Count > 0)
+                {
+                    <li class="nav-item @((selMenuKey as string == m.key_Menu) ? "active" : "")">
+                        <a href="#">
+                            <i class="menu-livicon livicon-evo-holder" data-icon="@m.ds_Icon"></i>
+                            <span class="menu-title text-truncate" data-i18n="@m.ds_Icon" data-placement="right" data-original-title="@m.ds_MenuTooltip" data-trigger="hover" data-toggle="tooltip">@m.nm_Menu</span>
+                        </a>
+                        <ul class="menu-content">
+                        @foreach (var subm in submenu)
+                        {
+                            var sub = Model.Where(n => n.key_MenuParent == subm.key_Menu).ToList();
+                            if (sub != null && sub.Count > 0)
+                            {
+                                        <li class="nav-item @((selMenuKey as string == subm.key_Menu) ? "active" : "")">
+                                            <a href="#">
+                                                <i class="bx bx-right-arrow-alt"></i>
+                                                <span class="menu-title text-truncate" data-i18n="@subm.ds_Icon" data-placement="right" data-original-title="@subm.ds_MenuTooltip" data-trigger="hover" data-toggle="tooltip">@subm.nm_Menu</span>
+                                            </a>
+                                            <ul class="menu-content">
+                                                @foreach (var sm in sub)
+                                                {
+                                                    <li class="nav-item @((selMenuKey as string == sm.key_Menu) ? "active" : "")" style="cursor:pointer;">
+                                                        <a class='d-flex align-items-center' onclick="fnMenuMove('@sm.key_Menu', '@sm.nm_Menu', '@Url.Content(@sm.url_Menu.ToString() == "" ? " " : @sm.url_Menu.ToString())', '')">
+                                                            <i class="bx bx-right-arrow-alt"></i>
+                                                            <span class="menu-title text-truncate" data-i18n="Third Level" data-placement="right" data-original-title="@sm.ds_MenuTooltip" data-trigger="hover" data-toggle="tooltip">@sm.nm_Menu</span>
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </li>
+                            }
+                            else
+                            {
+                                        <li class="nav-item @((selMenuKey as string == subm.key_Menu) ? "active" : "")" style="cursor:pointer;">
+                                            <a class='d-flex align-items-center' onclick="fnMenuMove('@subm.key_Menu', '@subm.nm_Menu', '@Url.Content(@subm.url_Menu.ToString() == "" ? " " : @subm.url_Menu.ToString())', '')">
+                                                <i class="bx bx-right-arrow-alt"></i>
+                                                <span class="menu-title text-truncate" data-i18n="" data-placement="right" data-original-title="@subm.ds_MenuTooltip" data-trigger="hover" data-toggle="tooltip">@subm.nm_Menu</span>
+                                            </a>
+                                        </li>
+                            }
+                        }
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item @((selMenuKey as string == m.key_Menu) ? "active" : "")">
+                        <a onclick='fnMenuMove("@m.key_Menu", "@m.nm_Menu", "@Url.Content(@m.url_Menu.ToString() == "" ? " " : @m.url_Menu.ToString())", "")'>
+                            <i class="menu-livicon livicon-evo-holder" data-icon="@m.ds_Icon"></i>
+                            <span class="menu-title text-truncate" data-i18n="@m.ds_Icon" data-placement="right" data-original-title="@m.ds_MenuTooltip" data-trigger="hover" data-toggle="tooltip">@m.nm_Menu</span>
+                        </a>
+                    </li>
+                }                    
+            }            
+            </ul>
+            <div class="ps__rail-x">
+                <div class="ps__thumb-x" tabindex="0"></div>
+            </div>
+            <div class="ps__rail-y">
+                <div class="ps__thumb-y" tabindex="0"></div>
+            </div>
+        </div>
+        <!--메뉴 본문 끝-->
+    </div>
+}
+<script>
+
+    //메뉴로 이동시 Session[moveAndback] 값 menu로 변경
+    function fnMenuMove(selMenuKey, selMenuNm, url, type) {
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Common/SessionMoveAndBackChange")",
+            data: {
+                selMenuKey: selMenuKey,
+                selMenuNm: selMenuNm,
+                type: type
+            },
+            dataType: 'text',
+            async: true,
+            success: function (data) {
+                //type이 blank일때 (즉 새창열기 일때) 만들어진 토큰 값으로 해당 url이동
+                if (type == "blank") {
+                    fnTokenLogin(url,data)                    
+                } else {
+                    location.href = url;
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                location.reload();
+            }
+        });
+    }
+
+    //만들어진 토큰을 post 방식으로 전달
+    function fnTokenLogin(url, token) {
+
+        //폼 요소 생성
+        let tokenForm = document.createElement('form');
+
+        //폼 속성 값 추가
+        tokenForm.name = "tokenForm";
+        tokenForm.action = url;
+        tokenForm.method = "post";
+        tokenForm.target = "_blank";
+
+        //input 요소 생성
+        let inputToken = document.createElement('input');
+
+        //input 속성 값 추가
+        inputToken.setAttribute("type", "hidden");
+        inputToken.setAttribute("name", "access_token");
+        inputToken.setAttribute("value", token);
+
+        //폼에 input 넣기
+        tokenForm.appendChild(inputToken);
+
+        //body에 form 넣기
+        document.body.appendChild(tokenForm);
+
+        tokenForm.submit();
+
+        //만들어진 form삭제
+        document.body.removeChild(tokenForm);
+    }
+</script>

@@ -1,0 +1,588 @@
+﻿@Styles.Render("~/frest/css/dashBoard")
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+        </div>
+        <div class="content-body">            
+            <section>
+                <div class="row">                    
+                    @*비용 영역 S*@
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <div>
+                                    <i class="livicon-evo" data-options="name:coins; size:70px;" id="monthCostIcon"></i>
+                                </div>
+                                <h5>이번달 비용</h5>
+                                <h3 class="mb-0" id="monthCost"></h3>
+                            </div>
+                        </div>
+                    </div>
+                    @*비용 영역 E*@
+                    @*사용자 영역 S*@
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="livicon-evo" data-options="name:users; size:50px;" id="userIcon"></i>
+                                    <h6>사용자</h6>
+                                </div>                                                     
+                            </div>
+                            <div class="card-body d-flex justify-content-around">
+                                <div class="d-inline-flex mr-xl-2" style="position: relative;">
+                                    <div id="userCloudChart"></div>
+                                    <div class="profit-content ml-50 mt-50">
+                                        <h5 class="mb-0" id="userCloudText"></h5>
+                                        <small class="text-muted">클라우드</small>
+                                    </div>
+                                    <div class="resize-triggers"><div class="expand-trigger"><div style="width: 91px; height: 65px;"></div></div><div class="contract-trigger"></div></div>
+                                </div>
+                                <div class="d-inline-flex" style="position: relative;">
+                                    <div id="userOnPremisesChart"></div>
+                                    <div class="profit-content ml-50 mt-50">
+                                        <h5 class="mb-0" id="userOnPremisesText"></h5>
+                                        <small class="text-muted">복합</small>
+                                    </div>
+                                    <div class="resize-triggers"><div class="expand-trigger"><div style="width: 95px; height: 65px;"></div></div><div class="contract-trigger"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*사용자 영역 E*@
+                    @*컴퓨터 영역 S*@
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="livicon-evo" data-options="name:desktop; size:50px;" id="desktopIcon"></i>
+                                    <h6>컴퓨터</h6>
+                                </div>
+                            </div>
+                            <div class="card-body d-flex justify-content-around">
+                                <div class="d-inline-flex mr-xl-2" style="position: relative;">
+                                    <div id="shTotalChart"></div>
+                                    <div class="profit-content ml-50 mt-50">
+                                        <h5 class="mb-0" id="shTotalText"></h5>
+                                        <small class="text-muted">Total</small>
+                                    </div>
+                                    <div class="resize-triggers"><div class="expand-trigger"><div style="width: 91px; height: 65px;"></div></div><div class="contract-trigger"></div></div>
+                                </div>
+                                <div class="d-inline-flex" style="position: relative;">
+                                    <div id="shRunChart"></div>
+                                    <div class="profit-content ml-50 mt-50">
+                                        <h5 class="mb-0" id="shRunText"></h5>
+                                        <small class="text-muted">Running</small>
+                                    </div>
+                                    <div class="resize-triggers"><div class="expand-trigger"><div style="width: 95px; height: 65px;"></div></div><div class="contract-trigger"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*컴퓨터 영역 E*@
+                </div>
+                <div class="row">
+                    @*시간당 비교 차트영역 S*@
+                    <div class="col-md-6 col-sm-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center pb-0">
+                                <h3 class="card-title">시간당 비교 차트</h3>
+                            </div>
+                            <div class="card-body pb-1" style="position: relative;">
+                                <div id="timeVMconnectCntChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    @*시간당 비교 차트 영역 E*@
+                    @*일자별 시간(분) 차트 영역 S*@
+                    <div class="col-md-6 col-sm-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center pb-0">
+                                <h3 class="card-title">일자별 시간(분) 차트</h3>
+                            </div>
+                            <div class="card-body pb-1" style="position: relative;">
+                                <div id="dailyUserConnectionChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    @*일자별 시간(분) 차트 영역 E*@
+                </div>
+                <div class="row">
+                    @*일자별 시간(분) 차트 영역2 S*@
+                    <div class="col-md-6 col-sm-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center pb-0">
+                                <h3 class="card-title">일자별 시간(분) 차트2</h3>
+                            </div>
+                            <div class="card-body pb-1" style="position: relative;">
+                                <div id="dailyVMAllocationChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    @*일자별 시간(분) 차트 영역2 E*@
+                    @*파이차트 영역 S*@
+                    <div class="col-md-6 col-sm-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center pb-0">
+                                <h3 class="card-title">파이 차트</h3>
+                            </div>
+                            <div class="card-body pb-1" style="position: relative;">
+                                <div id="typeCostChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    @*파이차트 영역 E*@
+                </div>
+
+                <div class="row">
+                    @*Task 영역 S*@
+                    <div class="col-lg-12">
+                        <div class="card widget-notification">
+                            <div class="card-header border-bottom">
+                                <h4 class="card-title d-flex align-items-center">
+                                    Task
+                                </h4>
+                            </div>
+                            <div class="card-body p-0">
+                                <ul id="taskBoardTable" class="list-group list-group-flush ">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    @*TASK 영역 E*@
+                </div>
+            </section>            
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    fnBasicDataSearch();
+    fnTimeVMconnectCntSearch();
+    fnDailyVMAllocationSearch();
+    fnDailyUserConnectionSearch();
+    fnTypeCostSearch();
+
+    @* 정시 마다 실행 *@
+    fnRefreshOnTheHourChart();
+
+    @* js doucument ready *@
+    document.addEventListener("DOMContentLoaded", function () {
+        fnTaskTableSearch();
+    });
+
+    @* 기본 데이터(쿼리가 간단한) 하나의 프로시저에서 조회함 *@
+    function fnBasicDataSearch() {
+        fetch("@Scripts.Url("~/Main/GetBasicData")", {
+            method: 'post'
+        })
+        .then(res => res.json())
+            .then(data => {
+                
+            @* 이번달 비용 *@
+                let monthCost = data.Table0;
+                let totalCost = Number(monthCost[0].TotalCost).toLocaleString("en-US", { style: "currency", currency: "KRW" });
+                document.querySelector("#monthCost").innerText = totalCost;
+
+            @* 사용자 (작은 도넛차트) *@
+                let userData = data.Table1;
+                let cloudCnt = Number.parseInt(userData[0].userCnt);
+                let onPromiseCnt = Number.parseInt(userData[1].userCnt);
+
+                @* 카운트 text 세팅 *@
+                document.querySelector("#userCloudText").innerText = cloudCnt;
+                document.querySelector("#userOnPremisesText").innerText = onPromiseCnt;
+
+                let chartData = {};
+
+                @* 클라우드 차트 *@
+                chartData.series = [cloudCnt, onPromiseCnt];
+                chartData.colors = ['#B95050', '#d2d2d2'];
+                fnSmallDonutApexChart('userCloudChart', chartData);
+
+                @* 복합 차트 *@
+                chartData = {};
+                chartData.series = [cloudCnt, onPromiseCnt];
+                chartData.colors = ['#d2d2d2', '#B95050'];
+                fnSmallDonutApexChart('userOnPremisesChart', chartData);
+
+            @* 세션호스트(작은 도넛차트) *@
+                let sessionHostData = data.Table2;
+                let total = Number.parseInt(sessionHostData[0].TOTAL);
+                let running = Number.parseInt(sessionHostData[0].RUNNING);
+
+                @* 카운트 text 세팅 *@
+                document.querySelector("#shTotalText").innerText = total;
+                document.querySelector("#shRunText").innerText = running;
+
+                let shChartData = {};
+
+                @* TOTAL 차트 *@
+                shChartData.series =[cloudCnt, onPromiseCnt];
+                shChartData.colors = ['#1E90FF', '#d2d2d2'];
+                fnSmallDonutApexChart('shTotalChart', shChartData);
+
+                @* Running 차트 *@
+                shChartData = { };
+                shChartData.series = [cloudCnt, onPromiseCnt];
+                shChartData.colors = ['#d2d2d2', '#1E90FF'];
+                fnSmallDonutApexChart('shRunChart', shChartData);
+
+                @* 아이콘 설정 *@
+                setTimeout(function () {
+                    fnDashBoardIconSet();
+                }, 1000);
+        })
+        .catch(err => {
+            console.log("fnBasicDataSearch Error", err);
+        });
+    }
+
+    @* 대시보드 아이콘 기능 설정 *@
+    function fnDashBoardIconSet() {
+        @* 이번달 비용 아이콘 반복 실행 *@
+        $("#monthCostIcon").playLiviconEvo({ duration: 2, repeat: 3 });
+        $("#userIcon").playLiviconEvo({ duration: 2, repeat: 3 });
+        $("#desktopIcon").playLiviconEvo({ duration: 2, repeat: 3 });
+    }
+
+    @* 정시마다 차트 새로고침
+       #적용중 차트
+       1.시간당 VM 접속 수 차트
+    *@
+    function fnRefreshOnTheHourChart() {
+        let now = new Date();
+        let minutes = now.getMinutes();
+        let seconds = now.getSeconds();
+        let milliseconds = now.getMilliseconds();
+        let timeToRefresh = (60 - minutes) * 60 * 1000 - seconds * 1000 - milliseconds; // 다음 정각까지 남은 시간 계산
+
+        setTimeout(function () {
+            fnTimeVMconnectCntSearch();
+            setInterval(fnTimeVMconnectCntSearch, 60 * 60 * 1000); // 정시마다 자동으로 새로고침
+        }, timeToRefresh);
+    }
+
+    @* 시간당 VM 접속 수 조회 *@
+    function fnTimeVMconnectCntSearch() {
+        fetch("@Scripts.Url("~/Main/GetTimeVMConnectCnt")", {
+            method: 'post'
+        })
+        .then(res => res.json())
+            .then(data => {
+                fnMultiAxisChart("timeVMconnectCntChart", data);
+        })
+        .catch(err => {
+            console.log("fnTimeVMconnectCntSearch Error", err);
+        });
+    }
+
+    @* 일자별 VM 할당 시간 조회 *@
+    function fnDailyVMAllocationSearch() {
+        fetch("@Scripts.Url("~/Main/GetDailyVMAllocation")", {
+            method: 'post'
+        })
+        .then(res => res.json())
+            .then(data => {
+                fnSingleAreaApexChart("dailyVMAllocationChart", data.Table0, "#00FF00");
+        })
+        .catch(err => {
+            console.log("fnDailyVMAllocationSearch Error", err);
+        });
+    }
+
+    @* 일자별 사용자 연결 시간 *@
+    function fnDailyUserConnectionSearch() {
+        fetch("@Scripts.Url("~/Main/GetDailyUserConnection")", {
+            method: 'post'
+        })
+        .then(res => res.json())
+            .then(data => {
+                fnSingleAreaApexChart("dailyUserConnectionChart", data.Table0, "#FAAC58");
+        })
+        .catch(err => {
+            console.log("fnDailyUserConnectionSearch Error", err);
+        });
+    }
+
+    @* 타입별 비용 *@
+    function fnTypeCostSearch() {
+        fetch("@Scripts.Url("~/Main/GetTypeCost")", {
+            method: 'post'
+        })
+        .then(res => res.json())
+            .then(data => {
+                fnPieChart("typeCostChart", data);
+        })
+        .catch(err => {
+            console.log("fnTypeCostSearch Error", err);
+        });
+    }
+
+    @* TASK Talble 조회 *@
+    function fnTaskTableSearch() {
+        fetch("@Scripts.Url("~/Main/GetTask")", {
+            method: 'post'
+        })
+        .then(res => res.json())
+            .then(data => {
+                document.querySelector("#taskBoardTable").innerHTML = "";
+                data.forEach(function (row, index, array) {
+                    $("<li class='task-list-row'> <div class= 'list-left d-flex justify-content-between align-items-center' > <div class='list-content text-truncate' data-toggle='tooltip' data-placement='top' title='' data-original-title='" + row.DS_CONTENT + "'> <span class='list-title truncate'>" + row.DS_CONTENT + "</span> <small class='text-muted d-block'>" + row.DTM_LOG + "</small> </div> <div class='badge badge-pill badge-light-" + row.STATUSImg + "'>" + row.DS_CATEGORY + "</div> </div > </li >").appendTo($("#taskBoardTable"));
+                });
+        })
+        .catch(err => {
+            console.log("fnTaskTableSearch Error", err);
+        });
+    }
+
+    @*작은 Donut 차트*@
+    function fnSmallDonutApexChart(chartId, chartData) {
+
+        let chartOpt = {
+            chart: {
+                height: 75,
+                width: 55,
+                type: 'donut',
+            },
+            dataLabels: {
+                enabled: false
+            },
+            series: chartData.series,
+            stroke: {
+                width: 0,
+                lineCap: 'round',
+            },
+            colors: chartData.colors,
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '70%'
+                    }
+                }
+            },
+            legend: {
+                show: false
+            },
+            tooltip: {
+                enabled: false
+            }
+        }
+        var chart = new ApexCharts(
+            document.querySelector("#" + chartId),
+            chartOpt
+        );
+        chart.render();
+    }
+
+    @* 영역 차트 *@
+    function fnSingleAreaApexChart(chartId, chartData, colorData) {
+
+        var categorieslist = [];
+        var serieslist = [];
+
+        for (let i = 0; i < chartData.length; i++) {
+            categorieslist.push(chartData[i].categories)
+            serieslist.push(Number.parseInt(chartData[i].series))
+        }
+
+        let chartOpt = {
+            chart: {
+                height: 300,
+                type: 'area',
+                stacked: true
+            },
+            colors: [colorData],
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth'
+            },
+            series: [{
+                data: serieslist
+            }],
+            legend: {
+                show: true
+            },
+            xaxis: {
+                type: 'datetime',
+                datetimeFormatter: {
+                    month: "mm",
+                    day: 'dd',
+                },
+                categories: categorieslist
+            },
+            toolbar: {
+                show: false
+            }, tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val.toLocaleString();
+                    }
+                }
+            }
+        }
+        let chart = new ApexCharts(
+            document.querySelector("#" + chartId),
+            chartOpt
+        );
+        chart.render();
+    }
+
+    @* 다축 차트 *@
+    function fnMultiAxisChart(chartId, chartData) {
+
+        let categories = [];
+        chartData.Table0.forEach(function (item) {
+            categories.push(item.H);
+        });
+
+        let todayDat = [];
+        chartData.Table0.forEach(function (item) {
+            todayDat.push(item.TODAY_VM_CONNECTIONS);
+        });
+
+        let yesterdayDat = [];
+        chartData.Table0.forEach(function (item) {
+            yesterdayDat.push(item.YESTERDAY_VM_CONNECTIONS);
+        });
+
+        let avgDat = [];
+        chartData.Table0.forEach(function (item) {
+            avgDat.push(item.AVG_VM_CONNECTIONS);
+        });
+
+        var options = {
+            chart: {
+                height: 300,
+                type: "line",
+                stacked: false
+            },
+            dataLabels: {
+                enabled: false
+            },
+            colors: ['#FA5858', '#5882FA', '#642EFE'],
+            series: [
+
+                {
+                    name: 'ToDay',
+                    type: 'column',
+                    data: todayDat
+                },
+                {
+                    name: "YesterDay",
+                    type: 'column',
+                    data: yesterdayDat
+                },
+                {
+                    name: "AVG",
+                    type: 'line',
+                    data: avgDat
+                },
+            ],
+            stroke: {
+                width: [4, 4, 4]
+            },
+            plotOptions: {
+                bar: {
+                    columnWidth: "70%"
+                }
+            },
+            xaxis: {
+                categories: categories
+            },
+            yaxis: [
+
+            ],
+            tooltip: {
+                shared: true,
+                intersect: false,
+                x: {
+                    show: false
+                }
+            },
+            legend: {
+                horizontalAlign: "center",
+                offsetX: 40
+            }
+        };
+
+        let chartEl = document.querySelector("#" + chartId);
+        if (chartEl) {
+            chartEl.innerHTML = ''; // 차트를 삭제
+        }
+
+        let chart = new ApexCharts(document.querySelector("#" + chartId), options);
+
+        chart.render();
+    }
+
+    @* 파이 차트 *@
+    function fnPieChart(chartId, chartData) {
+        let total = 0;                
+        let resourceType = [];
+        chartData.Table0.forEach(function (item) {
+            if (item.ResourceType != "Total") {
+                resourceType.push(item.ResourceType);
+            }         
+        });
+
+        let totalCost = [];
+        chartData.Table0.forEach(function (item) {
+            if (item.ResourceType != "Total") {
+                totalCost.push(parseInt(item.TotalCost));
+            } else {
+                total = parseInt(item.TotalCost).toLocaleString();
+            }   
+        });
+
+        let currentMonth = chartData.Table1[0].CurrentMonth;                
+
+        var options = {
+            series: totalCost,
+            chart: {
+                height: 345,
+                //width: 500,
+                type: 'pie',
+            },
+            labels: resourceType,
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val.toLocaleString();
+                    }
+                }
+            },
+            legend: {
+                position: 'bottom'
+            },
+            title: {
+                text: currentMonth + " / " + "Total : " + total,
+                align: 'center',
+                margin: 20,
+                style: {
+                    fontSize: '15px' // 제목 폰트 크기
+                   ,color: '#333' // 제목 색상
+                    //,fontWeight: 'bold' // 제목 글씨 두께
+                }
+            },
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 200
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }]
+        };
+
+        var chart = new ApexCharts(document.querySelector("#" + chartId), options);
+        chart.render();
+
+    }
+</script>

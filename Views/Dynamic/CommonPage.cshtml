@@ -1,0 +1,1118 @@
+﻿@using System.Collections;
+@{
+    //검색조건 ViewBag Data
+    Dictionary<string, object> searchAreaData = new Dictionary<string, object>();
+    searchAreaData = ViewBag.searchArea.Data[0];
+
+    //검색 조건 타이틀
+    string title = searchAreaData.ContainsKey("TITLE") ? searchAreaData["TITLE"].ToString() : "";
+    //검색 조건 사용 여부
+    string searchUseYn = searchAreaData.ContainsKey("YN_USE") ? searchAreaData["YN_USE"].ToString() : "";
+    string[] useYnArr = searchUseYn.Split(',');
+    int useYnCnt = searchUseYn.IsEmpty() ? 0 : useYnArr.Length;
+
+    //검색 조건 타이틀
+    string conditionTitle = searchAreaData.ContainsKey("CONDITION_TITLE") ? searchAreaData["CONDITION_TITLE"].ToString() : "";
+    string[] conditionTitleArr = conditionTitle.Split(',');
+
+    //검색 조건 id
+    string id = searchAreaData.ContainsKey("ID") ? searchAreaData["ID"].ToString() : "";
+    string[] idArr = id.Split(',');
+
+    //검색 조건 name
+    string name = searchAreaData.ContainsKey("NM") ? searchAreaData["NM"].ToString() : "";
+    string[] nameArr = name.Split(',');
+
+    //검색 조건 값
+    string value = searchAreaData.ContainsKey("VAL") ? searchAreaData["VAL"].ToString() : "";
+    string[] valueArr = value.Split(',');
+
+    //검색 조건 스타일
+    string style = searchAreaData.ContainsKey("STYLE") ? searchAreaData["STYLE"].ToString() : "";
+    string[] styleArr = style.Split(',');
+
+    /**************************함수*******************************/
+
+
+    //함수 ViewBag Data
+    Dictionary<string, object> pageFunctionData = new Dictionary<string, object>();
+    pageFunctionData = ViewBag.pageFunction.Data[0];
+
+    //함수 드롭다운으로 만들 input ID
+    string ID_DD = pageFunctionData.ContainsKey("ID_DD") ? pageFunctionData["ID_DD"].ToString() : "";
+    string[] ID_DDArr = ID_DD.Split(',');
+    int ID_DD_LEN = ID_DD.IsEmpty() ? 0 : ID_DDArr.Length;
+
+    //드롭다운 값
+    string DDList = pageFunctionData.ContainsKey("DDList") ? pageFunctionData["DDList"].ToString() : "";
+
+    //함수 드롭다운 기본값
+    string VAL_DD_DEFAULT = pageFunctionData.ContainsKey("VAL_DD_DEFAULT") ? pageFunctionData["VAL_DD_DEFAULT"].ToString() : "";
+    string[] VAL_DD_DEFAULTArr = VAL_DD_DEFAULT.Split(',');
+
+    //함수 드롭다운 데이터 중 '전체' 사용여부(값이 있을 시 사용하지않음, 값이 null이라면 사용)
+    string VAL_DD_ALLYN = pageFunctionData.ContainsKey("VAL_DD_ALLYN") ? pageFunctionData["VAL_DD_ALLYN"].ToString() : "";
+    string[] VAL_DD_ALLYNArr = VAL_DD_ALLYN.Split(',');
+
+    //함수 multiSelect input ID
+    string ID_MS = pageFunctionData.ContainsKey("ID_MS") ? pageFunctionData["ID_MS"].ToString() : "";
+    string[] ID_MSArr = ID_MS.Split(',');
+    int ID_MS_LEN = ID_MS.IsEmpty() ? 0 : ID_MSArr.Length;
+
+    //함수 multiSelect 쿼리문
+    string QUERY_MS = pageFunctionData.ContainsKey("QUERY_MS") ? pageFunctionData["QUERY_MS"].ToString() : "";
+    string[] QUERY_MSArr = QUERY_MS.Split(',');
+
+    //multiSelect 값
+    string MSList = pageFunctionData.ContainsKey("MSList") ? pageFunctionData["MSList"].ToString() : "";
+
+    //함수 multiSelect 기본값
+    string VAL_MS_DEFAULT = pageFunctionData.ContainsKey("VAL_MS_DEFAULT") ? pageFunctionData["VAL_MS_DEFAULT"].ToString() : "";
+    string[] VAL_MS_DEFAULTArr = VAL_MS_DEFAULT.Split(',');
+
+
+    /**************************기타 설정값*******************************/
+
+    //기타 설정값 ViewBag Data
+    Dictionary<string, object> etcConfigValueData = new Dictionary<string, object>();
+    etcConfigValueData = ViewBag.etcConfigValue.Data[0];
+
+    //기타 설정값 프로시저 ID
+    string procedureId = etcConfigValueData.ContainsKey("procedureId") ? etcConfigValueData["procedureId"].ToString() : "";
+
+    //현재 페이지 url에 마지막 슬러시/ 뒤로 들어오는 값
+    string ID_PAGE = etcConfigValueData.ContainsKey("ID_PAGE") ? etcConfigValueData["ID_PAGE"].ToString() : "";
+
+    //기타 설정값 조회검색 URL
+    string URL_SEARCH = etcConfigValueData.ContainsKey("URL_SEARCH") ? etcConfigValueData["URL_SEARCH"].ToString() : "~/Dynamic/DynamicSearch";
+
+
+    /************************** 모달 *******************************/
+
+    //모달 설정값 ViewBag Data
+    Dictionary<string, object> modalData = new Dictionary<string, object>();
+    modalData = ViewBag.modal.Data[0];
+
+    //모달 type
+    string modalUrl = modalData.ContainsKey("URL_MODAL") ? modalData["URL_MODAL"].ToString() : "";
+    string[] modalUrlArr = modalUrl.Split(',');
+    int modalUrlCnt = modalUrl.IsEmpty() ? 0 : modalUrlArr.Length;
+
+    /**************************그리드 설정값*******************************/
+
+    //그리드 설정값 ViewBag Data
+    Dictionary<string, object> gridConfigValueData = new Dictionary<string, object>();
+    gridConfigValueData = ViewBag.gridConfigValue.Data[0];
+
+    //그리드 설정값 엑셀 파일명
+    string excelName = gridConfigValueData.ContainsKey("excelName") ? gridConfigValueData["excelName"].ToString() : "";
+
+    //그리드 설정값 jumpKey
+    string jumpKey = gridConfigValueData.ContainsKey("jumpKey") ? gridConfigValueData["jumpKey"].ToString() : "";
+    string[] jumpKeyArr = jumpKey.Split(',');
+
+    //그리드 설정값 jumpUrl
+    string jumpUrl = gridConfigValueData.ContainsKey("jumpUrl") ? gridConfigValueData["jumpUrl"].ToString() : "";
+    string[] jumpUrlArr = jumpUrl.Split(',');
+
+    //그리드에서 사용하는 버튼 ID
+    string ID_BTN_GRID = gridConfigValueData.ContainsKey("ID_BTN_GRID") ? gridConfigValueData["ID_BTN_GRID"].ToString() : "";
+    string[] ID_BTN_GRIDArr = ID_BTN_GRID.Split(',');
+    int ID_BTN_GRID_LEN = ID_BTN_GRID.IsEmpty() ? 0 : ID_BTN_GRIDArr.Length;
+
+    //그리드에서 사용하는 버튼 명
+    string NM_BTN_GRID = gridConfigValueData.ContainsKey("NM_BTN_GRID") ? gridConfigValueData["NM_BTN_GRID"].ToString() : "";
+    string[] NM_BTN_GRIDArr = NM_BTN_GRID.Split(',');
+
+    //그리드에서 사용하는 버튼 cshtml URL
+    string URL_BTN_GRID = gridConfigValueData.ContainsKey("URL_BTN_GRID") ? gridConfigValueData["URL_BTN_GRID"].ToString() : "";
+
+    //그리드 체크박스 사용 여부
+    string YN_CB_GRID = gridConfigValueData.ContainsKey("YN_CB_GRID") ? gridConfigValueData["YN_CB_GRID"].ToString() : "";
+
+    //그리드에서 툴바 사용 여부(show/hide)
+    string YN_TOOLBAR = gridConfigValueData.ContainsKey("YN_TOOLBAR") ? gridConfigValueData["YN_TOOLBAR"].ToString() : "";
+    string[] YN_TOOLBARArr = YN_TOOLBAR.Split(',');
+
+    //병합 타입
+    string TY_AB = gridConfigValueData.ContainsKey("TY_AB") ? gridConfigValueData["TY_AB"].ToString() : "";
+
+    //병합
+    string AB_USE_COL = gridConfigValueData.ContainsKey("AB_USE_COL") ? gridConfigValueData["AB_USE_COL"].ToString() : "";
+}
+@Styles.Render("~/frest/css/commonPage")
+@Scripts.Render("~/frest/js/commonPage")
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) 2022-04-13 ksh header부분 삭제 검색조건 타이틀로 넣음 -->
+        @if (useYnCnt < 1)
+        {
+            <section class="content-header row">
+                <div class="content-header-left col-12" style="padding-bottom:0.1%;">
+                    <div class="breadcrumbs-top">
+                        <div>
+                            <h5 class="content-header-title float-left pr-1 mb-0">@title</h5>
+                        </div>                                                
+                        <div style="float: right;">
+                            <div class="livicon-evo livicon-evo-holder" data-options="name:search; style:lines; size:35px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px;" onclick="fnSearch()"></div>
+                        </div>                        
+                    </div>
+                </div>
+            </section>
+        }
+            <!-- Main content -->
+            <section class="content-body">
+                <!--검색조건 영역 시작-->
+                @if (useYnCnt > 0)
+                {
+                    <section class="row" id="conditionRow" style="margin-bottom:-1.3%;">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header" data-action="collapse" style="padding-top:0.2%; padding-bottom:0.2%; padding-left:0.5%">
+                                    <div style="display:flex;">
+                                        <div><label class="card-title" style="font-size:x-large;">@title</label></div>
+                                        <div>
+                                            <div class="livicon-evo livicon-evo-holder" data-options="name:trash; style:lines; size:25px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:5px; margin-top:3px;" onclick="fnSearchReset()"></div>
+                                        </div>
+                                    </div>
+                                    <div class="heading-elements">
+                                        <ul class="list-inline mb-0">
+                                            <li><a data-action="collapse" class="rotate"><i class="bx bx-chevron-down"></i></a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-content collapse show" aria-expanded="true">
+                                    <div class="card-body" style="padding-bottom:0;">
+                                        <form id="searchForm" method="post" onsubmit="return false">
+
+                                            <!-- /.box-header -->
+                                            <div class="row">
+                                                <div class="col-md-11">
+                                                    <div class="row">
+                                                        @for (int i = 0; i < useYnCnt; i++)
+
+                                                        {
+                                                            <!--기간 datepiker인 경우-->
+                                                            if (useYnArr[i] == "Y_DT")
+                                                            {
+                                                                <div class="col-md-3">
+                                                                    <fieldset class="form-group">
+                                                                        <label>@conditionTitleArr[i]</label>
+                                                                        <input type="text" class="form-control Y-DT" id="@idArr[i]" name="@nameArr[i]" value="@valueArr[i]" style="@styleArr[i]">
+                                                                    </fieldset>
+                                                                </div>
+                                                            }
+                                                            //select2 (dropdown) 인경우
+                                                            else if (useYnArr[i] == "Y_DD")
+                                                            {
+                                                                <div class="col-md-3">
+                                                                    <fieldset class="form-group">
+                                                                        <label>@conditionTitleArr[i]</label>
+                                                                        <select id="@idArr[i]" class="form-control" name="@nameArr[i]" data-placeholder="Select..." style="height:34px; overflow:auto; width:100%; @styleArr[i]">
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+                                                            }
+                                                            //multiselect 인경우
+                                                            else if (useYnArr[i] == "Y_MULTISEL")
+                                                            {
+                                                                <div class="col-md-6">
+                                                                    <fieldset class="form-group">
+                                                                        <label>@conditionTitleArr[i]</label>
+                                                                        <select id="@idArr[i]" class="form-control" name="@nameArr[i]" multiple="multiple" data-placeholder="Select..." style="height:34px; overflow:auto; width:100%; @styleArr[i]">
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+                                                            }
+                                                            //검색조건 검색 & 모달 방식
+                                                            else if (useYnArr[i] == "Y_SM")
+                                                            {
+                                                                string[] smIdArr = idArr[i].Split('&');
+                                                                string[] smNmArr = nameArr[i].Split('&');
+
+                                                                <div class="col-md-3">
+                                                                    <fieldset class="form-group">
+                                                                        <label>@conditionTitleArr[i]</label>
+                                                                        <div style="display:flex;">
+                                                                            <input type="text" class="form-control input-SM" id="@smIdArr[0]" name="@smNmArr[0]" style="width:45%;"> <!-- 클래스에 input-SM 넣은 이유 : 검색조건 영역에서 엔터시 해당 input만 검색 안되게-->
+                                                                            <input type="text" class="form-control" id="@smIdArr[1]" name="@smNmArr[1]" style="width:40%;" readonly="readonly">
+                                                                            <div class="livicon-evo livicon-evo-holder" id="BTN_USER" data-options="name:search; style:lines; size:40px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;"></div>
+                                                                        </div>
+                                                                    </fieldset>
+                                                                </div>
+                                                            }
+                                                            //검색조건 안쓰는경우
+                                                            else if (useYnArr[i] == "N")
+                                                            {
+
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="col-md-3">
+                                                                    <fieldset class="form-group">
+                                                                        <label>@conditionTitleArr[i]</label>
+                                                                        <input type="text" class="form-control" id="@idArr[i]" name="@nameArr[i]" value="@valueArr[i]" style="width:100%; @styleArr[i]">
+                                                                    </fieldset>
+                                                                </div>
+                                                            }
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div style="float: right;">
+                                                        <div class="livicon-evo livicon-evo-holder mt-2" data-options="name:search; style:lines; size:40px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;" onclick="fnSearch()"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- /.row -->
+                                            <!--검색조건 영역 끝-->
+                                            <!-- 검색 -->
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+                        </div>
+                    </section>
+                }
+                <!-- /.box -->
+                <!--그리드 추가 버튼영역-->
+                @if (ID_BTN_GRID != "")
+                {
+                    <section class="row" id="buttonRow" style="margin-bottom: -1.3%;">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body" style="padding:0.2%;">
+                                    @for (int i = 0; i < ID_BTN_GRID_LEN; i++)
+                                    {
+
+                                        <button class="btn btn-outline-dark" type="button" id="@ID_BTN_GRIDArr[i]">@NM_BTN_GRIDArr[i]</button>
+
+                                    }                                   
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                }
+                <!--/그리드 추가 버튼영역 끝-->
+                <section class="row">
+                    <div class="col-md-12">
+                        <div class="card" style="margin-bottom:0px;">
+                            <div class="card-body" style="padding:0px;">
+                                <!-- /.box -->
+                                <div id="grid" style="min-height:300px"></div>
+                                <!-- /.box -->
+                                <div class="loadingBar"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.col (left) -->
+                </section>
+                <!-- /.row -->
+            </section>
+            <!-- /.content -->
+        </div>
+</div>
+@section Scripts
+{
+    <script type="text/javascript">
+    $(document).ready(function () {
+        fnInit();
+        fnEvent();
+    });
+
+    //페이지 로드 후 실행
+    $(window).ready(function () {
+        fnLast();
+    });
+
+    function fnInit() {
+
+        //스타일 변경 설정
+        fnStyleChange();
+
+        //datepicker 설정
+        fnDatePickerSet();
+
+        //드롭다운 S
+        var ID_DDArr = "@ID_DD";
+        ID_DDArr = ID_DDArr.split(",");
+        var ID_DD_LEN = @ID_DD_LEN;
+        var DDList = @Html.Raw(Json.Encode(DDList)); //드롭다운 값을 json형태의 string값으로 변경
+        DDListArr = DDList.split("**");
+        var VAL_DD_ALLYNArr = "@VAL_DD_ALLYN";
+        VAL_DD_ALLYNArr = VAL_DD_ALLYNArr.split(",");
+
+        var VAL_DD_DEFAULT = @Html.Raw(Json.Encode(VAL_DD_DEFAULTArr)); //기본값
+
+        var param = {};
+        for (var i = 0; i < ID_DD_LEN; i++) {
+            var data = [];
+            if (VAL_DD_ALLYNArr[i] == "") {
+                data = [{ NM_DD: "전체", VAL_DD: "all" }];
+            }
+
+            data = $.merge(data, JSON.parse(DDListArr[i]).data); //json형 string값을 json으로 변경
+
+            ComJS.fnDataKeyRedefine("DD", data);
+
+            $("#" + ID_DDArr[i]).select2({
+                data: data
+            });
+            if (VAL_DD_DEFAULT[i] == '') {
+                $("#" + ID_DDArr[i]).val(data[0].VAL_DD).trigger('change');
+            }
+            else {
+                $("#" + ID_DDArr[i]).val(VAL_DD_DEFAULT[i]).trigger('change');
+            }
+
+            $("#" + ID_DDArr[i]).on('select2:select', function (e) {
+                fnSearch(); // 드롭다운 값 변경시 조회
+            });
+        }
+        //드롭다운 E
+
+        //InputBox Enter키 입력 시 조회
+        var useYnArr = @Html.Raw(Json.Encode(@useYnArr));
+        var useYnCnt = @useYnArr.Count();
+        var idArr = @Html.Raw(Json.Encode(@idArr));
+        var isDD = false;
+        if (useYnArr != null && useYnArr != "") {
+            for (var i = 0; i < useYnCnt; i++) {
+                if (useYnArr[i] == 'Y') {
+                    for (var j = 0; j < ID_DD_LEN; j++) {
+                        if (idArr[i] == ID_DDArr[j]) {
+                            isDD = true;
+                        }
+                    }
+                    if (!isDD) {
+                        $("#" + idArr[i]).on('keypress', function (e) {
+                            if (e.key === 'Enter' || e.keyCode === 13) {
+                                fnSearch();
+                            }
+                        })
+                    }
+                    isDD = false;
+                }
+            }
+        }
+
+       //multiselect
+        var ID_MSArr = "@ID_MS";
+        ID_MSArr = ID_MSArr.split(",");
+        var ID_MS_LEN = @ID_MS_LEN;
+        var MSList = @Html.Raw(Json.Encode(MSList)); //드롭다운 값을 json형태의 string값으로 변경
+        MSListArr = MSList.split("**");
+
+        var VAL_MS_DEFAULTArr = @Html.Raw(Json.Encode(VAL_MS_DEFAULTArr)); //기본값
+
+        for (var i = 0; i < ID_MS_LEN; i++) {
+            var data = [{ NM_MS: "전체", VAL_MS: "all" }];
+            data = $.merge(data, JSON.parse(MSListArr[i]).data); //json형 string값을 json으로 변경
+
+            ComJS.fnDataKeyRedefine("MS", data);
+
+            $("#" + ID_MSArr[i]).select2({
+                data: data
+            });
+            if (VAL_MS_DEFAULTArr[i] == '') {
+                $("#" + ID_MSArr[i]).val(data[0].VAL_MS);
+            }
+            else {
+                $("#" + ID_MSArr[i]).val(VAL_MS_DEFAULTArr[i]);
+            }
+            $("#" + ID_MSArr[i]).trigger('change.select2');
+
+            // 2021-04-28 ADD HS MultiSelect 아이템 선택에 따른 수정
+            $("#" + ID_MSArr[i]).on('select2:select', function (e) {
+
+                // 2021-04-28 COM HS 선택한 옵션 id
+                var val = e.params.data.id;
+
+                // 2021-04-28 COM HS 선택되어있는 옵션 id
+                var val_old = $("#" + e.target.name).val();
+
+                // 2021-04-28 COM HS '전체' 아이템 선택 시
+                if (val == "all") {
+                    $("#" + e.target.name).val(null).trigger("change");
+                    $("#" + e.target.name).val("all");
+                    $("#" + e.target.name).trigger('change.select2');
+                }
+
+                // 2021-04-28 COM HS 그 외 아이템 선택 시
+                else {
+                    for (var i = 0; i < val_old.length; i++) {
+                        if (val_old[i] == "all") {
+                            val_old.splice(i, 1);
+                            $("#" + e.target.name).val(val_old);
+                            $("#" + e.target.name).trigger('change.select2');
+                        }
+                    }
+                }
+                fnSearch();
+            });
+
+            // 2021-04-28 ADD HS '전체' 아이템 선택 해제 불가하게 변경
+            $("#" + ID_MSArr[i]).on('select2:unselect', function (e) {
+                // 2021-04-28 COM HS 선택한 옵션 id
+                var val = e.params.data.id;
+
+                // 2021-04-28 COM HS '전체' 아이템 선택 시
+                if (val == "all") {
+                    $("#" + e.target.name).val("all");
+                    $("#" + e.target.name).trigger('change.select2');
+                    $("#" + e.target.name).select2('close');
+                }
+
+                if ($(this).val() == "" ) {
+                    $("#" + e.target.name).val("all");
+                    $("#" + e.target.name).trigger('change.select2');
+                    $("#" + e.target.name).select2('close');
+                    fnSearch();
+                }
+            });
+        }
+
+        // Collapsible Card 여백을 줄이기 위해 app.js에서 가져와 다시 이벤트 걸기 2022.04.13.강승호
+        $('a[data-action="collapse"]').off("click").on("click", function (e) {
+            e.preventDefault()
+            $(this)
+                .closest(".card")
+                .children(".card-content")
+                .collapse("toggle")
+            // Adding bottom padding on card collapse
+            $(this)
+                .closest(".card")
+                .children(".card-header")
+                //.css("padding-bottom", "1.5rem") //이 부분을 없애기 위해 가져옴
+            $(this)
+                .closest(".card")
+                .find('[data-action="collapse"]')
+                .toggleClass("rotate")
+        })
+
+    }
+
+    //이벤트 모음
+    function fnEvent() {
+        //검색 영역에 focus가 있을 시에만 엔터키 이벤트 실행
+        //input 중 class에 .input-SM 있을 경우 제외
+        $("#searchForm").find("input").not(".input-SM").keydown(function (key) {
+            if (key.keyCode == 13) {//키가 13이면 실행 (엔터는 13)
+                fnSearch();
+            }
+        });
+
+        $(window).off("resize"); //재설정을 위해 resize 이벤트를 off
+
+        $(window).resize(function () {
+            fnGridSize("grid");
+        });
+
+        // 2021-04-27 ADD HS 검색조건 열리고 닫힐때 그리드 리사이즈
+        $('.card-content').on('shown.bs.collapse', function () {
+            fnGridSize("grid");
+        })
+        $('.card-content').on('hidden.bs.collapse', function () {
+            fnGridSize("grid");
+        })
+    };
+
+    //마지막 세팅
+    function fnLast() {
+        //히스토리 데이터 세팅 레이아웃에서 fnLast로 변경 레이아웃에 있으면 조회 후 데이터가 세팅됨
+        HistoryJS.fnHistoryGet();
+
+        fnGridDraw();
+        fnSearch();
+
+        //리사이즈
+        fnGridSize("grid");
+    }
+
+    //그리드
+    function fnGridDraw(result) {
+
+        //그리드 정보 데이터 세팅
+        var data = result != null ? result.data : result;
+        var total = result != null ? result.total != null ? result.total[0].TOTAL : result : result;
+        var pageSize = result != null ? result.pageSize : 30;
+        var pageNo = result != null ? result.pageNo : 1;
+        var sortField = result != null ? result.sortField : result;
+        var sortDir = result != null ? result.sortDir : result;
+        var filter = result != null ? result.filter : result;
+
+        //그리드 체크박스 넣기
+        var columns = [];
+        var checkBox = {
+            headerAttributes: { style: "text-align:center;" },
+            attributes: { style: "text-align:center;" },
+            headerTemplate: "<input type='checkbox' id='CB_ALL' style='width:20px; height:20px;'>",
+            template: function () {
+                return "<input type='checkbox' id='CB' style='width:20px; height:20px;'>";
+            },
+            width: 30
+        }
+
+        //체크 박스 사용여부에 따라..
+        var YN_CB_GRID = "@YN_CB_GRID";
+        if ("Y" == YN_CB_GRID) {
+            columns.push(checkBox);
+        }
+        columns = $.merge(columns, GridJS.fnGridColumsSet(@Html.Raw(Json.Encode(ViewBag.gridColData.Data)), "@ViewBag.gridColSetType"));
+
+        var nonReordableColumn; //체크박스 영역 담는 변수
+
+        //그리드를 empty하면 기존 관련 이벤트들이 모두 사라짐
+        //toolbar 버튼은 다른 cshtml에서 이벤트를 걸기 때문에 페이지 실행시 1회만 적용됨
+        //이런 부분을 보완하기위해 그리드가 empty되기전에 detach라는 기능을 사용하여 기존toolbar 이벤트를 담아두고
+        //그리드를 새로 다시 그린 후 추가 하는 방식
+        //detach는 기존 이벤트 정보까지 모두 가진상태로 삭제함 2021.07.07. 강승호
+        var toolbarDetach;
+        if ($("#grid").data("kendoGrid") != null) { //데이터 없이 그려질 경우 toolbarDetach에 넣지 않아도됨
+            toolbarDetach = $("#grid").children(".k-toolbar").detach();
+        }
+
+        $("#grid").empty(); //그리드 초기화를 안해주면 해당 그리드에 계속 추가되어 페이징에서 스크립트 오류가 뜸
+        var grid = $("#grid").kendoGrid({
+            toolbar: [
+                { name: "add", iconClass: "k-icon", text: "" }   //그리드 데이터 추가 기능 (추가버튼영역 한개와 연결)
+                , { name: "delete", iconClass: "k-icon", text: "" }   //그리드 row 삭제기능
+                , { template: '<a role="button" class="k-button k-button-icontext k-grid-colDisplay" href="\\#"></a>' }                
+                , { name: "columnSave", iconClass: "k-icon", text: "" } //그리드 컬럼 저장
+                , { name: "columnReset", iconClass: "k-icon", text: "" } //그리드 컬럼 초기화
+                , { name: "excel", iconClass: "k-icon", text: "" }   //excel기능 버튼 사용시 toolbar:["excel"] 만해도 됨 //2023.03.03.ksh 순서 변경 요청으로 엑셀들을 맨 마지막으로
+                , { name: "allExcel", iconClass: "k-icon", text: "" }   //전체 엑셀 다운로드excelType //2023.03.03.ksh 순서 변경 요청으로 엑셀들을 맨 마지막으로
+            ],
+            excelExport: function (e) { //엑셀다운로드시 날짜형 데이터 포멧 변환해주기 (날짜형은 typeof 시 object임)
+                var sheet = e.workbook.sheets[0];
+                for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                    var row = sheet.rows[rowIndex];
+                    for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex++) {
+                        if (typeof row.cells[cellIndex].value == "object") {
+                            row.cells[cellIndex].format = "yyyy-MM-dd HH:mm:ss"
+                        }
+                    }
+                }
+            },
+            excel: {
+                allPages: true
+                , fileName: "@excelName"
+                , filterable: true
+                , collapsible: true
+            },
+            dataSource: {
+                data: data,
+                pageSize: pageSize,
+                serverPaging: true,
+                serverSorting: true,
+                serverFiltering: true,
+                sort: { field: sortField, dir: sortDir },
+                filter: filter
+            },
+            pageable: {
+                pageSizes: [20, 30, 40, 50, 100],
+                buttonCount: 5,
+                change: function (e) {
+                    fnSearch();
+                }
+            },
+            noRecords: {
+                template: "조회된 데이터가 없습니다."
+            },
+            filterable: {
+                mode: "row" //menu,row
+                , operators: {
+                    string: {
+                        contains: "Contains"
+                    }
+                    , date: {
+                        gte: "After or equal to" //해당날짜 이후
+                    }
+                }
+            },
+            autoWidth: true,
+            sortable: true,
+            resizable: true,
+            reorderable: true,
+            dataBound: function (e) {
+                this.element.find(".k-filtercell .k-dropdown-wrap").remove(); // 필터 이미지 및 영역 삭제
+                this.element.find(".k-filtercell > span").css("width", "100%"); // input 영역 100%
+
+                var rows = this.tbody[0].rows; //그리드 row 값 사용 시 필요한 변수
+
+                // 2020-12-08 ADD HS tab입력하여 다음필터로 바로 넘어갈 수 있게 수정
+                this.element.find(".k-widget.k-dropdown.k-dropdown-operator").removeAttr("tabindex");
+
+                // 2020-12-10 ADD HS tab입력하여 다음필터로 바로 넘어갈 수 있게 수정(필터 동작 수정 버튼 제거)
+                this.element.find(".k-button.k-button-icon").remove();
+
+                // 2023.04.24.ksh 이동진 이사 요청으로 버튼 간격 띄우기 추가
+                $("#buttonRow .btn").css("margin-right", "0.5%");
+
+                //toolbar 툴팁 설정
+                this.element.find(".k-grid-add").attr("title", "Grid Data Add");
+                this.element.find(".k-grid-delete").attr("title", "Grid Data Delete");
+                $(this.element.find(".k-grid-colDisplay")).find(".k-header-column-menu").attr("title", "ColumView.");
+                this.element.find(".k-grid-excel").attr("title", "One Page Excel Download.");
+                this.element.find(".k-grid-allExcel").attr("title", "All Page Excel Download.");
+                this.element.find(".k-grid-columnSave").attr("title", "Grid Column Save.");
+                this.element.find(".k-grid-columnReset").attr("title", "Grid Column Save Reset.");
+
+                //툴팁 사용여부 (show/hide)
+                //순서 : 추가, 삭제, 수정, 컬럼show/hide, 단일페이지 엑셀 다운로드, 전체엑셀 다운로드, 그리드컬럼 저장, 그리드 컬럼 초기화
+                var YN_TOOLBARArr = "@YN_TOOLBAR";
+                YN_TOOLBARArr = YN_TOOLBARArr.split(",");
+                for (var i = 0; i < YN_TOOLBARArr.length; i++) {
+                    if ("Y" == YN_TOOLBARArr[i]) {
+                        $(this.element.find(".k-grid-toolbar .k-button")[i]).show();
+                    }
+                    else {
+                        $(this.element.find(".k-grid-toolbar .k-button")[i]).hide();
+                    }
+                }
+
+                //체크박스 사용안할 시 툴바 삭제 감추기
+                if ("N" == YN_CB_GRID) {
+                    $(this.element.find(".k-grid-toolbar .k-grid-delete")).hide();
+                }
+
+                //그리드 컬럼 초기화 버튼
+                this.element.find(".k-grid-columnReset").off("click").on("click", function () {
+                    var result = confirm('컬럼 정보를 초기화 하시겠습니까?');
+                    if (result) {
+                        GridJS.fnColumnReset();
+                    } else {
+                        return false;
+                    }
+                });
+
+                //엑셀 전체다운로드 저장 버튼
+                this.element.find(".k-grid-allExcel").off("click").on("click", function () {
+                    var sOption = {}
+                    sOption.excelType = 'all';
+                    fnSearch(sOption)
+                });
+
+                //total 세팅
+                this.dataSource._total = total;
+
+                //페이지 사이즈 변경시
+                $(this.pager.element.find(".k-dropdown")).off("change").on("change", function (e) {
+                    grid.dataSource._skip = 0; //페이지사이즈 변환시 페이지가 1로 변하는데 skip이 0으로 안되어 있어서 1페이지 부터 데이터가 안나오게 보여 0으로 초기화
+                    fnSearch();
+                });
+
+                //타이틀 클릭 시 정렬 이벤트
+                $(this.thead.find("tr")[0]).find("th").off("click").on("click", function (e) {
+
+                    var dsSort = {}; //그리드 데이터중 정렬 부분에 들어갈 json 형태 변수
+                    dsSort.field = $(this).attr("data-field"); //선택한 필드명
+                    $(grid.thead.find("tr")[0]).find("th").find("span").remove(); //헤더에 있는 정렬 표시를 초기화
+
+                    //정렬 이벤트
+                    if ($(this).is("[aria-sort]")) { //정렬이 있으면
+                        if ($(this).attr("data-dir") == "desc") { //내림차순이면 오름차순으로
+                            $(this).attr("aria-sort", "ascending");
+                            $(this).attr("data-dir", "asc");
+                            $(this).find("a").append("<span class='k-icon k-i-sort-asc-sm'></span>")
+
+                            dsSort.dir = $(this).attr("data-dir");
+                        } else if ($(this).attr("data-dir") == "asc") { //오름차순이면 정렬 사라지게
+                            $(this).removeAttr("aria-sort");
+                            $(this).removeAttr("data-dir");
+                        }
+                    } else {//정렬이 없으면 내림차순부터
+                        $(this).attr("aria-sort", "descending");
+                        $(this).attr("data-dir", "desc");
+                        $(this).find("a").append("<span class='k-icon k-i-sort-desc-sm'></span>")
+
+                        dsSort.dir = $(this).attr("data-dir");
+                    }
+
+                    grid.dataSource.sort()[0] = dsSort;    //최종 정렬 값을 그리드데이터 중 정렬쪽에 넣음
+
+                    //전체선택 체크 박스 컬럼 제외
+                    if ($(this).find("input").length > 0) {
+                        //전체선택 체크박스가 있으면
+                        if ($(this).find("input")[0].id == "CB_ALL") {
+                            fnGridAllCheck(this);
+                        } else {
+                            fnSearch();
+                        }
+                    } else {
+                        fnSearch();
+                    }
+                });
+
+                //필터 input 더블 클릭 시 초기화
+                $(this.element.find(".k-filtercell .k-input")).off("change").on("change", function (e) {
+                    setTimeout(function (e) {
+                        this.value = "";
+                        fnSearch();
+                    }, 1)
+                });
+
+                 //jump이벤트
+                $("#" + this.element[0].id + " .jumpCell").off("dblclick").on("dblclick", function (e) {
+                    var field = grid.columns[this.cellIndex].field; //필드명
+                    var data = grid.dataItem($(this).closest("tr")); //선택한 컬럼의 row의 data
+                    var key = @Html.Raw(Json.Encode(jumpKeyArr)); //필드명 key
+
+                    var urlArr = @Html.Raw(Json.Encode(jumpUrlArr));
+                    var url = "";
+                    for (var i = 0; i < key.length; i++){
+                        if (field == key[i]) {
+                            url = "../../../../" + virtualDirectory + urlArr[i];  //상위로 가는게 많아도 상관없음
+                            break;
+                        }
+                    }
+
+                    ComJS.fnSubmit(url, data); // form에 담긴 데이터 서버로 보내기
+                });
+
+                //체크박스 영역 담기
+                if ("Y" == YN_CB_GRID) {
+                    nonReordableColumn = e.sender.columns[0];
+                }
+            },
+            columns: columns,
+            columnReorder: function (e) {
+                setTimeout(function (e) {
+                    grid.reorderColumn(0, nonReordableColumn); //체크 박스 영역을 움직일 시 다시 되돌리기
+                }, 1)
+            }
+        }).data("kendoGrid");
+        //page 세팅
+        var pageNo = pageNo;
+        grid.dataSource.page(pageNo);
+
+        //fillter 중 datepicker 타입의 format을 정의해줌
+        $("#" + grid.element[0].id + " [data-role=datepicker]").kendoDatePicker({
+            format: "yyyy-MM-dd"
+        });
+
+        //그리드 td 툴팁
+        grid.table.kendoTooltip({
+            filter: "td",
+            content: function (e) {
+                var target = e.target; // element for which the tooltip is shown
+                return $(target).text();
+            }
+        });
+
+        //데이터없이 그려진 이후 부터 그리드를 다시 그릴 시 툴바를 다시 넣어준다
+        //참고사항 detach로 삭제 된 후 이므로 grid의 datasorce 정보가 날아간 상태임
+        //datasorce를 사용 하는 소스가 위에 있는경 우 다시 밑에서 불러와야 정상 작동
+        //데이터없이 그려지면 해당 이벤트들이 실행 안되므로 result가 없는경우(그리드만 그리는경우) 실행될 수 있도록 null체크 조건 추가
+        if (toolbarDetach != null || result == null) {
+            if (result != null) {
+                $("#" + grid.element[0].id + " .k-grid-toolbar").remove();
+                $("#" + grid.element[0].id + " .k-grid-header").before(toolbarDetach);
+            }       
+
+            //병합 시 필요한 데이터
+            var rows = grid.tbody[0].rows; //그리드 row 값 사용 시 필요한 변수
+            var abType = "@TY_AB";
+            var abUseCol = "@AB_USE_COL";
+
+            //컬럼 show/hide 기능
+            //해당 소스를 databound에서 toolbar 다시 추가 된 후 넣는걸로 변경
+            //kendoColumnMenu 만들때 datasource와 columns 데이터가 detach로 지우기때문에 남아있어서 해당 기능이 안되서 소스 위치를 변경 2021.07.16.강승호
+            grid.element.find(".k-grid-colDisplay").kendoColumnMenu({
+                filterable: false,
+                sortable: false,
+                dataSource: grid.dataSource,
+                columns: grid.columns,
+                owner: grid
+            });
+
+            //컬럼 show/hide 기본 아이콘 변경
+            $(grid.element.find(".k-grid-colDisplay")).find(".k-i-more-vertical").attr("class", "k-icon");
+            //컬럼show/hide 선택 할때마다 table 넓이 100% 변경
+            $(grid.element.find(".k-grid-colDisplay")).find(".k-header-column-menu").on("click", function () {
+                if ($(".k-column-menu").length > 0) {
+                    $($(".k-column-menu").last()).find("[role='menuitemcheckbox'] span").off("click").on("click", function () {
+                        var tableWidth = setInterval(function () {
+                            if ($("#" + grid.element[0].id + " table").css("width") != '100%') {
+                                clearInterval(tableWidth)
+                            }
+                            $("#" + grid.element[0].id + " table").css("width", "100%");
+                        }, 50);
+                        GridJS.fnAbsorption(grid, "rowDiv", rows, useColArr); // show/hide 컬럼 선택 시 다시 분할
+                        setTimeout(function (e) {
+                            GridJS.fnAbsorption(grid, abType, rows, useColArr); //약간의 딜레이를 줘서 분할이 다된 후 다시 병합 해야되는 컬럼 병합
+                        },50)
+                    });
+                }
+            });
+
+            //초기 그리드 병합
+            var useColArr = abUseCol.split(',');
+            if (abUseCol != "") {
+                GridJS.fnAbsorption(grid, abType, rows, useColArr);
+            }
+
+            //detach로 grid.dataSorce가 날아간 상태이므로 kendoGrid 데이터가 완성 된 후의 이벤트를 다시걸어 엑셀다운로드 할 수 있게 추가함
+            grid.element.find(".k-grid-excel").off("click").on("click", function () {
+                grid.saveAsExcel();
+            });
+
+            //detach로 grid.dataSorce가 날아간 상태이므로 kendoGrid 데이터가 완성 된 후의 이벤트를 다시걸어 컬럼저장 할 수 있게 추가함
+            grid.element.find(".k-grid-columnSave").off("click").on("click", function () {
+                GridJS.fnColumnSave(grid);
+            });
+
+            //모달이 있는 경우 fnSearch() 함수 실행 시 그리드를 지우고 다시 생성해서 그리드에 있는 이벤트가 모두 사라짐
+            //이런 경우를 방지하기 위해 모달 이벤트를 fnModalEvent 함수 안에 넣고 이벤트 들이 다시 세팅 되게 실행함
+            //모달에서 꼭 fnModalEvent 함수를 만들어 살려야되는 이벤트들을 모두 fnModalEvent 함수에 넣어야 살려짐
+            //예제는 AZM프로젝트에 usermodify.cshtml을 참조하면 됨
+            //function fnModalEvent() {  fnModalUserEvent("M_UserModify");  }
+            //위 예제처럼 모달 cshtml에서 변경해줘야함
+            let modalUrlCnt = @modalUrlCnt; //가져와야되는 모달 수
+            if (modalUrlCnt > 0) //모달이 있으면
+            {
+                //fnModalEvent 이라는 함수가 있는경우 fnModalEvent 모달 함수를 실행
+                if ($.isFunction(window.fnModalEvent)) {
+                    fnModalEvent();
+                }
+            }
+        }
+    }
+
+    //그리드 검색
+    function fnSearch(sOption) {
+
+        var grid = $("#grid").data("kendoGrid");
+
+        //pageSize 선택한 값 세팅(변경 되는 pageSize를 _take에 넣어야되며 pageSize 값 변경 후에는 .k-input의 변경된 값-innerText값을 가져와 세팅한다)
+        grid.dataSource._take = grid.pager.element.find(".k-dropdown .k-input")[0].innerText;
+
+        var param = {}
+        param = GridJS.gridDataSet(grid.dataSource); //페이지,정렬,필터 정보를 가져오는 메서드(*추가로 넘기는 데이터보다 앞에 사용해야함)
+
+        //프로시저 ID 파라미터 --필수값
+        param["ID_PROCEDURE"] = "@procedureId";
+        param["ID_PAGE"] = "@ID_PAGE";
+
+        //검색조건 파라미터
+        var idArr = @Html.Raw(Json.Encode(@idArr));
+
+        for (var i = 0; i < @useYnCnt; i++) {
+            if (idArr[i].indexOf("&") != -1) {
+                var smArr = idArr[i].split("&");
+                param["CONDITION" + (i + 1)] = $("#" + smArr[1]).val();
+            } else {
+                param["CONDITION" + (i + 1)] = $("#" + idArr[i]).val();
+                if ($.type(param["CONDITION" + (i + 1)]) == "array") {
+                    param["CONDITION" + (i + 1)] = JSON.stringify(param["CONDITION" + (i + 1)]).replace("[", "").replace("]", "");
+                }
+            }
+        }
+
+        var excelType = null;
+        if (sOption != null) {
+            excelType = sOption.excelType;
+            param.excelType = excelType;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url(@URL_SEARCH)",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: false,
+            beforeSend: function () { // 조회 전
+                kendo.ui.progress($(".loadingBar"), true);
+            },
+            complete: function () {//조회 후
+                kendo.ui.progress($(".loadingBar"), false);
+                var idData = { grid: "#grid" }
+                ComJS.fnReSize("grid", idData);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                location.reload();
+            },
+            success: function (result) {
+                if (excelType == 'all') {
+                    GridJS.fnExcelAllDownload(result, grid);
+                } else {
+                    //그리드 정보 결과값에 세팅 (page정보, sort정보, fillter정보)
+                    result.pageNo = param.PAGE;
+                    result.pageSize = param.PAGESIZE;
+
+                    var sortField = param.SORTFIELD;
+                    //따로 정렬 컬럼을 지정했을때 _Sort 붙은 컬럼일 경우 필드명을 다시 넣어줌 (ip 정렬 시 사용중)
+                    if (sortField != null) {
+                        var index = sortField.lastIndexOf("_Sort");
+                        if (index > 0) {
+                            sortField = sortField.substring(0, index);
+                        }
+                    }
+
+                    result.sortField = sortField;
+                    result.sortDir = param.SORTDIR;
+                    result.filter = param.FILTER;
+                    fnGridDraw(result);
+                }
+            }
+        });
+    }
+
+    //그리드 사이즈 설정
+    function fnGridSize(gridId) {
+        //2021-04-20 COM HS 화면 모바일로 변경
+        //if (window.innerWidth > 991) {
+
+        //2021-04-20 COM HS 브라우저 컨텐츠 영역 높이
+        var html = window.innerHeight;
+
+        //2021-04-20 COM HS *outHeight(true) 해당 컴포넌트의 padding까지 더한 높이반환
+        //2021-04-20 COM HS 상단 네비게이션 바 높이
+        var naviHeight = $(".navbar-wrapper").outerHeight(true);
+
+        //2021-04-20 COM HS 페이지 제목 영역 높이
+        //2022-04-13 ksh 헤더 부분 삭제로 이부분도 주석처리
+        var contentHeader = 0;
+        if (@useYnCnt < 1) {
+            contentHeader = $(".content-header.row").outerHeight(true);
+        }
+
+
+        //2021-04-20 COM HS 검색조건 영역 높이
+        var conditionRow = 0;
+        if (@useYnCnt > 0) {
+            conditionRow = $("#conditionRow").outerHeight(true);
+            if (@ID_BTN_GRID_LEN < 1) {
+                conditionRow = conditionRow - 25;
+            }
+        }
+
+        //2021-05-04 COM HS 버튼 검색조건 분기 추가
+        var buttonRow = 0;
+        if (@ID_BTN_GRID_LEN > 1) {
+            buttonRow = $("#buttonRow").outerHeight(true);
+        }
+
+        //2021-04-20 COM HS footer 높이
+        var footer = $(".footer.footer-static.footer-light").outerHeight(true);
+
+        //2021-04-20 COM HS content-wrapper 영역 margin 높이
+        //var contentWrapperMargin = $(".content-wrapper").outerHeight(true) - $(".content-wrapper").innerHeight();
+
+        //2021-04-20 COM HS grid page 설정 영역 높이
+        var gridpager = $(".k-pager-wrap.k-grid-pager.k-widget.k-floatwrap").outerHeight(true);
+
+
+        //2021-04-20 COM HS 그리드 높이 계산
+        //$("#" + gridId).height(html - naviHeight - contentHeader - conditionRow - buttonRow - contentWrapperMargin - gridpager - footer - 10);
+
+        //2022-04-13 ksh 그리드 높이 계산 공식 다시 재정의
+        $("#" + gridId).height(html - naviHeight - contentHeader - conditionRow - buttonRow - gridpager - footer);
+        $("#" + gridId).data("kendoGrid").resize();
+
+        //if ($("#" + gridId).height() >= $("#" + gridId).css("min-height")) {
+        //    //2021-04-20 COM HS contentWrapper 높이 계산(contentWrapper의 높이 계산이 틀리면 배경이 깨짐)
+        //    var contentWrapperHeight = 0;
+        //    contentWrapperHeight = naviHeight + contentHeader + conditionRow + $("#grid").outerHeight(true) + contentWrapperMargin;
+
+        //    $(".content-wrapper").css("min-height", contentWrapperHeight);
+        //    $(".content-wrapper").css("height", contentWrapperHeight);
+        //}
+    }
+
+    //그리드 전체체크박스 함수
+    function fnGridAllCheck(cbData) {
+        var grid = $("#grid").data("kendoGrid");
+
+        if ($(cbData).find("input").is(":checked")) {
+            $(grid.tbody[0].rows).find("input").prop("checked", true); // 전체선택
+        } else {
+            $(grid.tbody[0].rows).find("input").prop("checked", false); //전체 선택해제
+        }
+    }
+
+    /*
+     * 검색조건 모두 삭제
+     */
+    function fnSearchReset() {
+        if (confirm("검색조건을 모두 초기화 또는 삭제 하시겠습니까?")) {
+            $("#searchForm")[0].reset();
+            $("#searchForm select").each(function () {
+                $(this).find("option:first").prop("selected", true).trigger("change");
+            });
+        }
+    }
+
+    /**
+     * datepicker 세팅
+     * *
+     */
+    function fnDatePickerSet() {
+        var searchUseYn = "@searchUseYn";
+        searchUseYn = searchUseYn.split(",");
+
+        var id = "@id"; //검색조건 id
+        id = id.split(",");
+        var dtArr = [] // Y_DT id 만 넣기
+
+        var value = "@value"; //검색조건 value
+        value = value.split(",");
+        var dtValArr = [];// Y_DT value 만 넣기
+
+        //결과값 담기
+        for (var i = 0; i < searchUseYn.length; i++) {
+            if (searchUseYn[i] == "Y_DT") {
+                dtArr.push(id[i]);
+                dtValArr.push(value[i]);
+            }
+        }
+
+        for (var j = 0; j < dtArr.length; j++) {
+            $("#" + dtArr[j]).daterangepicker({
+                locale: { format: 'YYYY-MM-DD', separator: " ~ " },
+                ranges: {
+                    '금일': [moment(), moment()],
+                    '전일': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    '지난7일': [moment().subtract(6, 'days'), moment()],
+                    '지난30일': [moment().subtract(29, 'days'), moment()],
+                    '금월': [moment().startOf('month'), moment().endOf('month')],
+                    '전월': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                }
+            });
+
+            //value 값이 있으면 없으면 금일로 자동 지정
+            if (dtValArr[j] != "") {
+                var dtVal = dtValArr[j].split("~");
+                $("#" + dtArr[j]).data('daterangepicker').setStartDate(dtVal[0]);
+                $("#" + dtArr[j]).data('daterangepicker').setEndDate(dtVal[1]);
+            }
+        }
+    }
+
+    //조건에 따라 스타일이 변경되어야되는 경우 여기에다가 모두 작성..
+    function fnStyleChange() {
+        //검색조건이 있고 버튼 영역 있는 경우
+        let useYnCnt = @useYnCnt;
+        let ID_BTN_GRID_LEN = @ID_BTN_GRID_LEN;
+        if (useYnCnt > 0 && ID_BTN_GRID_LEN > 0) {
+            $("#buttonRow").css("margin-top", "-1.3%");
+        }
+     }
+    </script>
+    <!--모달 불러오기-->
+    @if (modalUrlCnt > 0)
+    {
+        for (int i = 0; i < modalUrlArr.Length; i++)
+        {
+            @Html.Partial("~/Views/Modal/" + modalUrlArr[i] + ".cshtml")
+        }
+    }
+    @*그리드 버튼영역 이벤트 불러오기(페이지당 하나의 cshtml을 불러옴)*@
+    @if (!URL_BTN_GRID.IsEmpty())
+    {
+        @Html.Partial("~/Views/Common/GridBtn/" + URL_BTN_GRID + ".cshtml")
+    }
+}
