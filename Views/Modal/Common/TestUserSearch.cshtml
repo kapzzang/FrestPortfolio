@@ -1,0 +1,329 @@
+﻿<div class="modal fade show" id="M_TestUserSearch" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">사용자 검색</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="searchArea">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <label>사번</label>
+                                                <div class="input-group" style="width:100%;">
+                                                    <input type="text" class="form-control" id="EMP_NO" name="EMP_NO">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>사용자명</label>
+                                                <div class="input-group" style="width:100%;">
+                                                    <input type="text" class="form-control" id="EMP_NM" name="EMP_NM">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label>부서명</label>
+                                                <div style="display:flex;">
+                                                    <input type="text" class="form-control input-SM" id="DEPT_NM" name="DEPT_NM"> <!-- 클래스에 input-SM 넣은 이유 : 검색조건 영역에서 엔터시 해당 input만 검색 안되게-->
+                                                    <input type="text" class="form-control" id="DEPT_CD" name="DEPT_CD" readonly="readonly">
+                                                    <div class="livicon-evo livicon-evo-holder" id="BTN_DEPT" data-options="name:search; style:lines; size:120px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;"></div>
+                                                    <input type="checkbox" class="input-group ml-1" id="CH_DEPT_SUB" style="width:100px;">
+                                                    <label style="line-height:3; width:85%;">하위부서 포함</label>
+                                                    <input type="hidden" id="ID_RT_MODAL" name="ID_RT_MODAL" value="M_TestUserSearch">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <div style="float: right;">
+                                            <div class="livicon-evo livicon-evo-holder mt-2" data-options="name:search; style:lines; size:35px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;" onclick="fnTestUserModalSearch()"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="testUserModalGrid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary ml-1" id="selectBtn">
+                    <span class="d-none d-sm-block">선택</span>
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+    <div class="M_loadingBar"></div>
+</div>
+<!-- /.modal -->
+
+<script>
+
+    var selData = []; //선택(체크)된 데이터 담기
+
+    //그리드 그리기
+    function fnTestUserModalGrid(result) {
+
+        //그리드 정보 데이터 세팅
+        var data = result != null ? result.data : result;
+        //var total = result != null ? result.total != null ? result.total[0].TOTAL : result : result;
+
+        //그리드 체크박스 넣기
+        var columns = [
+            {
+                headerAttributes: { style: "text-align:center;" }
+                , attributes: { style: "text-align:center;" }
+                , headerTemplate: "<input type='checkbox' id='M_CB_ALL' style='width:20px; height:20px;'>"
+                , template: function () {
+                    return "<input type='checkbox' id='M_CB' style='width:20px; height:20px;'>";
+                },
+                width: 30
+            },
+            { field: "EMP_NO", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, title: "사번", width: "100px" },
+            { field: "EMP_NM", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, title: "사용자명", width: "100px" },
+            { field: "DEPT_CD", hidden: true },
+            { field: "DEPT_NM", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, title: "부서명", width: "100px" }
+        ]
+
+        $("#testUserModalGrid").empty(); //그리드 초기화를 안해주면 해당 그리드에 계속 추가되어 페이징에서 스크립트 오류가 뜸
+        var grid = $("#testUserModalGrid").kendoGrid({
+            dataSource: {
+                data: data,
+                pageSize: 10,
+                schema: {
+                    model: { id: "EMP_NO" }
+                }
+            },
+            pageable: {
+                pageSizes: [5, 10, 20, 30],
+                buttonCount: 2,
+                change: function (e) {
+                    grid.element.find("#M_CB_ALL").prop("checked", false); //페이지 변경 시 전체 체크 박스 초기화
+                    fnGridRowEvent(grid) //페이지 변경 시 그리드 row에 이벤트를 다시 걸어줘야함
+                    fnPageEvent(grid);
+                }
+            },
+            noRecords: {
+                template: "Please search."
+            },
+            autoWidth: true,
+            sortable: true,
+            resizable: true,
+            reorderable: true,
+            height:350,
+            selectable: "row", // multiple 다중 row선택, multiple cell 다중cell선택
+            columns: columns
+        }).data("kendoGrid");
+
+        //그리드 td 툴팁
+        grid.table.kendoTooltip({
+            filter: "td",
+            content: function (e) {
+                var target = e.target; // element for which the tooltip is shown
+                return $(target).text();
+            }
+        });
+
+        //페이지 사이즈 변경시
+        $(grid.pager.element.find(".k-dropdown")).off("change").on("change", function (e) {
+            grid.element.find("#M_CB_ALL").prop("checked", false); //페이지 변경 시 전체 체크 박스 초기화
+            fnGridRowEvent(grid) //페이지 변경 시 그리드 row에 이벤트를 다시 걸어줘야함
+            setTimeout(() => fnPageEvent(grid), 300); //fnPageEvent 메서드가 사이즈 변경 이벤트 보다 먼저 실행 되어 체크박스가 안찍혀 수정 2023.05.22.ksh
+        });
+
+        //전체 체크박스 이벤트
+        grid.element.find("#M_CB_ALL").off("click").on("click", function (e) {
+            fnMGridAllCheck(this);
+        });
+
+        //row 클릭 및 input 체크박스 클릭 시
+        fnGridRowEvent(grid);
+    }
+
+    /**
+     * 그리드 row 클릭 및 input 체크박스 클릭 메서드
+     * param grid
+     */
+    function fnGridRowEvent(grid) {
+        grid.tbody.find("tr input").off("click").on("click", (e) => {
+            let ct = e.currentTarget;
+            if (ct.checked) {
+                ct.checked = true;
+                let sel = grid.dataItem(ct.parentElement.parentElement);
+                selData.push(sel);
+            } else {
+                ct.checked = false;
+                let sel = grid.dataItem(ct.parentElement.parentElement);
+
+                selData.forEach((item,index) => {
+                    if (item.EMP_NO === sel.EMP_NO
+                        && item.EMP_NM === sel.EMP_NM
+                    ) {
+                        selData.splice(index,1)
+                    }
+                });                
+            }
+            event.stopPropagation(); //이벤트 버블링 막기 (input 이벤트 돌고 tr 이벤트가 또 다시 호출되는경우 방지)
+        });
+
+        //해당 row 클릭 시 input box 클릭 이벤트
+        grid.tbody.find("tr").off("click").on("click", (e) => {
+            e.currentTarget.querySelector("input").click();
+        });
+    }
+
+    @* 그리드 전체체크박스 함수 *@
+    function fnMGridAllCheck(cbData) {
+        var grid = $("#testUserModalGrid").data("kendoGrid");
+
+        if ($(cbData).is(":checked")) {
+            $(grid.tbody[0].rows).find("input").prop("checked", true); // 전체선택
+            $(grid.tbody[0].rows).each((index, item) => {
+                selData.push(grid.dataItem(item));
+            });
+            selData = selData.filter((v, i, arr) =>
+                arr.findIndex(t => t.EMP_NO === v.EMP_NO && t.EMP_NM === v.EMP_NM) === i); //중복 제거
+        } else {
+            $(grid.tbody[0].rows).find("input").prop("checked", false); //전체 선택해제
+            let compareData = [];
+            $(grid.tbody[0].rows).each((index, item) => {
+                compareData.push(grid.dataItem(item));
+            });
+            compareData.forEach((compareItem) => {
+                selData.forEach((item, index) => {                
+                    if (item.EMP_NO === compareItem.EMP_NO && item.EMP_NM === compareItem.EMP_NM) {
+                        selData.splice(index, 1);
+                    }
+                });
+            });
+        }
+    }
+
+
+    /**
+     * 페이지 변경 시 실행되는 이벤트 (전역변수 값 체크하기)
+     * param grid
+     */
+    function fnPageEvent(grid) {
+        let curPageRow = grid.tbody[0].rows;
+        for (let i = 0; i < curPageRow.length; i++) {
+            let rowData = grid.dataItem(curPageRow[i]);
+            selData.forEach((item) => {
+                if (item.EMP_NO === rowData.EMP_NO
+                    && item.EMP_NM === rowData.EMP_NM
+                ) {
+                    curPageRow[i].querySelector("input").checked = true;
+                }
+            });
+        }
+    }
+
+    //modal event
+    //1.모달 영역 id
+    function fnModalTestUserEvent(ID_MODAL) {
+
+        var grid = $("#pUserGrid");
+        var gridData = grid.data("kendoGrid");
+
+        //그리드 추가기능
+        gridData.element.find(".k-grid-add").off("click").on("click", function () {     
+            fnTestUserModalGrid();            
+            $("#" + ID_MODAL).modal();            
+        });
+
+        //부트스트랩에서 모달띄울때 shown.bs.modal을 써야 모달이 열린 후 포커스 이벤트가 발생할 수 있다
+        $("#" + ID_MODAL).off("shown.bs.modal").on("shown.bs.modal", function () {
+            fnTestUserModalSearch();
+            fnSelSet();
+            $("#" + ID_MODAL + " #EMP_NM").focus();            
+        });
+
+        //모달이 닫힐때
+        $("#" + ID_MODAL).off("hide.bs.modal").on("hide.bs.modal", function () {
+            //초기화
+            fnTestUserModalReset(ID_MODAL);
+        });
+
+        //선택 버튼 클릭
+        $("#" + ID_MODAL + " #selectBtn").off("click").on("click", function () {
+            let selectedData = [];
+            for (let i = 0; i < selData.length; i++) {
+                selectedData.push(selData[i]);
+            }
+            $("#pUserGrid").data("kendoGrid").setDataSource(selectedData);
+            //selData = []; //전역변수 초기화
+            $("#" + ID_MODAL).modal("hide");
+        });
+
+        $("#" + ID_MODAL + " #searchArea").not(".input-SM").keydown(function (key) {
+            if (key.keyCode == 13) {//키가 13이면 실행 (엔터는 13)
+                fnTestUserModalSearch();
+            }
+        });
+    }
+
+    //모달 초기화
+    function fnTestUserModalReset(ID_MODAL) {
+        $("#" + ID_MODAL + " input").val("");
+        fnTestUserModalGrid();
+    }
+
+    function fnTestUserModalSearch() {
+        var param = {}
+        param.EMP_NO = $("#EMP_NO").val();
+        param.EMP_NM = $("#EMP_NM").val();
+        param.DEPT_CD = $("#DEPT_CD").val();
+        param.hostFull = $("#hostFull").val();
+        if ($("#CH_DEPT_SUB").is(":checked")) {
+            param.CH_DEPT_SUB = "Y";
+        }
+
+         $.ajax({
+            type: "POST",
+             url: "@Scripts.Url("~/VMManagement/VMUserSearch")",
+             data: { param: JSON.stringify(param) },
+             beforeSend: function () { // 조회 전
+                 kendo.ui.progress($(".M_loadingBar"), true);
+             },
+             complete: function () {//조회 후
+                 kendo.ui.progress($(".M_loadingBar"), false);
+             },
+            dataType: 'json',
+             async: true,
+             success: function (result) {
+                 fnTestUserModalGrid(result);
+            }
+        });
+    }   
+
+    
+    @* 선택한 대상자가 있을 경우 다시 대상자 검색 그리드에 체크 *@    
+    function fnSelSet() {                
+        let pUserGrid = $("#pUserGrid").data("kendoGrid");
+        if (pUserGrid._data.length > 0) {            
+            setTimeout(() => {
+                let testUserModalGrid = $("#testUserModalGrid").data("kendoGrid");
+                selData = pUserGrid._data;
+                fnPageEvent(testUserModalGrid);
+            }, 300);
+        } else {
+            selData = []; @* 선택한 대상자가 없으면 전역변수 초기화;*@
+        }
+    }
+</script>

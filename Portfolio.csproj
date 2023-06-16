@@ -3261,6 +3261,7 @@
     <Content Include="Views\Modal\Board\BoardManagement.cshtml" />
     <Content Include="Views\Example\Alarm.cshtml" />
     <Content Include="Views\Main\Index.cshtml" />
+    <Content Include="Views\Modal\Common\TestUserSearch.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
