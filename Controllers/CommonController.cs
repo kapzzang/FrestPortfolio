@@ -306,13 +306,9 @@ namespace proTnsWeb.Controllers
 		/// <param name="param"></param>
 		/// <returns></returns>
 		[HttpPost]
-		public JsonResult SearchDept(string param)
-		{
-			var parameter = commonService.ParameterDataSet(param);
-
-			Dictionary<string, object> list = new Dictionary<string, object>();
-			list = commonService.SearchDept(parameter);
-			return commonService.JsonMaxLength(Json(list));
+		public JsonResult SearchDept(string deptNm)
+		{		
+			return commonService.JsonMaxLength(Json(commonService.SearchDept(deptNm)));
 		}
 
 		/// <summary>

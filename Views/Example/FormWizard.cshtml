@@ -226,6 +226,8 @@
                         rowData.push(JSON.stringify(data[this.rowIndex])); //선택한 컬럼의 row의 data
                     });
 
+                    ComJS.fnSweetAlert("완료 되었습니다. Step1로 돌아갑니다.");
+
                     if (rowData.length > 0) {
                         $(".wizard-vertical").steps("destroy");
                         fnWizardSetting();

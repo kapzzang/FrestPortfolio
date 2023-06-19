@@ -3364,7 +3364,7 @@
     <Content Include="Views\Dynamic\CommonPage.cshtml" />
     <Content Include="Views\Common\CommonGridBtnEvent.cshtml" />
     <Content Include="Views\Login\Index.cshtml" />
-    <Content Include="Views\Modal\DeptSearch.cshtml" />
+    <Content Include="Views\Modal\Common\DeptSearch.cshtml" />
     <Content Include="Resources\frest\.csscomb.json" />
     <Content Include="Resources\frest\app-assets\data\cities.json" />
     <Content Include="Resources\frest\app-assets\data\citynames.json" />

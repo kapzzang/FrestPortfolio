@@ -74,7 +74,7 @@
         $("#deptGrid").empty(); //그리드 초기화를 안해주면 해당 그리드에 계속 추가되어 페이징에서 스크립트 오류가 뜸
         $("#deptGrid").kendoTreeList({
             dataSource: {
-                data: result != null ? result.data : result
+                data: result
                 , schema: {
                     model: {
                         id: "ORG_CD",
@@ -116,6 +116,8 @@
     //3.선택한 값을 돌려줄 컨트롤러의 ID (input ID)
     function fnModalDeptEvent(ID_MODAL, ID_BTN) {        
 
+        var ID_RT_MODAL = $("#ID_RT_MODAL").val(); //부서값을 리턴받을 모달창 ID
+
         $("#" + ID_BTN).off("click").on("click", function () {            
             //$("#" + ID_MODAL).find(".modal-dialog").prop("class", "modal-dialog modal-lg");
             //$("#" + ID_MODAL).modal({ backdrop: 'static', keyboard: false });
@@ -134,8 +136,7 @@
         });
 
         //그리드 row 더블 클릭시
-        $("#" + ID_MODAL + " #deptGrid").off("dblclick").on("dblclick", "tbody tr", function () {
-            var ID_RT_MODAL = $("#ID_RT_MODAL").val(); //부서값을 리턴받을 모달창 ID
+        $("#" + ID_MODAL + " #deptGrid").off("dblclick").on("dblclick", "tbody tr", function () {            
             var treeList = $("#" + ID_MODAL + " #deptGrid").data("kendoTreeList"); //그리드 정보 담기
             var selectedData = treeList.dataItem(treeList.select()); //선택한 값 담기
             $("#" + ID_RT_MODAL + " #DEPT_CD").val(selectedData.ORG_CD); //input box에 세팅
@@ -145,8 +146,7 @@
        
 
         //선택 버튼 클릭
-        $("#" + ID_MODAL + " #selectBtn").off("click").on("click", function () {
-            var ID_RT_MODAL = $("#ID_RT_MODAL").val(); //부서값을 리턴받을 모달창 ID
+        $("#" + ID_MODAL + " #selectBtn").off("click").on("click", function () {            
             var treeList = $("#" + ID_MODAL + " #deptGrid").data("kendoTreeList"); //그리드 정보 담기
             var selectedData = treeList.dataItem(treeList.select()); //선택한 값 담기
             $("#" + ID_RT_MODAL + " #DEPT_CD").val(selectedData.ORG_CD); //input box에 세팅
@@ -154,42 +154,42 @@
             $("#" + ID_MODAL).modal("hide");  
         });        
 
-        $("#M_VMUserSearch #DEPT_NM").keydown(function (key) {//검색 영역에 focus가 있을 시에만 엔터키 이벤트 실행
+        $("#" + ID_RT_MODAL + " #DEPT_NM").keydown(function (key) {//검색 영역에 focus가 있을 시에만 엔터키 이벤트 실행
             if (key.keyCode == 13) {//키가 13이면 실행 (엔터는 13)                
-                $("#" + ID_MODAL + " #deptNm").val($("#M_VMUserSearch #DEPT_NM").val());
+                $("#" + ID_MODAL + " #deptNm").val($("#" + ID_RT_MODAL + " #DEPT_NM").val());
                 fnDeptSearch(ID_MODAL,"input");
             }
 
             //백스페이스 입력 시 사용자 id 초기화
             if (key.keyCode == 8) {//키가 13이면 실행 (엔터는 13)
-                $("#M_VMUserSearch #DEPT_CD").val("");
+                $("#" + ID_RT_MODAL + " #DEPT_CD").val("");
             }
         });
 
         //부모 검색조건 input 더블 클릭시 초기화
-        $("#M_VMUserSearch #DEPT_NM").off("dblclick").on("dblclick", function () {
-            $("#M_VMUserSearch #DEPT_NM").val("");
-            $("#M_VMUserSearch #DEPT_CD").val("");
+        $("#" + ID_RT_MODAL + " #DEPT_NM").off("dblclick").on("dblclick", function () {
+            $("#" + ID_RT_MODAL + " #DEPT_NM").val("");
+            $("#" + ID_RT_MODAL + " #DEPT_CD").val("");
             fnVMUserModalSearch();
         });
     }
 
     function fnDeptSearch(ID_MODAL,type) {
 
-        let param = {}
+        let deptNm = "";
         let ID_RT_MODAL = $("#ID_RT_MODAL").val(); //부서값을 리턴받을 모달창 ID
         if (type == "input") {
             let ID_RT_MODAL = $("#ID_RT_MODAL").val(); //부서값을 리턴받을 모달창 ID
-            param.deptNm = $("#" + ID_RT_MODAL + " #DEPT_NM").val();
+            deptNm = $("#" + ID_RT_MODAL + " #DEPT_NM").val();
         } else {
-            param.deptNm = $("#" + ID_MODAL + " #deptNm").val();
+            deptNm = $("#" + ID_MODAL + " #deptNm").val();
         }
         
 
          $.ajax({
             type: "POST",
             url: "@Scripts.Url("~/Common/SearchDept")",
-             data: { param: JSON.stringify(param) },
+             data: { deptNm: deptNm },
              beforeSend: function () { // 조회 전
                  kendo.ui.progress($(".M_LoadingBar"), true);
              },
@@ -200,7 +200,7 @@
             async: false,
              success: function (result) {
                  //사용자 검색시 필요                
-                 var data = result != null ? result.data : result;
+                 var data = result;
 
                  //부모 검색조건에서 입력 시
                  if ("input" == type) {

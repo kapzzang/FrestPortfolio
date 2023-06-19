@@ -8,6 +8,7 @@ using System.Web.Mvc;
 using System.ServiceProcess;
 using System.Data.SqlClient;
 using Portfolio;
+using System.Linq;
 
 namespace proTnsWeb.Models.Services
 {
@@ -890,20 +891,54 @@ namespace proTnsWeb.Models.Services
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public Dictionary<string, object> SearchDept(Dictionary<string, object> parameter)
+        public object SearchDept(string orgNm)
         {
-            Common ComService = new Common();
+            object result = new[]
+            {
+                new
+                {
+                    ORG_CD = "001",
+                    ORG_NM = "부서1",
+                    UPPER_ORG_CD = "",
+                },
+                new
+                {
+                    ORG_CD = "002",
+                    ORG_NM = "부서1-1",
+                    UPPER_ORG_CD = "001",
+                },
+                new
+                {
+                    ORG_CD = "003",
+                    ORG_NM = "부서1-2",
+                    UPPER_ORG_CD = "001",
+                },
+                new
+                {
+                    ORG_CD = "004",
+                    ORG_NM = "부서1-1-1",
+                    UPPER_ORG_CD = "002",
+                },
+                new
+                {
+                    ORG_CD = "005",
+                    ORG_NM = "부서2",
+                    UPPER_ORG_CD = "",
+                },
+                new
+                {
+                    ORG_CD = "006",
+                    ORG_NM = "부서2-1",
+                    UPPER_ORG_CD = "005",
+                }                
+            };
 
-            //검색조건            
-            string deptNm = parameter.ContainsKey("deptNm") ? parameter["deptNm"] != null ? parameter["deptNm"].ToString() : "" : "";
-
-            string sQuery = string.Format(@"EXEC [dbo].[uspn_GetVdiOrg]                                                                                                          
-                                                      @DEPT_NM = N'{0}'                                                      
-                                                   "
-                                                    , deptNm
-                                             );
-
-            return ComService.DataSearch(sQuery, "SearchDept", parameter, null);
+            var filteredResult = ((dynamic[])result).ToList().Where(entry =>
+                                    entry.ORG_NM.Contains(orgNm) ||
+                                    entry.UPPER_ORG_CD.ToString().Contains(orgNm) ||
+                                    string.IsNullOrEmpty(entry.UPPER_ORG_CD)
+                                );
+            return filteredResult;            
         }
 
         /// <summary>

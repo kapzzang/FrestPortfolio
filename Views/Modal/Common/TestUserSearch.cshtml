@@ -81,7 +81,7 @@
     function fnTestUserModalGrid(result) {
 
         //그리드 정보 데이터 세팅
-        var data = result != null ? result.data : result;
+        var data = result;
         //var total = result != null ? result.total != null ? result.total[0].TOTAL : result : result;
 
         //그리드 체크박스 넣기
@@ -177,7 +177,7 @@
                     ) {
                         selData.splice(index,1)
                     }
-                });                
+                });
             }
             event.stopPropagation(); //이벤트 버블링 막기 (input 이벤트 돌고 tr 이벤트가 또 다시 호출되는경우 방지)
         });
@@ -206,7 +206,7 @@
                 compareData.push(grid.dataItem(item));
             });
             compareData.forEach((compareItem) => {
-                selData.forEach((item, index) => {                
+                selData.forEach((item, index) => {
                     if (item.EMP_NO === compareItem.EMP_NO && item.EMP_NM === compareItem.EMP_NM) {
                         selData.splice(index, 1);
                     }
@@ -242,16 +242,16 @@
         var gridData = grid.data("kendoGrid");
 
         //그리드 추가기능
-        gridData.element.find(".k-grid-add").off("click").on("click", function () {     
-            fnTestUserModalGrid();            
-            $("#" + ID_MODAL).modal();            
+        gridData.element.find(".k-grid-add").off("click").on("click", function () {
+            fnTestUserModalGrid();
+            $("#" + ID_MODAL).modal();
         });
 
         //부트스트랩에서 모달띄울때 shown.bs.modal을 써야 모달이 열린 후 포커스 이벤트가 발생할 수 있다
         $("#" + ID_MODAL).off("shown.bs.modal").on("shown.bs.modal", function () {
             fnTestUserModalSearch();
             fnSelSet();
-            $("#" + ID_MODAL + " #EMP_NM").focus();            
+            $("#" + ID_MODAL + " #EMP_NM").focus();
         });
 
         //모달이 닫힐때
@@ -285,38 +285,86 @@
     }
 
     function fnTestUserModalSearch() {
-        var param = {}
-        param.EMP_NO = $("#EMP_NO").val();
-        param.EMP_NM = $("#EMP_NM").val();
-        param.DEPT_CD = $("#DEPT_CD").val();
-        param.hostFull = $("#hostFull").val();
-        if ($("#CH_DEPT_SUB").is(":checked")) {
-            param.CH_DEPT_SUB = "Y";
-        }
+        //var param = {}
+        //param.EMP_NO = $("#EMP_NO").val();
+        //param.EMP_NM = $("#EMP_NM").val();
+        //param.DEPT_CD = $("#DEPT_CD").val();
+        //param.hostFull = $("#hostFull").val();
+        //if ($("#CH_DEPT_SUB").is(":checked")) {
+        //    param.CH_DEPT_SUB = "Y";
+        //}
 
-         $.ajax({
-            type: "POST",
-             url: "@Scripts.Url("~/VMManagement/VMUserSearch")",
-             data: { param: JSON.stringify(param) },
-             beforeSend: function () { // 조회 전
-                 kendo.ui.progress($(".M_loadingBar"), true);
-             },
-             complete: function () {//조회 후
-                 kendo.ui.progress($(".M_loadingBar"), false);
-             },
-            dataType: 'json',
-             async: true,
-             success: function (result) {
-                 fnTestUserModalGrid(result);
+        var result = [
+            {
+                EMP_NO: "1001",
+                EMP_NM: "John Doe",
+                DEPT_CD: "001",
+                DEPT_NM: "Sales"
+            },
+            {
+                EMP_NO: "1002",
+                EMP_NM: "Jane Smith",
+                DEPT_CD: "002",
+                DEPT_NM: "Marketing"
+            },
+            {
+                EMP_NO: "1003",
+                EMP_NM: "Michael Johnson",
+                DEPT_CD: "003",
+                DEPT_NM: "Finance"
+            },
+            {
+                EMP_NO: "1004",
+                EMP_NM: "Emily Davis",
+                DEPT_CD: "001",
+                DEPT_NM: "Sales"
+            },
+            {
+                EMP_NO: "1005",
+                EMP_NM: "David Wilson",
+                DEPT_CD: "002",
+                DEPT_NM: "Marketing"
+            },
+            {
+                EMP_NO: "1006",
+                EMP_NM: "Sarah Brown",
+                DEPT_CD: "003",
+                DEPT_NM: "Finance"
+            },
+            {
+                EMP_NO: "1007",
+                EMP_NM: "Daniel Lee",
+                DEPT_CD: "001",
+                DEPT_NM: "Sales"
+            },
+            {
+                EMP_NO: "1008",
+                EMP_NM: "Olivia Anderson",
+                DEPT_CD: "002",
+                DEPT_NM: "Marketing"
+            },
+            {
+                EMP_NO: "1009",
+                EMP_NM: "Sophia Martinez",
+                DEPT_CD: "003",
+                DEPT_NM: "Finance"
+            },
+            {
+                EMP_NO: "1010",
+                EMP_NM: "James Taylor",
+                DEPT_CD: "001",
+                DEPT_NM: "Sales"
             }
-        });
-    }   
+        ];
 
-    
-    @* 선택한 대상자가 있을 경우 다시 대상자 검색 그리드에 체크 *@    
-    function fnSelSet() {                
+        fnTestUserModalGrid(result);
+    }
+
+
+    @* 선택한 대상자가 있을 경우 다시 대상자 검색 그리드에 체크 *@
+    function fnSelSet() {
         let pUserGrid = $("#pUserGrid").data("kendoGrid");
-        if (pUserGrid._data.length > 0) {            
+        if (pUserGrid._data.length > 0) {
             setTimeout(() => {
                 let testUserModalGrid = $("#testUserModalGrid").data("kendoGrid");
                 selData = pUserGrid._data;
@@ -327,3 +375,5 @@
         }
     }
 </script>
+
+@Html.Partial("~/Views/Modal/Common/DeptSearch.cshtml")
