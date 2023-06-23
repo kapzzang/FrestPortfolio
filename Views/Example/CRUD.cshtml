@@ -14,7 +14,7 @@
                     <div class="card">
                         <div class="card-header" data-action="collapse" style="padding-top:0.2%; padding-bottom:0.2%; padding-left:0.5%">
                             <div style="display:flex;">
-                                <div><label class="card-title" style="font-size:x-large;">CRUD (여기서 추가 조회 수정 삭제되는 과정은 메모리에 저장되므로 재기동 시 기존 데이터가 삭제됨)</label></div>
+                                <div><label class="card-title" style="font-size:x-large;">CRUD</label><label style="color:red;">(여기서 추가 조회 수정 삭제되는 과정은 메모리에 저장되므로 재기동 시 기존 데이터가 삭제됨)</label></div>
                                 <div>
                                     <div class="livicon-evo livicon-evo-holder" data-options="name:trash; style:lines; size:25px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:5px; margin-top:3px;" onclick="fnSearchReset()"></div>
                                 </div>
@@ -262,7 +262,7 @@
         //HistoryJS.fnHistoryGet();
 
         fnGridDraw();
-        //fnSearch();
+        fnSearch();
 
         //리사이즈
         fnGridSize("grid");
@@ -458,7 +458,7 @@
                     $("#" + ID_MODAL).modal();
                 });
 
-                @* 제 *@
+                @* 삭제 *@
                 this.element.find(".k-grid-delete").off("click").on("click", function () {
                     var rowData = [];
                     $(grid.tbody[0].rows).find("input").each(function (index, item) {
@@ -469,7 +469,7 @@
                     });
 
                     if (rowData.length < 1) {
-                        ComJS.fnSweetAlert("삭제 할 URL을 선택해주세요.");
+                        ComJS.fnSweetAlert("삭제 할 대상을 선택해주세요.");
                         return false;
                     }
 
@@ -545,11 +545,11 @@
 
         //검색조건 파라미터
         var param = {}
-        param.url = $("#url").val();
+        param.test1 = $("#test1").val();
 
         $.ajax({
             type: "POST",
-            url: "@Scripts.Url("~/Management/GetURLRedirection")",
+            url: "@Scripts.Url("~/Example/SearchData")",
             data: { param: JSON.stringify(param) },
             dataType: 'json',
             async: false,
@@ -571,7 +571,7 @@
                         ,pageSize: 30
                     }
                     grid.setDataSource(dataSource);
-                    grid.dataSource._total = result.total[0].TOTAL;
+                    grid.dataSource._total = result.total;
                 } else {
                     grid.setDataSource(null);
                     grid.dataSource._total = 0;
@@ -681,11 +681,11 @@
         });
     }
 
-    @* URL 삭제 *@
+    @* 삭제 *@
     function fnDel(rowData) {
         $.ajax({
             type: "POST",
-            url: "@Scripts.Url("~/Exa/DelURLRedirection")",
+            url: "@Scripts.Url("~/Example/DelData")",
             data: { rowData:rowData },
             dataType: 'json',
             async: false,
@@ -703,18 +703,18 @@
         });
     }
 
-    @* URL 상세 모달 이벤트 메서드 *@
+    @* 상세 모달 이벤트 메서드 *@
     function fnModalDetailEvent(selData) {
         let ID_MODAL = "M_Detail";
 
         @* 선택 값 세팅 *@
-        $("#M_KEY_URL_D").val(selData.KEY_URL);
-        $("#M_URL_D").val(selData.URL);
-        $("#M_EXCEPURL_D").val(selData.EXCEPTION_URL);
+        $("#M_KEY_D").val(selData.KEY_TEST);
+        $("#M_test1_D").val(selData.test1);
+        $("#M_test2_D").val(selData.test2);
 
         //부트스트랩에서 모달띄울때 shown.bs.modal을 써야 모달이 열린 후 포커스 이벤트가 발생할 수 있다
         $("#" + ID_MODAL).off("shown.bs.modal").on("shown.bs.modal", function () {
-            $("#" + ID_MODAL + " #M_URL_D").focus();
+            $("#" + ID_MODAL + " #M_test1_D").focus();
 
         });        
 
@@ -723,18 +723,18 @@
 
             var rs = $("#" + ID_MODAL + " form").valid();
             if (rs) {
-                fnSetRedirection(ID_MODAL);
+                fnPutData(ID_MODAL);
                 $("#" + ID_MODAL).modal("hide");
             }
         });
     }
 
-    @* URL 수정 *@
-    function fnSetRedirection(ID_MODAL) {
+    @* 수정 *@
+    function fnPutData(ID_MODAL) {
         var param = $("#" + ID_MODAL + " form").serializeObject();   //폼 입력값을 객체로 변경
          $.ajax({
             type: "POST",
-            url: "@Scripts.Url("~/Management/SetURLRedirection")",
+            url: "@Scripts.Url("~/Example/PutData")",
             data: { param: JSON.stringify(param) },
             dataType: 'json',
             async: false,

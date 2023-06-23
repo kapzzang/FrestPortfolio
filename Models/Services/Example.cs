@@ -9,11 +9,15 @@ using Microsoft.Win32;
 using System.Data.SqlClient;
 using System.Configuration;
 using Portfolio;
+using Microsoft.AspNet.Identity;
+using System.Linq;
 
 namespace proTnsWeb.Models.Services
 {
     public class Example
     {
+        private static List<TestData> testDataList = new List<TestData>();
+
         //동적쿼리 예제 조회
         public Dictionary<string, object> ExampleListSearch(Dictionary<string, object> parameter)
         {
@@ -122,5 +126,145 @@ namespace proTnsWeb.Models.Services
             }
             return result;
         }
+
+        #region CRUD
+        /// <summary>
+        /// 추가(post)
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        public Dictionary<string, object> PostData(Dictionary<string, object> parameter)
+        {
+            Common ComService = new Common();
+
+            Dictionary<string, object> result = new Dictionary<string, object>();
+
+            string test1 = parameter.ContainsKey("M_test1") ? parameter["M_test1"]?.ToString() ?? "" : "";
+            string test2 = parameter.ContainsKey("M_test2") ? parameter["M_test2"]?.ToString() ?? "" : "";
+            string ID_USER = parameter.ContainsKey("ID_USER") ? parameter["ID_USER"]?.ToString() ?? "" : "";
+            
+
+            try
+            {
+                TestData testData = new TestData();
+
+                if (testDataList.Count > 0)
+                {                    
+                    int maxKey = testDataList.Max(obj => obj.KEY_TEST);
+                    testData.KEY_TEST = maxKey + 1;
+                }
+                else
+                {
+                    testData.KEY_TEST = 1;
+                }
+
+                testData.test1 = test1;
+                testData.test2 = test2;
+                testData.ID_REG = ID_USER;
+                testData.DT_REG = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt");
+
+                testDataList.Add(testData);
+                
+                result.Add("msg", "추가 되었습니다.");
+                result.Add("successYn", true);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Add("msg", "Error : " + ex.ToString());
+                result.Add("successYn", false);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 조회
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        public Dictionary<string, object> SearchData(Dictionary<string, object> parameter)
+        {
+            Dictionary<string, object> result = new Dictionary<string, object>();
+
+            string test1 = parameter.ContainsKey("test1") ? parameter["test1"]?.ToString() ?? "" : "";
+
+            List<TestData> data = testDataList.Where(obj => obj.test1.Contains(test1)).ToList();
+            result.Add("data", data);
+            result.Add("total", data.Count);
+            return result;
+        }
+
+        /// <summary>
+        /// 수정
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        public Dictionary<string, object> PutData(Dictionary<string, object> parameter)
+        {
+            Common ComService = new Common();
+
+            Dictionary<string, object> result = new Dictionary<string, object>();
+
+            int keyTest = parameter.ContainsKey("M_KEY_D") ? int.Parse(parameter["M_KEY_D"]?.ToString() ?? "") : 0;
+            string test1 = parameter.ContainsKey("M_test1_D") ? parameter["M_test1_D"]?.ToString() ?? "" : "";
+            string test2 = parameter.ContainsKey("M_test2_D") ? parameter["M_test2_D"]?.ToString() ?? "" : "";
+            string ID_USER = parameter.ContainsKey("ID_USER") ? parameter["ID_USER"]?.ToString() ?? "" : "";
+
+
+            try
+            {
+                TestData searchResult = testDataList.FirstOrDefault(obj => obj.KEY_TEST == keyTest);
+                if (searchResult != null)
+                {                    
+                    searchResult.test1 = test1;
+                    searchResult.test2 = test2;
+                    searchResult.ID_UPT = ID_USER;
+                    searchResult.DT_UPT = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt");
+                }
+
+                result.Add("msg", "수정 되었습니다.");
+                result.Add("successYn", true);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Add("msg", "Error : " + ex.ToString());
+                result.Add("successYn", false);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 삭제
+        /// </summary>
+        /// <param name="rowData"></param>
+        /// <returns></returns>
+        public Dictionary<string, object> DelData(string[] rowData)
+        {
+            Common comService = new Common();
+            Dictionary<string, object> result = new Dictionary<string, object>();
+            List<Dictionary<string, object>> errList = new List<Dictionary<string, object>>();
+
+            try
+            {
+                for (int i = 0; i < rowData.Length; i++)
+                {
+                    var param = comService.ParameterDataSet(rowData[i]);                    
+                    int KEY_TEST = param.ContainsKey("KEY_TEST") ? int.Parse(param["KEY_TEST"]?.ToString() ?? "") : 0;
+
+                    testDataList.RemoveAll(obj => obj.KEY_TEST == KEY_TEST);
+                }
+                result.Add("msg", "삭제 되었습니다.");
+                result.Add("successYn", true);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Add("msg", "Error : " + ex.ToString());
+                result.Add("successYn", false);
+            }
+            return result;
+        }
+        #endregion
     }
 }

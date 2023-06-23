@@ -3294,6 +3294,7 @@
     <Compile Include="Models\Services\Common.cs" />
     <Compile Include="Models\Services\MenuService.cs" />
     <Compile Include="Models\Services\UserService.cs" />
+    <Compile Include="Models\TestData.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Images\UserWeb\Resource1.Designer.cs" />
