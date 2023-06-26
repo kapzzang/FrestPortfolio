@@ -1,15 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Web.Mvc;
-using Microsoft.Win32;
-using System.Data.SqlClient;
-using System.Configuration;
 using Portfolio;
-using Microsoft.AspNet.Identity;
 using System.Linq;
 
 namespace proTnsWeb.Models.Services

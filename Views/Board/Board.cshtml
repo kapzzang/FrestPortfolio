@@ -1,0 +1,749 @@
+﻿@Styles.Render("~/frest/css/commonPage")
+@Scripts.Render("~/frest/js/commonPage")
+@Styles.Render("~/frest/css/validation")
+@Scripts.Render("~/frest/js/validation")
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Main content -->
+        <section class="content-body">
+            <!--검색조건 영역 시작-->
+            <section class="row" id="conditionRow" style="margin-bottom:-1.3%;">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header" data-action="collapse" style="padding-top:0.2%; padding-bottom:0.2%; padding-left:0.5%">
+                            <div style="display:flex;">
+                                <div><label class="card-title" style="font-size:x-large;">게시판</label><label style="color:red;">(여기서 추가 조회 수정 삭제되는 과정은 메모리에 저장되므로 재기동 시 기존 데이터가 삭제됨)</label></div>
+                                <div>
+                                    <div class="livicon-evo livicon-evo-holder" data-options="name:trash; style:lines; size:25px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:5px; margin-top:3px;" onclick="fnSearchReset()"></div>
+                                </div>
+                            </div>
+                            <div class="heading-elements">                               
+                                <ul class="list-inline mb-0">
+                                    <li><a data-action="collapse" class="rotate"><i class="bx bx-chevron-down"></i></a></li>
+                                </ul>
+                            </div>                               
+                        </div>                                     
+                        <div class="card-content collapse show" aria-expanded="true">
+                            <div class="card-body" style="padding-bottom:0;">
+                                <form id="searchForm" method="post" onsubmit="return false">
+                                    <!-- /.box-header -->
+                                    <div class="row">                                                                                                              
+                                        <div class="col-md-11">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <fieldset class="form-group">
+                                                        <label for="title">제목</label>
+                                                        <input type="text" class="form-control" id="title" name="title" style="width:100%;">
+                                                    </fieldset>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div style="float: right;">
+                                                <div class="livicon-evo livicon-evo-holder mt-2" data-options="name:search; style:lines; size:40px; strokeColor:#717b85;" style="border:1px solid #717b85; border-radius:10px; margin-left:1px;" onclick="fnSearch()"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /.row -->
+                                    <!--검색조건 영역 끝-->
+                                    <!-- 검색 -->
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+            </section>
+            <!-- /.box -->
+            <!--loadingBar Area-->
+            <section class="row">
+                <div class="col-md-12">
+                    <div class="card" style="margin-bottom:0px;">
+                        <div class="card-body" style="padding:0px;">
+                            <!-- /.box -->
+                            <div id="grid" style="min-height:300px"></div>
+                            <!-- /.box -->
+                            <div class="loadingBar"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!--loadingBar Area-->
+            <!-- /.row -->
+        </section>
+        <!-- /.content -->
+    </div>
+</div>
+
+@*게시글 작성 모달**@
+<div class="modal fade show" id="M_Write" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">게시글 작성</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" onsubmit="return false">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <fieldset class="form-group">
+                                            <label for="M_test1">항목1</label><label style="color:red;">*</label>
+                                            <input type="text" class="form-control" id="M_test1" name="M_test1" style="width:100%;" required>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <fieldset class="form-group">
+                                            <label for="M_test2">항목2</label>
+                                            <input type="text" class="form-control" id="M_test2" name="M_test2" style="width:100%;">
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary ml-1" id="writeBtn">
+                    <span class="d-none d-sm-block">글쓰기</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="M_loadingBar"></div>
+</div>
+
+@*상세(수정) 모달**@
+<div class="modal fade show" id="M_Detail" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">상세</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" onsubmit="return false">
+                    <input type="hidden" id="M_KEY_D" name="M_KEY_D">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <fieldset class="form-group">
+                                            <label for="M_test1_D">항목1</label><label style="color:red;">*</label>
+                                            <input type="text" class="form-control" id="M_test1_D" name="M_test1_D" style="width:100%;" required>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <fieldset class="form-group">
+                                            <label for="M_test2_D">항목2</label>
+                                            <input type="text" class="form-control" id="M_test2_D" name="M_test2_D" style="width:100%;">
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary ml-1" id="uptBtn">
+                    <span class="d-none d-sm-block">수정</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="M_loadingBar"></div>
+</div>
+
+@*에러리스트 모달*@
+<div class="modal fade show" id="M_ErrURL" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <!--에러리스트-->
+        <div class="modal-content" id="erroListArea">
+            <div class="modal-header">
+                <h5 class="modal-title">URL리디렉션 에러리스트</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="errorListGrid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--에러리스트 끝-->
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+    $(document).ready(function () {
+        fnInit();
+        fnEvent();
+    });
+
+    @* 페이지 로드 후 실행 *@
+    $(window).ready(function () {
+        fnLast();
+        fnModalAddEvent("M_Write");
+        ComJS.fnValidation("M_Write form");
+    });
+
+    function fnInit() {
+        @* Collapsible Card 여백을 줄이기 위해 app.js에서 가져와 다시 이벤트 걸기 2022.04.13.강승호 *@
+        $('a[data-action="collapse"]').off("click").on("click", function (e) {
+            e.preventDefault()
+            $(this)
+                .closest(".card")
+                .children(".card-content")
+                .collapse("toggle")
+            // Adding bottom padding on card collapse
+            $(this)
+                .closest(".card")
+                .children(".card-header")
+                //.css("padding-bottom", "1.5rem") //이 부분을 없애기 위해 가져옴
+            $(this)
+                .closest(".card")
+                .find('[data-action="collapse"]')
+                .toggleClass("rotate")
+        })
+
+    }
+
+    @* 이벤트 모음 *@
+    function fnEvent() {
+
+        @* 검색 영역에 focus가 있을 시에만 엔터키 이벤트 실행 *@
+        $("#searchForm").find("input").keydown(function (key) {
+            if (key.keyCode == 13) { //키가 13이면 실행 (엔터는 13)
+                fnSearch();
+            }
+        });
+
+        @* 재설정을 위해 resize 이벤트를 off *@
+        $(window).off("resize");
+
+        $(window).resize(function () {
+            fnGridSize("grid");
+        });
+
+        @* 2021-04-27 ADD HS 검색조건 열리고 닫힐때 그리드 리사이즈 *@
+        $('.card-content').on('shown.bs.collapse', function () {
+            fnGridSize("grid");
+        })
+        $('.card-content').on('hidden.bs.collapse', function () {
+            fnGridSize("grid");
+        })
+    };
+
+    @* 마지막 세팅 *@
+    function fnLast() {
+        @* 히스토리 데이터 세팅 레이아웃에서 fnLast로 변경 레이아웃에 있으면 조회 후 데이터가 세팅됨 *@
+        //HistoryJS.fnHistoryGet();
+
+        fnGridDraw();
+        fnSearch();
+
+        //리사이즈
+        fnGridSize("grid");
+    }
+
+
+
+    @* 그리드 설정 *@
+    function fnGridDraw() {
+
+        @* 그리드 정보 데이터 세팅 *@
+        let pageSize = 30;
+        let pageNo = 1;
+
+        let columns = [
+            { field: "KEY_TEST", title: "KEY_TEST", hidden: true, filterable: true, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
+            , { field: "test1", title: "test1", hidden: false, filterable: false, width: "300px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
+            , { field: "test2", title: "test2", hidden: false, filterable: false, width: "300px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
+            , { field: "ID_REG", title: "등록자", hidden: false, filterable: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
+            , { field: "DT_REG", title: "등록일", hidden: false, filterable: false, width: "200px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, format: "{0: yyyy-MM-dd HH:mm:ss}", type: "date" }
+            , { field: "ID_UPT", title: "수정자", hidden: false, filterable: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
+            , { field: "DT_UPT", title: "수정일", hidden: false, filterable: false, width: "200px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, format: "{0: yyyy-MM-dd HH:mm:ss}", type: "date" }
+        ]
+        //컬럼 저장기능이 있어 저장된 컬럼정보가 있으면 불러와서 세팅을 해주나 포트폴리오에서는 사용안하기로
+        //let colData = GridJS.fnColumnSearch();
+        //if (colData.length > 0) {
+        //    columns = $.merge(columns, GridJS.fnGridColumsSet(colData, "user"));
+        //} else {
+        //    columns = [
+        //        { field: "KEY_TEST", title: "KEY_TEST", hidden: true, filterable: true, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
+        //        , { field: "test1", title: "test1", hidden: false, filterable: false, width: "500px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
+        //        , { field: "test2", title: "test2", hidden: false, filterable: false, width: "500px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
+        //        , { field: "ID_REG", title: "등록자", hidden: false, filterable: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
+        //        , { field: "DT_REG", title: "등록일", hidden: false, filterable: false, width: "200px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, format: "{0: yyyy-MM-dd HH:mm:ss}", type: "date" }
+        //        , { field: "ID_UPT", title: "수정자", hidden: false, filterable: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
+        //        , { field: "DT_UPT", title: "수정일", hidden: false, filterable: false, width: "200px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, format: "{0: yyyy-MM-dd HH:mm:ss}", type: "date" }
+        //    ]
+        //}
+
+        @* 그리드 체크박스 여부 *@
+        let YN_CB_GRID = "Y";
+
+        @* 그리드 체크박스 넣기 *@
+        if (YN_CB_GRID == "Y") {
+            var checkBox = {
+                headerAttributes: { style: "text-align:center;" },
+                attributes: { style: "text-align:center;" },
+                headerTemplate: "<input type='checkbox' id='CB_ALL' style='width:20px; height:20px;'>",
+                template: function () {
+                    return "<input type='checkbox' id='CB' style='width:20px; height:20px;'>";
+                },
+                width: 30
+            }
+            columns.unshift(checkBox);
+        }
+        var nonReordableColumn; //체크박스 영역 담는 변수
+
+        var grid = $("#grid").kendoGrid({
+            toolbar: [
+                  { name: "add", iconClass: "k-icon", text: "" }   //그리드 데이터 추가 기능 (추가버튼영역 한개와 연결)
+                , { name: "delete", iconClass: "k-icon", text: "" }   //그리드 row 삭제기능
+                , { template: '<a role="button" class="k-button k-button-icontext k-grid-colDisplay" href="\\#"></a>' }
+                , { name: "columnSave", iconClass: "k-icon", text: "" } //그리드 컬럼 저장
+                , { name: "columnReset", iconClass: "k-icon", text: "" } //그리드 컬럼 초기화
+                , { name: "excel", iconClass: "k-icon", text: "" }   //excel기능 버튼 사용시 toolbar:["excel"] 만해도 됨 //2023.03.03.ksh 순서 변경 요청으로 엑셀들을 맨 마지막으로
+                , { name: "allExcel", iconClass: "k-icon", text: "" }   //전체 엑셀 다운로드excelType //2023.03.03.ksh 순서 변경 요청으로 엑셀들을 맨 마지막으로
+            ],
+            excelExport: function (e) {
+                @* 엑셀다운로드시 날짜형 데이터 포멧 변환해주기(날짜형은 typeof 시 object임) *@
+                var sheet = e.workbook.sheets[0];
+                for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                    var row = sheet.rows[rowIndex];
+                    for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex++) {
+                        if (typeof row.cells[cellIndex].value == "object") {
+                            row.cells[cellIndex].format = "yyyy-MM-dd HH:mm:ss"
+                        }
+                    }
+                }
+            },
+            excel: {
+                  filterable: true
+                , collapsible: true
+                , allPages: false
+                , fileName: "CRUD.xlsx"
+            },
+            pageable: {
+                pageSizes: [30, 50, 100, 150, 200],
+                buttonCount: 3
+            },
+            noRecords: {
+                template: "조회된 데이터가 없습니다."
+            },
+            filterable: {
+                mode: "row" //menu,row
+                , operators: {
+                    string: {
+                        contains: "Contains"
+                    }
+                    , date: {
+                        gte: "After or equal to" //해당날짜 이후
+                    }
+                }
+            },
+            autoWidth: true,
+            sortable: true,
+            resizable: true,
+            reorderable: true,
+            dataBound: function (e) {
+                @* 필터 이미지 및 영역 삭제 *@
+                this.element.find(".k-filtercell .k-dropdown-wrap").remove();
+                @* input 영역 100% *@
+                this.element.find(".k-filtercell > span").css("width", "100%");
+                @* 2020 - 12 - 08 ADD HS tab입력하여 다음필터로 바로 넘어갈 수 있게 수정 *@
+                this.element.find(".k-widget.k-dropdown.k-dropdown-operator").removeAttr("tabindex");
+                @* 2020 - 12 - 10 ADD HS tab입력하여 다음필터로 바로 넘어갈 수 있게 수정(필터 동작 수정 버튼 제거) *@
+                this.element.find(".k-button.k-button-icon").remove();
+
+                $("#buttonRow .btn").css("margin-right", "0.5%");
+
+                @* 필터 영역 숨기기 *@
+                document.querySelector(".k-filter-row").style.display = "none";
+
+                @* toolbar 툴팁 설정 *@
+                this.element.find(".k-grid-add").attr("title", "Grid Data Add");
+                this.element.find(".k-grid-delete").attr("title", "Grid Data Delete");
+                $(this.element.find(".k-grid-colDisplay")).find(".k-header-column-menu").attr("title", "ColumView.");
+                this.element.find(".k-grid-excel").attr("title", "One Page Excel Download.");
+                this.element.find(".k-grid-allExcel").attr("title", "All Page Excel Download.");
+                this.element.find(".k-grid-columnSave").attr("title", "Grid Column Save.");
+                this.element.find(".k-grid-columnReset").attr("title", "Grid Column Save Reset.");
+
+                @* 툴팁 사용여부(show / hide) *@
+                @* 순서 : 추가, 삭제, 컬럼show / hide, 그리드컬럼 저장, 그리드 컬럼 초기화, 단일페이지 엑셀 다운로드, 전체엑셀 다운로드 *@
+                var YN_TOOLBARArr = ["Y","Y","Y","N","N","Y","Y"]; @*포트폴리오는 그리드 컬럼 기능 제외*@
+                for (var i = 0; i < YN_TOOLBARArr.length; i++) {
+                    if ("Y" == YN_TOOLBARArr[i]) {
+                        $(this.element.find(".k-grid-toolbar .k-button")[i]).show();
+                    }
+                    else {
+                        $(this.element.find(".k-grid-toolbar .k-button")[i]).hide();
+                    }
+                }
+
+                @* 체크박스 사용안할 시 툴바 삭제 감추기 *@
+                if ("N" == YN_CB_GRID) {
+                    $(this.element.find(".k-grid-toolbar .k-grid-delete")).hide();
+                } else {
+                    nonReordableColumn = e.sender.columns[0];
+                }
+
+                //detach로 grid.dataSorce가 날아간 상태이므로 kendoGrid 데이터가 완성 된 후의 이벤트를 다시걸어 컬럼저장 할 수 있게 추가함
+                this.element.find(".k-grid-columnSave").off("click").on("click", function () {
+                    GridJS.fnColumnSave(grid);
+                });
+
+                @* 그리드 컬럼 초기화 버튼 *@
+                this.element.find(".k-grid-columnReset").off("click").on("click", function () {
+                    var result = confirm('컬럼 정보를 초기화 하시겠습니까?');
+                    if (result) {
+                        GridJS.fnColumnReset();
+                    } else {
+                        return false;
+                    }
+                });
+
+                @* 엑셀 전체다운로드 저장 버튼 *@
+                this.element.find(".k-grid-allExcel").off("click").on("click", function () {
+                    var excelOptions = grid.options.excel;
+                    excelOptions.allPages = true;
+                    excelOptions.fileName = "VMStateAll.xlsx";
+                    grid.saveAsExcel();
+                });
+
+                @* 페이지 사이즈 변경시 *@
+                $(this.pager.element.find(".k-dropdown")).off("change").on("change", function (e) {
+                    grid.dataSource._skip = 0; //페이지사이즈 변환시 페이지가 1로 변하는데 skip이 0으로 안되어 있어서 1페이지 부터 데이터가 안나오게 보여 0으로 초기화
+                });
+
+                @* 타이틀 클릭 시 정렬 이벤트 *@
+                $(this.thead.find("tr")[0]).find("th").on("click", function (e) {
+                @* 전체선택 체크 박스 컬럼 제외 *@
+                    if ($(this).find("input").length > 0) {
+                    @* 전체선택 체크박스가 있으면 *@
+                        if ($(this).find("input")[0].id == "CB_ALL") {
+                            fnGridAllCheck(this);
+                        }
+                    }
+                });
+
+                @* 그리드 추가기능 *@
+                this.element.find(".k-grid-add").off("click").on("click", function () {
+                    let ID_MODAL = "M_Write";
+                    $("#" + ID_MODAL).modal();
+                });
+
+                @* 삭제 *@
+                this.element.find(".k-grid-delete").off("click").on("click", function () {
+                    var rowData = [];
+                    $(grid.tbody[0].rows).find("input").each(function (index, item) {
+                        if ($(this).is(":checked")) {
+                            var data = grid.dataItem($(this).closest("tr"));
+                            rowData.push(JSON.stringify(data)); //체크된 데이터 넣기
+                        }
+                    });
+
+                    if (rowData.length < 1) {
+                        ComJS.fnSweetAlert("삭제 할 대상을 선택해주세요.");
+                        return false;
+                    }
+
+                    fnDel(rowData);
+                });
+
+                @* URL 상세 *@
+                $(this.tbody.find("tr td")).off("dblclick").on("dblclick", function (e) {
+                    let selData = grid.dataItem($(this).closest("tr")) //row 선택
+                    fnModalDetailEvent(selData);
+                    $("#M_Detail").modal();
+                });
+            },
+            columns: columns
+        }).data("kendoGrid");
+
+        @*체크 박스 영역을 움직일 시 다시 되돌리기*@
+        if (YN_CB_GRID == "Y") {
+            grid.bind("columnReorder", function (e) {
+                setTimeout(function (e) {
+                    grid.reorderColumn(0, nonReordableColumn);
+                }, 1)
+            });
+        }
+
+        @* fillter 중 datepicker 타입의 format을 정의해줌 *@
+        $("#" + grid.element[0].id + " [data-role=datepicker]").kendoDatePicker({
+            format: "yyyy-MM-dd"
+        });
+
+        @* 그리드 td 툴팁 *@
+        grid.table.kendoTooltip({
+            filter: "td",
+            content: function (e) {
+                var target = e.target; // element for which the tooltip is shown
+                return $(target).text();
+            }
+        });
+
+        //컬럼 show/hide 기능
+        grid.element.find(".k-grid-colDisplay").kendoColumnMenu({
+            filterable: false,
+            sortable: false,
+            dataSource: grid.dataSource,
+            columns: grid.columns,
+            owner: grid
+        });
+
+        //컬럼 show/hide 기본 아이콘 변경
+        $(grid.element.find(".k-grid-colDisplay")).find(".k-i-more-vertical").attr("class", "k-icon");
+        //컬럼show/hide 선택 할때마다 table 넓이 100% 변경
+        $(grid.element.find(".k-grid-colDisplay")).find(".k-header-column-menu").on("click", function () {
+            if ($(".k-column-menu").length > 0) {
+                $($(".k-column-menu").last()).find("[role='menuitemcheckbox'] span").off("click").on("click", function () {
+                    var tableWidth = setInterval(function () {
+                        if ($("#" + grid.element[0].id + " table").css("width") != '100%') {
+                            clearInterval(tableWidth)
+                        }
+                        $("#" + grid.element[0].id + " table").css("width", "100%");
+                    }, 50);
+                });
+            }
+        });
+    }
+
+    @* 그리드 검색 *@
+    function fnSearch() {
+
+        var grid = $("#grid").data("kendoGrid");
+
+        @* pageSize 선택한 값 세팅(변경 되는 pageSize를 _take에 넣어야되며 pageSize 값 변경 후에는.k - input의 변경된 값 - innerText값을 가져와 세팅한다) *@
+        grid.dataSource._take = grid.pager.element.find(".k-dropdown .k-input")[0].innerText;
+
+        //검색조건 파라미터
+        var param = {}
+        param.test1 = $("#test1").val();
+
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Example/SearchData")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: false,
+            beforeSend: function () { // 조회 전
+                kendo.ui.progress($(".loadingBar"), true);
+            },
+            complete: function () {//조회 후
+                kendo.ui.progress($(".loadingBar"), false);
+                var idData = { grid: "#grid" }
+                ComJS.fnReSize("grid", idData);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                location.reload();
+            },
+            success: function (result) {
+                if (result.data != null) {
+                    var dataSource = {
+                         data: result.data
+                        ,pageSize: 30
+                    }
+                    grid.setDataSource(dataSource);
+                    grid.dataSource._total = result.total;
+                } else {
+                    grid.setDataSource(null);
+                    grid.dataSource._total = 0;
+                }
+            }
+        });
+    }
+
+    @* 그리드 사이즈 설정 *@
+    function fnGridSize(gridId) {
+        //2021-04-20 COM HS 브라우저 컨텐츠 영역 높이
+        var html = window.innerHeight;
+
+        //2021-04-20 COM HS *outHeight(true) 해당 컴포넌트의 padding까지 더한 높이반환
+        //2021-04-20 COM HS 상단 네비게이션 바 높이
+        var naviHeight = $(".navbar-wrapper").outerHeight(true);
+
+        //2021-04-20 COM HS 페이지 제목 영역 높이
+        var contentHeader = 0;
+
+        //2021-04-20 COM HS 검색조건 영역 높이
+        var conditionRow = 0;
+            conditionRow = $("#conditionRow").outerHeight(true);
+
+        //2021-05-04 COM HS 버튼 검색조건 분기 추가
+        var buttonRow = 0;
+        //buttonRow = $("#buttonRow").outerHeight(true);
+
+        //2021-04-20 COM HS footer 높이
+        var footer = $(".footer.footer-static.footer-light").outerHeight(true);
+
+        //2021-04-20 COM HS grid page 설정 영역 높이
+        var gridpager = $(".k-pager-wrap.k-grid-pager.k-widget.k-floatwrap").outerHeight(true);
+
+        //2022-04-13 ksh 그리드 높이 계산 공식 다시 재정의
+        $("#" + gridId).height(html - naviHeight - contentHeader - conditionRow - buttonRow - gridpager - footer);
+        $("#" + gridId).data("kendoGrid").resize();
+    }
+
+    @* 그리드 전체체크박스 함수 *@
+    function fnGridAllCheck(cbData) {
+        var grid = $("#grid").data("kendoGrid");
+
+        if ($(cbData).find("input").is(":checked")) {
+            $(grid.tbody[0].rows).find("input").prop("checked", true); // 전체선택
+        } else {
+            $(grid.tbody[0].rows).find("input").prop("checked", false); //전체 선택해제
+        }
+    }
+
+    @* 검색조건 모두 삭제 *@
+    function fnSearchReset() {
+        if (confirm("검색조건을 모두 초기화 또는 삭제 하시겠습니까?")) {
+            $("#searchForm")[0].reset();
+            $("#searchForm select").each(function () {
+                $(this).find("option:first").prop("selected", true).trigger("change");
+            });
+        }
+    }
+
+
+    @*추가 모달 이벤트 메서드 *@
+    function fnModalAddEvent(ID_MODAL) {
+        @* 부트스트랩에서 모달띄울때 shown.bs.modal을 써야 모달이 열린 후 포커스 이벤트가 발생할 수 있다 *@
+        $("#" + ID_MODAL).off("shown.bs.modal").on("shown.bs.modal", function () {
+            $("#" + ID_MODAL + " #M_URL").focus();
+        });
+
+        @* 모달이 닫힐때 *@
+        $("#" + ID_MODAL).off("hide.bs.modal").on("hide.bs.modal", function () {
+            @* 초기화 *@
+            fnModalAddReset(ID_MODAL);
+        });
+
+        @* 추가 버튼 클릭 *@
+        $("#" + ID_MODAL + " #writeBtn").off("click").on("click", function () {
+
+            var rs = $("#" + ID_MODAL + " form").valid();
+            if (rs) {
+                fnAdd(ID_MODAL);
+                $("#" + ID_MODAL).modal("hide");
+            }
+        });
+    }
+
+    @*추가 모달 초기화 *@
+    function fnModalAddReset(ID_MODAL) {
+        $("#" + ID_MODAL + " input").val("");
+        $("#" + ID_MODAL + " form").validate().resetForm(); @* validation 표시 초기화 *@
+    }
+
+    @*추가 *@
+    function fnAdd(ID_MODAL) {
+        var param = $("#" + ID_MODAL + " form").serializeObject();   @* 폼 입력값을 객체로 변경 *@
+         $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Example/PostData")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: false,
+             success: function (result) {
+                 ComJS.fnSweetAlert(result.msg);
+                 if (result.successYn) {
+                     fnSearch();
+                 }
+            }
+        });
+    }
+
+    @* 삭제 *@
+    function fnDel(rowData) {
+        $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Example/DelData")",
+            data: { rowData:rowData },
+            dataType: 'json',
+            async: false,
+             success: function (result) {
+                 ComJS.fnSweetAlert(result.msg);
+                 if (result.successYn) {
+                     var errList = result.errList;
+                     if (errList == null) {
+                         fnSearch();
+                     } else {
+                         ComJS.ErroListOpen("M_ErrURL", errList);
+                     }
+                 }
+            }
+        });
+    }
+
+    @* 상세 모달 이벤트 메서드 *@
+    function fnModalDetailEvent(selData) {
+        let ID_MODAL = "M_Detail";
+
+        @* 선택 값 세팅 *@
+        $("#M_KEY_D").val(selData.KEY_TEST);
+        $("#M_test1_D").val(selData.test1);
+        $("#M_test2_D").val(selData.test2);
+
+        //부트스트랩에서 모달띄울때 shown.bs.modal을 써야 모달이 열린 후 포커스 이벤트가 발생할 수 있다
+        $("#" + ID_MODAL).off("shown.bs.modal").on("shown.bs.modal", function () {
+            $("#" + ID_MODAL + " #M_test1_D").focus();
+
+        });        
+
+        //수정 버튼 클릭
+        $("#" + ID_MODAL + " #uptBtn").off("click").on("click", function () {
+
+            var rs = $("#" + ID_MODAL + " form").valid();
+            if (rs) {
+                fnPutData(ID_MODAL);
+                $("#" + ID_MODAL).modal("hide");
+            }
+        });
+    }
+
+    @* 수정 *@
+    function fnPutData(ID_MODAL) {
+        var param = $("#" + ID_MODAL + " form").serializeObject();   //폼 입력값을 객체로 변경
+         $.ajax({
+            type: "POST",
+            url: "@Scripts.Url("~/Example/PutData")",
+            data: { param: JSON.stringify(param) },
+            dataType: 'json',
+            async: false,
+            success: function (result) {
+                 ComJS.fnSweetAlert(result.msg);
+                 if (result.successYn) {
+                     fnSearch();
+                 }
+            }
+        });
+    }
+    </script>
+}

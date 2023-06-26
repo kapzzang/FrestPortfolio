@@ -21,7 +21,23 @@ namespace proTnsWeb.Controllers
             ViewData["IsManagerPage"] = (Session["User"] as User).IsManagerPage;
             ViewData["LocationSope"] = (Session["User"] as User).LocationSope;
 
-            
+            if (!"menu".Equals(Session["moveAndBack"].ToString()))
+            {
+                Session["moveAndBack"] = "move"; // 페이지 이동(상세 또는 목록 이동)시 세션에 move라는 값을 넣어준다 (검색조건을 히스토리세션에 가져올지 일반 파라미터로 넘어간걸 세팅 해줄지 결정해주는 중요한 세션)  
+                List<Menu> menu = new List<Menu>();
+                menu = Session["_Menu"] as List<Menu>;
+
+                for (int i = 0; i < menu.Count; i++)
+                {
+                    if (menu[i].id_Page == page)
+                    {
+                        Session["selMenuKey"] = menu[i].key_Menu;
+                    }
+                }
+            }
+
+            ViewBag.Title = Session["selMenuNm"].ToString() ?? "";
+
             return View(page);
         }
 

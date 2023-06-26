@@ -3263,6 +3263,7 @@
     <Content Include="Views\Main\Index.cshtml" />
     <Content Include="Views\Modal\Common\TestUserSearch.cshtml" />
     <Content Include="Views\Example\CRUD.cshtml" />
+    <Content Include="Views\Board\Board.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
