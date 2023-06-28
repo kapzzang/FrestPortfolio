@@ -95,6 +95,7 @@
             </div>
             <div class="modal-body">
                 <form method="post" onsubmit="return false">
+                    <input type="hidden" id="param" name="param" />
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-body">
@@ -119,11 +120,11 @@
                                     </div>
                                 </div>
                                 <div class="row mt-1 mb-1">
-                                    <div class="col-md-12">                                        
+                                    <div class="col-md-12">
                                         <textarea id="content" name="content" class="form-control" rows="10" cols="30" style="width:100%; height:400px" aria-label="editor">
                                         </textarea>
                                     </div>
-                                </div>                                
+                                </div>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <label for="" class="form-label">첨부파일</label>
@@ -133,7 +134,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>                                
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -161,6 +162,7 @@
             <div class="modal-body">
                 <form method="post" onsubmit="return false">
                     <input type="hidden" id="M_KEY_D" name="M_KEY_D">
+                    <input type="hidden" id="param" name="param" />
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-body">
@@ -287,8 +289,6 @@
 
         @* 마지막 세팅 *@
         function fnLast() {
-            @* 히스토리 데이터 세팅 레이아웃에서 fnLast로 변경 레이아웃에 있으면 조회 후 데이터가 세팅됨 *@
-            //HistoryJS.fnHistoryGet();
 
             fnGridDraw();
             fnSearch();
@@ -315,21 +315,6 @@
                 , { field: "ID_UPT", title: "수정자", hidden: false, filterable: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
                 , { field: "DT_UPT", title: "수정일", hidden: false, filterable: false, width: "200px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, format: "{0: yyyy-MM-dd HH:mm:ss}", type: "date" }
             ]
-            //컬럼 저장기능이 있어 저장된 컬럼정보가 있으면 불러와서 세팅을 해주나 포트폴리오에서는 사용안하기로
-            //let colData = GridJS.fnColumnSearch();
-            //if (colData.length > 0) {
-            //    columns = $.merge(columns, GridJS.fnGridColumsSet(colData, "user"));
-            //} else {
-            //    columns = [
-            //        { field: "KEY_TEST", title: "KEY_TEST", hidden: true, filterable: true, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
-            //        , { field: "test1", title: "test1", hidden: false, filterable: false, width: "500px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
-            //        , { field: "test2", title: "test2", hidden: false, filterable: false, width: "500px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
-            //        , { field: "ID_REG", title: "등록자", hidden: false, filterable: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
-            //        , { field: "DT_REG", title: "등록일", hidden: false, filterable: false, width: "200px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, format: "{0: yyyy-MM-dd HH:mm:ss}", type: "date" }
-            //        , { field: "ID_UPT", title: "수정자", hidden: false, filterable: false, width: "100px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" } }
-            //        , { field: "DT_UPT", title: "수정일", hidden: false, filterable: false, width: "200px", headerAttributes: { style: "text-align: center;" }, attributes: { style: "text-align: center; white-space : nowrap;" }, format: "{0: yyyy-MM-dd HH:mm:ss}", type: "date" }
-            //    ]
-            //}
 
             @* 그리드 체크박스 여부 *@
             let YN_CB_GRID = "Y";
@@ -680,7 +665,7 @@
 
                 var rs = $("#" + ID_MODAL + " form").valid();
                 if (rs) {
-                    fnAdd(ID_MODAL);
+                    fnWrite(ID_MODAL);
                     $("#" + ID_MODAL).modal("hide");
                 }
             });
@@ -692,22 +677,78 @@
             $("#" + ID_MODAL + " form").validate().resetForm(); @* validation 표시 초기화 *@
         }
 
-        @*추가 *@
-        function fnAdd(ID_MODAL) {
-            var param = $("#" + ID_MODAL + " form").serializeObject();   @* 폼 입력값을 객체로 변경 *@
-             $.ajax({
-                type: "POST",
-                url: "@Scripts.Url("~/Example/PostData")",
-                data: { param: JSON.stringify(param) },
-                dataType: 'json',
-                async: false,
-                 success: function (result) {
-                     ComJS.fnSweetAlert(result.msg);
-                     if (result.successYn) {
-                         fnSearch();
-                     }
+        @*글쓰기 *@
+        function fnWrite(ID_MODAL) {
+            @* 제목 *@
+            if ($("#" + ID_MODAL +" #title").val() == "") {
+                ComJS.fnSweetAlert("제목을 입력해주세요.");
+                $("#" + ID_MODAL +" #title").focus();
+                return false;
+            }
+            @* 내용 *@
+            if ($("#" + ID_MODAL +" #content").val() == "") {
+                ComJS.fnSweetAlert("내용을 입력해주세요.");
+                $("#" + ID_MODAL +" #content").focus();
+                return false;
+            }
+
+            @* 게시여부 *@
+            let publish = "";             
+
+            @* 게시기간 *@
+            if ($("#" + ID_MODAL +" #publish").is(":checked")) {
+                publish = "Y";
+            } else {
+                publish = "N";
+            }            
+            
+            if (publish == "Y") {                
+                let result = confirm("작업공지 게시는 1건만 가능합니다. 이전 게시글이 있으면 자동 해제됩니다. 게시하시겠습니까?");
+                if (!result) {
+                    return false;
                 }
-            });
+            }
+            
+
+            let htmlContent = $("#" + ID_MODAL +" #content").data("kendoEditor").value();
+            let content = $("#" + ID_MODAL +" #content").val();
+            let plainTextContent = $("<div>").html(htmlContent).text();
+
+            var param = {                
+                title: $("#" + ID_MODAL +" #title").val(),
+                publish: publish,                                
+                content: content,
+                plainContent: plainTextContent,
+            }
+
+            $("#" + ID_MODAL +" #param").val(JSON.stringify(param))
+
+            let actionType = "D"; //페이지 및 첨부파일 여부에 따라 어떤 방식으로 서버에 접글 할지 정하는 변수
+           
+            //첨부파일이 없는경우
+            if (Dropzone.forElement("#" + ID_MODAL +" #dropzone-basic").getAcceptedFiles().length < 1) {
+                actionType = "A";
+            }         
+
+            //actionType A인경우 ajax로 D인경우 dropzone을 이용하여
+            if (actionType =="A") {
+                $.ajax({
+                    type: "POST",
+                    url: "@Scripts.Url("~/Board/SaveBoard")",
+                    data: { param: JSON.stringify(param) },
+                    dataType: 'json',
+                    async: true,
+                    success: function (result) {
+                        ComJS.fnSweetAlert(result.msg);
+                        if (result.successYn) {
+                            fnSearch();
+                            $("#" + ID_MODAL).modal("hide");
+                        }
+                    }
+                });
+            } else {
+                Dropzone.forElement("#" + ID_MODAL +" #dropzone-basic").processQueue();
+            }
         }
 
         @* 삭제 *@
@@ -863,7 +904,7 @@
                              * 파일 추가 후 파일명이 안보여서 기존 소스 안건드리는 방법으로 파일 추가시 progress 안보이게
                              */
                             $("#" + ID_MODAL + " .dz-progress").css("z-index", 0);
-                            $("#" + ID_MODAL + " .dropzone.dz-clickable .dz-message").css("display", "none");//한개라도 파일우 추가된다면 해당 영역 display 감추기
+                            $("#" + ID_MODAL + " .dropzone.dz-clickable .dz-message").css("display", "none");//한개라도 파일이 추가된다면 해당 영역 display 감추기
                         });
                       }
                 });
